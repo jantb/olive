@@ -31,6 +31,8 @@ func Display() {
 
 	go func() {
 		for {
+			drawRuler(s)
+			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
@@ -38,14 +40,11 @@ func Display() {
 				case tcell.KeyEscape, tcell.KeyEnter:
 					close(quit)
 					return
-				case tcell.KeyCtrlL:
-					s.Sync()
 				default:
-					s.Clear()
 					puts(s, tcell.StyleDefault.
 						Foreground(tcell.ColorWhite).
 						Background(tcell.ColorDefault), 0, 0, ev.Name())
-					s.Show()
+
 				}
 			case *tcell.EventResize:
 				s.Sync()
@@ -56,4 +55,14 @@ func Display() {
 	<-quit
 
 	s.Fini()
+}
+
+func drawRuler(s tcell.Screen) {
+	_, h := s.Size()
+	for index := 0; index < h; index++ {
+		puts(s, tcell.StyleDefault.
+			Foreground(tcell.ColorWhite).
+			Background(tcell.ColorDefault), 0, index, fmt.Sprintf("%2d", index+1))
+	}
+	s.Show()
 }
