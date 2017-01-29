@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
+
+	"strings"
 
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/encoding"
 )
 
 //Display renders the editor
-func Display() {
+func Display(buffer *Buffer) {
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -28,11 +31,14 @@ func Display() {
 	s.Clear()
 	quit := make(chan struct{})
 	s.Show()
-
+	//backing := [][]Backing{}
 	go func() {
 		for {
-			drawRuler(s)
+			//drawRuler(s)
+			t := time.Now()
+			drawBacking(s, drawBuffer(s, buffer))
 			s.Show()
+			buffer.r = buffer.r.Insert(0, []byte(fmt.Sprint(time.Now().Sub(t))))
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
@@ -43,7 +49,11 @@ func Display() {
 				default:
 					puts(s, tcell.StyleDefault.
 						Foreground(tcell.ColorWhite).
-						Background(tcell.ColorDefault), 0, 0, ev.Name())
+						Background(tcell.ColorDefault), 10, 0, "               ")
+
+					puts(s, tcell.StyleDefault.
+						Foreground(tcell.ColorWhite).
+						Background(tcell.ColorDefault), 10, 0, ev.Name())
 
 				}
 			case *tcell.EventResize:
@@ -55,6 +65,51 @@ func Display() {
 	<-quit
 
 	s.Fini()
+}
+
+// Backing backs the display so we don't overwrite runes unnessecary
+type Backing struct {
+	value rune
+}
+
+var previousBacking = [][]Backing{}
+
+func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
+	bytes := buffer.r.Bytes()
+	document := string(bytes)
+	lines := strings.Split(document, "\n")
+	backing := make([][]Backing, len(lines))
+	for i := range backing {
+		line := lines[i]
+		for _, r := range line {
+			b := Backing{}
+			b.value = r
+			backing[i] = append(backing[i], b)
+		}
+	}
+	return &backing
+}
+
+func drawBacking(s tcell.Screen, backing *[][]Backing) {
+	if len(previousBacking) != len(*backing) {
+		previousBacking = make([][]Backing, len(*backing), len(*backing))
+	}
+
+	for ir, row := range *backing {
+		prevRow := previousBacking[ir]
+		if len(prevRow) != len(row) {
+			prevRow = make([]Backing, len(row), len(row))
+		}
+		for ic, column := range row {
+			if column == prevRow[ic] {
+				continue
+			}
+			prevRow[ic] = column
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), ic, ir, string(column.value))
+		}
+	}
 }
 
 func drawRuler(s tcell.Screen) {

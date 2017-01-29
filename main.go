@@ -1,13 +1,8 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/jantb/rope"
-)
+var buffer = Buffer{}
 
 func main() {
-	r := rope.NewFromBytes([]byte("test"))
-	fmt.Println(string(r.Bytes()))
-	Display()
+	buffer.Open("display.go")
+	Display(&buffer)
 }
