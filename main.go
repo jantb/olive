@@ -3,6 +3,6 @@ package main
 var buffer = Buffer{}
 
 func main() {
-	buffer.Open("display.go")
+	buffer.Open("main.go")
 	Display(&buffer)
 }

@@ -75,11 +75,15 @@ type Backing struct {
 var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-	bytes := buffer.r.Bytes()
+	bytes := buffer.r.Sub(0, 1000)
 	document := string(bytes)
 	lines := strings.Split(document, "\n")
 	backing := make([][]Backing, len(lines))
+	_, height := s.Size()
 	for i := range backing {
+		if i > height {
+			break
+		}
 		line := lines[i]
 		for _, r := range line {
 			b := Backing{}
@@ -100,14 +104,15 @@ func drawBacking(s tcell.Screen, backing *[][]Backing) {
 		if len(prevRow) != len(row) {
 			prevRow = make([]Backing, len(row), len(row))
 		}
+		x := 0
 		for ic, column := range row {
 			if column == prevRow[ic] {
 				continue
 			}
 			prevRow[ic] = column
-			puts(s, tcell.StyleDefault.
+			x += puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), ic, ir, string(column.value))
+				Background(tcell.ColorDefault), x, ir, string(column.value))
 		}
 	}
 }

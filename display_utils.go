@@ -1,14 +1,17 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
-func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
+func puts(s tcell.Screen, style tcell.Style, x, y int, str string) (length int) {
 	i := 0
 	var deferred []rune
 	dwidth := 0
+	str = strings.Replace(str, "\t", "    ", -1)
 	for _, r := range str {
 		switch runewidth.RuneWidth(r) {
 		case 0:
@@ -37,4 +40,5 @@ func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 		s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 		i += dwidth
 	}
+	return i
 }
