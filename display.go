@@ -75,7 +75,7 @@ type Backing struct {
 var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-	bytes := buffer.r.Sub(0, 1000)
+	bytes := buffer.rr.Bytes()
 	document := string(bytes)
 	lines := strings.Split(document, "\n")
 	backing := make([][]Backing, len(lines))
