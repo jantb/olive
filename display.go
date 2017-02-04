@@ -5,8 +5,6 @@ import (
 	"os"
 	"time"
 
-	"strings"
-
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/encoding"
 )
@@ -75,9 +73,10 @@ type Backing struct {
 var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-	bytes := buffer.rr.Bytes()
-	document := string(bytes)
-	lines := strings.Split(document, "\n")
+	t := time.Now()
+
+	lines := buffer.getLines(0, 10)
+	fmt.Print(time.Now().Sub(t))
 	backing := make([][]Backing, len(lines))
 	_, height := s.Size()
 	for i := range backing {
@@ -85,7 +84,7 @@ func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
 			break
 		}
 		line := lines[i]
-		for _, r := range line {
+		for _, r := range string(line) {
 			b := Backing{}
 			b.value = r
 			backing[i] = append(backing[i], b)

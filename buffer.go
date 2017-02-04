@@ -35,3 +35,11 @@ func (b *Buffer) Open(filename string) {
 		log.Fatal(err)
 	}
 }
+
+func (b *Buffer) getLines(start, length int) [][]byte {
+	ret := make([][]byte, length)
+	for i, rope := range b.rr.Sub(start, length) {
+		ret[i] = rope.Bytes()
+	}
+	return ret
+}
