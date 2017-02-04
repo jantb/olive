@@ -40,10 +40,26 @@ func (b *Buffer) Open(filename string) {
 	}
 }
 
-func (b *Buffer) getLines(start, length int) [][]byte {
+// GetLines return lines from the buffer
+func (b *Buffer) GetLines(start, length int) [][]byte {
 	ret := make([][]byte, length)
 	for i, rope := range b.r.Sub(start, length) {
 		ret[i] = rope.Bytes()
 	}
 	return ret
+}
+
+// Insert into the buffer
+func (b *Buffer) Insert(row, column int, bytes []byte) {
+	for row >= b.r.Len() {
+		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte("\n"))})
+	}
+	r := b.r.Index(row)
+	b.r = b.r.Delete(row, 1)
+	b.r = b.r.Insert(row, []rope.Rope{*r.Insert(column, bytes)})
+}
+
+// New buffer
+func (b *Buffer) New() {
+	b.r = rope.NewFromRope([]rope.Rope{})
 }

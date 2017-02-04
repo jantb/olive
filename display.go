@@ -73,7 +73,7 @@ var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
 
-	lines := buffer.getLines(0, 10)
+	lines := buffer.GetLines(0, 10)
 	backing := make([][]Backing, len(lines))
 	_, height := s.Size()
 	for i := range backing {
