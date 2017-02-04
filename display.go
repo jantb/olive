@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/encoding"
 )
+
+var topRow = 0
 
 //Display renders the editor
 func Display(buffer *Buffer) {
@@ -32,26 +35,25 @@ func Display(buffer *Buffer) {
 	go func() {
 		for {
 			//drawRuler(s)
-			//	t := time.Now()
+			t := time.Now()
 			drawBacking(s, drawBuffer(s, buffer))
 			s.Show()
-			//buffer.r.Insert(0, []byte(fmt.Sprint(time.Now().Sub(t))))
+
+			buffer.Insert(1, 0, []byte(fmt.Sprint(time.Now().Sub(t))))
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
+				case tcell.KeyDown:
+					topRow++
+				case tcell.KeyUp:
+					topRow = Max(0, topRow-1)
 				case tcell.KeyEscape, tcell.KeyEnter:
 					close(quit)
 					return
 				default:
-					puts(s, tcell.StyleDefault.
-						Foreground(tcell.ColorWhite).
-						Background(tcell.ColorDefault), 10, 0, "               ")
-
-					puts(s, tcell.StyleDefault.
-						Foreground(tcell.ColorWhite).
-						Background(tcell.ColorDefault), 10, 0, ev.Name())
-
+					buffer.RemoveRow(0)
+					buffer.Insert(0, 0, []byte(ev.Name()))
 				}
 			case *tcell.EventResize:
 				s.Sync()
@@ -72,19 +74,19 @@ type Backing struct {
 var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-
-	lines := buffer.GetLines(0, 10)
+	w, h := s.Size()
+	lines := buffer.GetLines(topRow, topRow+h)
 	backing := make([][]Backing, len(lines))
-	_, height := s.Size()
 	for i := range backing {
-		if i > height {
-			break
-		}
 		line := lines[i]
+
 		for _, r := range string(line) {
 			b := Backing{}
 			b.value = r
 			backing[i] = append(backing[i], b)
+		}
+		for len(backing[i]) < w {
+			backing[i] = append(backing[i], Backing{value: ' '})
 		}
 	}
 	return &backing
@@ -96,16 +98,15 @@ func drawBacking(s tcell.Screen, backing *[][]Backing) {
 	}
 
 	for ir, row := range *backing {
-		prevRow := previousBacking[ir]
-		if len(prevRow) != len(row) {
-			prevRow = make([]Backing, len(row), len(row))
+		if len(previousBacking[ir]) != len(row) {
+			previousBacking[ir] = make([]Backing, len(row), len(row))
 		}
 		x := 0
 		for ic, column := range row {
-			if column == prevRow[ic] {
+			if column == previousBacking[ir][ic] {
 				continue
 			}
-			prevRow[ic] = column
+			previousBacking[ir][ic] = column
 			x += puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), x, ir, string(column.value))

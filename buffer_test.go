@@ -13,3 +13,20 @@ func TestBufferInsert(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestBufferDeleteEmpty(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	b.RemoveRow(0)
+}
+func TestBufferDelete(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "Buffer insert test"
+	b.Insert(0, 0, []byte(text))
+	b.RemoveRow(0)
+	if "" != string(b.GetLines(0, 1)[0]) {
+		fmt.Println("!=" + string(b.GetLines(0, 1)[0]))
+		t.Fail()
+	}
+}

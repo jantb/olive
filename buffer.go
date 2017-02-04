@@ -59,6 +59,11 @@ func (b *Buffer) Insert(row, column int, bytes []byte) {
 	b.r = b.r.Insert(row, []rope.Rope{*r.Insert(column, bytes)})
 }
 
+// Insert into the buffer
+func (b *Buffer) RemoveRow(row int) {
+	b.r = b.r.Delete(row, 1)
+}
+
 // New buffer
 func (b *Buffer) New() {
 	b.r = rope.NewFromRope([]rope.Rope{})
