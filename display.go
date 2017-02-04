@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/encoding"
@@ -33,10 +32,10 @@ func Display(buffer *Buffer) {
 	go func() {
 		for {
 			//drawRuler(s)
-			t := time.Now()
+			//	t := time.Now()
 			drawBacking(s, drawBuffer(s, buffer))
 			s.Show()
-			buffer.r = buffer.r.Insert(0, []byte(fmt.Sprint(time.Now().Sub(t))))
+			//buffer.r.Insert(0, []byte(fmt.Sprint(time.Now().Sub(t))))
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
@@ -73,10 +72,8 @@ type Backing struct {
 var previousBacking = [][]Backing{}
 
 func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-	t := time.Now()
 
 	lines := buffer.getLines(0, 10)
-	fmt.Print(time.Now().Sub(t))
 	backing := make([][]Backing, len(lines))
 	_, height := s.Size()
 	for i := range backing {

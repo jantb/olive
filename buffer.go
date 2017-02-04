@@ -2,16 +2,17 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jantb/rope"
 )
 
 //Buffer holds the current buffer
 type Buffer struct {
-	r  *rope.Rope
-	rr *rope.RopeRope
+	r *rope.RopeRope
 }
 
 // Open initializes a new buffer
@@ -23,14 +24,17 @@ func (b *Buffer) Open(filename string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	b.rr = rope.NewFromRope([]rope.Rope{})
-	for scanner.Scan() {
-		by := []byte(scanner.Text())
-		by = append(by, []byte("\n")...)
-		r := rope.NewFromBytes(by)
-		b.rr = b.rr.Insert(b.rr.Len(), []rope.Rope{*r})
-	}
+	b.r = rope.NewFromRope([]rope.Rope{})
+	t := time.Now()
 
+	ropes := []rope.Rope{}
+
+	for scanner.Scan() {
+		ropes = append(ropes, *rope.NewFromBytes([]byte(scanner.Text() + "\n")))
+	}
+	b.r = b.r.Insert(b.r.Len(), ropes)
+
+	fmt.Print(time.Now().Sub(t))
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +42,7 @@ func (b *Buffer) Open(filename string) {
 
 func (b *Buffer) getLines(start, length int) [][]byte {
 	ret := make([][]byte, length)
-	for i, rope := range b.rr.Sub(start, length) {
+	for i, rope := range b.r.Sub(start, length) {
 		ret[i] = rope.Bytes()
 	}
 	return ret
