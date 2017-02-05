@@ -8,8 +8,8 @@ func TestBufferInsert(t *testing.T) {
 	b.New()
 	text := "Buffer insert test"
 	b.Insert(0, 0, []byte(text))
-	if text+"\n" != string(b.GetLines(0, 1)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1)[0]))
+	if text+"\n" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
 	}
 }
@@ -25,8 +25,8 @@ func TestBufferDelete(t *testing.T) {
 	text := "Buffer insert test"
 	b.Insert(0, 0, []byte(text))
 	b.RemoveRow(0)
-	if "" != string(b.GetLines(0, 1)[0]) {
-		fmt.Println("!=" + string(b.GetLines(0, 1)[0]))
+	if "" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println("!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
 	}
 }

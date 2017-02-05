@@ -52,8 +52,10 @@ func Display(buffer *Buffer) {
 		for {
 			var offset = drawRuler(topRow, h, s)
 			var w = width - offset
+			lines := buffer.GetLines(topRow, h, w)
+
 			t := time.Now()
-			drawBuffer(w, topRow, height-1, buffer, s, offset)
+			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
 			time := time.Now().Sub(t).String()
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
@@ -95,9 +97,11 @@ type Backing struct {
 
 var previousBacking = [][]Backing{}
 var backing = [][]Backing{}
+var style = tcell.StyleDefault.
+	Foreground(tcell.ColorWhite).
+	Background(tcell.ColorDefault)
 
-func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int) {
-	lines := buffer.GetLines(topRow, h, w)
+func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]byte) {
 
 	for i := range backing {
 		for j, r := range string(lines[i]) {
@@ -107,18 +111,22 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int) {
 			backing[i][index].value = ' '
 		}
 	}
-
+	re := []rune{}
 	for ir, row := range backing {
 		x := offset
+
 		for _, column := range row {
-			// buffer equal does not matter, it's whats painted that does
-			//if column == previousBacking[ir][x] {
+			//	if column == previousBacking[ir][ic] {
 			//continue
 			//	}
-			//previousBacking[ir][ic] = column
-			x += puts(s, tcell.StyleDefault.
-				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), x, ir, string(column.value))
+			//	previousBacking[ir][ic] = column
+			//mainc, _, _, _ := s.GetContent(x, ir)
+			//if mainc == column.value {
+			//fmt.Print(mainc)
+			//continue
+			//}
+			s.SetContent(x, ir, column.value, re, style)
+			x++
 		}
 	}
 

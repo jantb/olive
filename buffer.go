@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/jantb/rope"
@@ -14,6 +15,8 @@ import (
 type Buffer struct {
 	r *rope.RopeRope
 }
+
+var m sync.Mutex
 
 // Open initializes a new buffer
 func (b *Buffer) Open(filename string) {
@@ -25,14 +28,25 @@ func (b *Buffer) Open(filename string) {
 
 	scanner := bufio.NewScanner(file)
 	b.r = rope.NewFromRope([]rope.Rope{})
+
+	ropes := make([]rope.Rope, 0, 512)
+
 	t := time.Now()
-
-	ropes := []rope.Rope{}
-
+	i := 0
 	for scanner.Scan() {
 		ropes = append(ropes, *rope.NewFromBytes([]byte(scanner.Text() + "\n")))
+		if i == 512 {
+			go func(ropes *[]rope.Rope) {
+				m.Lock()
+				b.r = b.r.Insert(b.r.Len(), *ropes)
+				m.Unlock()
+			}(&ropes)
+			ropes = make([]rope.Rope, 0, 512)
+			i = 0
+			continue
+		}
+		i++
 	}
-	b.r = b.r.Insert(b.r.Len(), ropes)
 
 	fmt.Print(time.Now().Sub(t))
 	if err := scanner.Err(); err != nil {
