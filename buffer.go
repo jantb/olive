@@ -47,6 +47,7 @@ func (b *Buffer) Open(filename string) {
 		}
 		i++
 	}
+	b.r = b.r.Insert(b.r.Len(), ropes)
 
 	fmt.Print(time.Now().Sub(t))
 	if err := scanner.Err(); err != nil {

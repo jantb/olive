@@ -111,6 +111,9 @@ var style = tcell.StyleDefault.
 func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]byte) {
 
 	for i := range backing {
+		if len(lines)-1 < i {
+			continue
+		}
 		for j, r := range string(lines[i]) {
 			backing[i][j].value = r
 		}
