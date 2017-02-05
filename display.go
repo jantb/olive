@@ -3,13 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"strconv"
+
 	"time"
 
-	"github.com/gdamore/tcell"
-	"github.com/gdamore/tcell/encoding"
+	"github.com/jantb/tcell"
+	"github.com/jantb/tcell/encoding"
 )
 
 var topRow = 0
+var height = 0
+var width = 0
 
 //Display renders the editor
 func Display(buffer *Buffer) {
@@ -31,15 +36,32 @@ func Display(buffer *Buffer) {
 	s.Clear()
 	quit := make(chan struct{})
 	s.Show()
+	w, h := s.Size()
+	width = w
+	height = h
+	backing = make([][]Backing, h-1, h-1)
+	for i := range backing {
+		backing[i] = make([]Backing, w, w)
+	}
+	previousBacking = make([][]Backing, h-1, h-1)
+	for i := range previousBacking {
+		previousBacking[i] = make([]Backing, w, w)
+	}
 	//backing := [][]Backing{}
 	go func() {
 		for {
-			//drawRuler(s)
+			var offset = drawRuler(topRow, h, s)
+			var w = width - offset
 			t := time.Now()
-			drawBacking(s, drawBuffer(s, buffer))
+			drawBuffer(w, topRow, height-1, buffer, s, offset)
+			time := time.Now().Sub(t).String()
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), 0, height-1, "                                                                                            ")
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), 0, height-1, time)
 			s.Show()
-
-			buffer.Insert(1, 0, []byte(fmt.Sprint(time.Now().Sub(t))))
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
@@ -72,36 +94,46 @@ type Backing struct {
 }
 
 var previousBacking = [][]Backing{}
+var backing = [][]Backing{}
 
-func drawBuffer(s tcell.Screen, buffer *Buffer) *[][]Backing {
-	w, h := s.Size()
-	lines := buffer.GetLines(topRow, topRow+h)
-	backing := make([][]Backing, len(lines))
+func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int) {
+	lines := buffer.GetLines(topRow, h, w)
+
 	for i := range backing {
-		line := lines[i]
-
-		for _, r := range string(line) {
-			b := Backing{}
-			b.value = r
-			backing[i] = append(backing[i], b)
+		for j, r := range string(lines[i]) {
+			backing[i][j].value = r
 		}
-		for len(backing[i]) < w {
-			backing[i] = append(backing[i], Backing{value: ' '})
+		for index := len(lines[i]); index < w; index++ {
+			backing[i][index].value = ' '
 		}
 	}
-	return &backing
+
+	for ir, row := range backing {
+		x := offset
+		for _, column := range row {
+			// buffer equal does not matter, it's whats painted that does
+			//if column == previousBacking[ir][x] {
+			//continue
+			//	}
+			//previousBacking[ir][ic] = column
+			x += puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), x, ir, string(column.value))
+		}
+	}
+
 }
 
-func drawBacking(s tcell.Screen, backing *[][]Backing) {
+func drawBacking(offset, w, h int, s tcell.Screen, backing *[][]Backing) {
 	if len(previousBacking) != len(*backing) {
-		previousBacking = make([][]Backing, len(*backing), len(*backing))
+		previousBacking = make([][]Backing, len(*backing))
 	}
 
 	for ir, row := range *backing {
 		if len(previousBacking[ir]) != len(row) {
 			previousBacking[ir] = make([]Backing, len(row), len(row))
 		}
-		x := 0
+		x := offset
 		for ic, column := range row {
 			if column == previousBacking[ir][ic] {
 				continue
@@ -114,12 +146,13 @@ func drawBacking(s tcell.Screen, backing *[][]Backing) {
 	}
 }
 
-func drawRuler(s tcell.Screen) {
-	_, h := s.Size()
+func drawRuler(topRow, h int, s tcell.Screen) int {
+	length := strconv.Itoa(len(fmt.Sprintf("%d", topRow+h)))
+	ret := len(fmt.Sprintf("%d", topRow+h))
 	for index := 0; index < h; index++ {
 		puts(s, tcell.StyleDefault.
 			Foreground(tcell.ColorWhite).
-			Background(tcell.ColorDefault), 0, index, fmt.Sprintf("%2d", index+1))
+			Background(tcell.ColorDefault), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
 	}
-	s.Show()
+	return ret + 1
 }

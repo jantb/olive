@@ -41,10 +41,10 @@ func (b *Buffer) Open(filename string) {
 }
 
 // GetLines return lines from the buffer
-func (b *Buffer) GetLines(start, length int) [][]byte {
+func (b *Buffer) GetLines(start, length, w int) [][]byte {
 	ret := make([][]byte, length)
 	for i, rope := range b.r.Sub(start, length) {
-		ret[i] = rope.Bytes()
+		ret[i] = rope.Sub(0, w)
 	}
 	return ret
 }

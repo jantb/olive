@@ -3,7 +3,7 @@ package main
 import (
 	"strings"
 
-	"github.com/gdamore/tcell"
+	"github.com/jantb/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
