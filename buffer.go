@@ -20,7 +20,7 @@ var m sync.Mutex
 
 // Open initializes a new buffer
 func (b *Buffer) Open(filename string) {
-	file, err := os.Open("big.txt")
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,6 +76,11 @@ func (b *Buffer) Insert(row, column int, bytes []byte) {
 // Insert into the buffer
 func (b *Buffer) RemoveRow(row int) {
 	b.r = b.r.Delete(row, 1)
+}
+
+// Len gives length of buffer
+func (b *Buffer) Len() int {
+	return b.r.Len()
 }
 
 // New buffer

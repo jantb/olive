@@ -1,8 +1,14 @@
 package main
 
+import (
+	"os"
+)
+
 var buffer = Buffer{}
 
 func main() {
-	buffer.Open("main.go")
-	Display(&buffer)
+	if len(os.Args) == 2 {
+		buffer.Open(os.Args[1])
+		Display(&buffer)
+	}
 }

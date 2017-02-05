@@ -43,26 +43,26 @@ func Display(buffer *Buffer) {
 	for i := range backing {
 		backing[i] = make([]Backing, w, w)
 	}
-	previousBacking = make([][]Backing, h-1, h-1)
-	for i := range previousBacking {
-		previousBacking[i] = make([]Backing, w, w)
-	}
 	//backing := [][]Backing{}
 	go func() {
 		for {
-			var offset = drawRuler(topRow, h, s)
+			var offset = drawRuler(topRow, h-1, s)
 			var w = width - offset
-			lines := buffer.GetLines(topRow, h, w)
+			lines := buffer.GetLines(topRow, h-1, w)
 
 			t := time.Now()
 			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
 			time := time.Now().Sub(t).String()
+
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), 0, height-1, "                                                                                            ")
+				Background(tcell.ColorDefault), 0, height-1, "                                                                                                                                                                                                                                                               ")
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), 0, height-1, time)
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len())), height-1, strconv.Itoa(buffer.Len()))
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
@@ -76,11 +76,19 @@ func Display(buffer *Buffer) {
 					close(quit)
 					return
 				default:
-					buffer.RemoveRow(0)
-					buffer.Insert(0, 0, []byte(ev.Name()))
+					puts(s, tcell.StyleDefault.
+						Foreground(tcell.ColorWhite).
+						Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len()))-2-len(ev.Name()), height-1, ev.Name())
 				}
 			case *tcell.EventResize:
 				s.Sync()
+				w, h := s.Size()
+				width = w
+				height = h
+				backing = make([][]Backing, h-1, h-1)
+				for i := range backing {
+					backing[i] = make([]Backing, w, w)
+				}
 			}
 		}
 	}()
@@ -95,7 +103,6 @@ type Backing struct {
 	value rune
 }
 
-var previousBacking = [][]Backing{}
 var backing = [][]Backing{}
 var style = tcell.StyleDefault.
 	Foreground(tcell.ColorWhite).
@@ -114,44 +121,20 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 	re := []rune{}
 	for ir, row := range backing {
 		x := offset
-
 		for _, column := range row {
-			//	if column == previousBacking[ir][ic] {
-			//continue
-			//	}
-			//	previousBacking[ir][ic] = column
-			//mainc, _, _, _ := s.GetContent(x, ir)
-			//if mainc == column.value {
-			//fmt.Print(mainc)
-			//continue
-			//}
+			if column.value == '\t' {
+				s.SetContent(x, ir, ' ', re, style)
+				s.SetContent(x+1, ir, ' ', re, style)
+				s.SetContent(x+2, ir, ' ', re, style)
+				s.SetContent(x+3, ir, ' ', re, style)
+				x += 4
+				continue
+			}
 			s.SetContent(x, ir, column.value, re, style)
 			x++
 		}
 	}
 
-}
-
-func drawBacking(offset, w, h int, s tcell.Screen, backing *[][]Backing) {
-	if len(previousBacking) != len(*backing) {
-		previousBacking = make([][]Backing, len(*backing))
-	}
-
-	for ir, row := range *backing {
-		if len(previousBacking[ir]) != len(row) {
-			previousBacking[ir] = make([]Backing, len(row), len(row))
-		}
-		x := offset
-		for ic, column := range row {
-			if column == previousBacking[ir][ic] {
-				continue
-			}
-			previousBacking[ir][ic] = column
-			x += puts(s, tcell.StyleDefault.
-				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), x, ir, string(column.value))
-		}
-	}
 }
 
 func drawRuler(topRow, h int, s tcell.Screen) int {
