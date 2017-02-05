@@ -145,7 +145,7 @@ func drawRuler(topRow, h int, s tcell.Screen) int {
 	ret := len(fmt.Sprintf("%d", topRow+h))
 	for index := 0; index < h; index++ {
 		puts(s, tcell.StyleDefault.
-			Foreground(tcell.ColorWhite).
+			Foreground(tcell.ColorDarkSlateGrey).
 			Background(tcell.ColorDefault), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
 	}
 	return ret + 1

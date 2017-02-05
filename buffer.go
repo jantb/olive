@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -26,15 +27,22 @@ func (b *Buffer) Open(filename string) {
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	reader := bufio.NewReader(file)
+
 	b.r = rope.NewFromRope([]rope.Rope{})
 
 	ropes := make([]rope.Rope, 0, 512)
 
 	t := time.Now()
 	i := 0
-	for scanner.Scan() {
-		ropes = append(ropes, *rope.NewFromBytes([]byte(scanner.Text() + "\n")))
+	for {
+		line, _, err := reader.ReadLine()
+
+		if err == io.EOF {
+			break
+		}
+
+		ropes = append(ropes, *rope.NewFromBytes([]byte(string(line) + "\n")))
 		if i == 512 {
 			go func(ropes *[]rope.Rope) {
 				m.Lock()
@@ -50,9 +58,7 @@ func (b *Buffer) Open(filename string) {
 	b.r = b.r.Insert(b.r.Len(), ropes)
 
 	fmt.Print(time.Now().Sub(t))
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+
 }
 
 // GetLines return lines from the buffer
