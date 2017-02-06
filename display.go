@@ -43,6 +43,7 @@ func Display(buffer *Buffer) {
 	for i := range backing {
 		backing[i] = make([]Backing, w, w)
 	}
+	evName := ""
 	//backing := [][]Backing{}
 	go func() {
 		for {
@@ -63,23 +64,36 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len())), height-1, strconv.Itoa(buffer.Len()))
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len()))-2-len(evName), height-1, evName)
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyDown:
-					topRow++
+					topRow = Min(topRow+1, buffer.Len())
 				case tcell.KeyUp:
 					topRow = Max(0, topRow-1)
-				case tcell.KeyEscape, tcell.KeyEnter:
+				case tcell.KeyLeft:
+					c := GetCursor()
+					c.MoveLeft()
+				case tcell.KeyRight:
+					c := GetCursor()
+					c.MoveRight()
+				case tcell.KeyEscape:
 					close(quit)
 					return
+				case tcell.KeyRune:
+					evName = ev.Name()
+					c := GetCursor()
+					buffer.Insert(c.loc.row, c.loc.column, []byte(string(ev.Rune())))
+					c.MoveRight()
 				default:
-					puts(s, tcell.StyleDefault.
-						Foreground(tcell.ColorWhite).
-						Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len()))-2-len(ev.Name()), height-1, ev.Name())
+					evName = ev.Name()
 				}
+
 			case *tcell.EventResize:
 				s.Sync()
 				w, h := s.Size()
@@ -101,6 +115,7 @@ func Display(buffer *Buffer) {
 // Backing backs the display so we don't overwrite runes unnessecary
 type Backing struct {
 	value rune
+	style tcell.Style
 }
 
 var backing = [][]Backing{}
@@ -116,11 +131,16 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		}
 		for j, r := range string(lines[i]) {
 			backing[i][j].value = r
+			backing[i][j].style = tcell.StyleDefault
 		}
 		for index := len(lines[i]); index < w; index++ {
 			backing[i][index].value = ' '
+			backing[i][index].style = tcell.StyleDefault
 		}
 	}
+	c := GetCursor()
+
+	backing[c.loc.row][c.loc.column].style = tcell.StyleDefault.Reverse(true)
 	re := []rune{}
 	for ir, row := range backing {
 		x := offset
@@ -133,7 +153,7 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 				x += 4
 				continue
 			}
-			s.SetContent(x, ir, column.value, re, style)
+			put(s, column.style, x, ir, column.value)
 			x++
 		}
 	}
