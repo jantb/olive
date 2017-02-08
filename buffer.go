@@ -42,7 +42,7 @@ func (b *Buffer) Open(filename string) {
 			break
 		}
 
-		ropes = append(ropes, *rope.NewFromBytes([]byte(string(line) + "\n")))
+		ropes = append(ropes, *rope.NewFromBytes(line))
 		if i == 512 {
 			go func(ropes *[]rope.Rope) {
 				m.Lock()
@@ -73,7 +73,7 @@ func (b *Buffer) GetLines(start, length, w int) [][]byte {
 // Insert into the buffer
 func (b *Buffer) Insert(row, column int, bytes []byte) {
 	for row >= b.r.Len() {
-		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte("\n"))})
+		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte(""))})
 	}
 	r := b.r.Index(row)
 	for r.Len() < column {
@@ -86,7 +86,7 @@ func (b *Buffer) Insert(row, column int, bytes []byte) {
 // Delete char from
 func (b *Buffer) Delete(row, column int) {
 	for row >= b.r.Len() {
-		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte("\n"))})
+		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte(""))})
 	}
 	r := b.r.Index(row)
 	for r.Len() < column {
