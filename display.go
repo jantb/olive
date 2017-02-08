@@ -85,6 +85,10 @@ func Display(buffer *Buffer) {
 				case tcell.KeyEscape:
 					close(quit)
 					return
+				case tcell.KeyBackspace2:
+					c := GetCursor()
+					buffer.Delete(c.loc.row, c.loc.column-1)
+					c.MoveLeft()
 				case tcell.KeyRune:
 					evName = ev.Name()
 					c := GetCursor()

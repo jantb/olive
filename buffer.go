@@ -76,11 +76,30 @@ func (b *Buffer) Insert(row, column int, bytes []byte) {
 		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte("\n"))})
 	}
 	r := b.r.Index(row)
+	for r.Len() < column {
+		r = *r.Insert(column, []byte(" "))
+	}
 	b.r = b.r.Delete(row, 1)
 	b.r = b.r.Insert(row, []rope.Rope{*r.Insert(column, bytes)})
 }
 
-// Insert into the buffer
+// Delete char from
+func (b *Buffer) Delete(row, column int) {
+	for row >= b.r.Len() {
+		b.r = b.r.Insert(b.r.Len(), []rope.Rope{*rope.NewFromBytes([]byte("\n"))})
+	}
+	r := b.r.Index(row)
+	for r.Len() < column {
+		r = *r.Insert(column, []byte(" "))
+	}
+	if column < 0 {
+		return
+	}
+	b.r = b.r.Delete(row, 1)
+	b.r = b.r.Insert(row, []rope.Rope{*r.Delete(column, 1)})
+}
+
+// RemoveRow removes row
 func (b *Buffer) RemoveRow(row int) {
 	b.r = b.r.Delete(row, 1)
 }

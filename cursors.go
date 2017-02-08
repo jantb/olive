@@ -36,5 +36,7 @@ func (c *Cursor) MoveRight() {
 
 // MoveLeft the cursor
 func (c *Cursor) MoveLeft() {
-	c.loc.column--
+	if c.loc.column > 0 {
+		c.loc.column--
+	}
 }

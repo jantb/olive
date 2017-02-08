@@ -30,3 +30,16 @@ func TestBufferDelete(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestBufferDeleteChar(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "Buffer h insert test"
+	b.Insert(0, 0, []byte(text))
+	b.Delete(0, 7)
+	b.Delete(0, 7)
+	if "Buffer insert test\n" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println("Buffer insert test" + "!=" + string(b.GetLines(0, 1, 100)[0]))
+		t.Fail()
+	}
+}
