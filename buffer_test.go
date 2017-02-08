@@ -8,7 +8,20 @@ func TestBufferInsert(t *testing.T) {
 	b.New()
 	text := "Buffer insert test"
 	b.Insert(0, 0, []byte(text))
-	if text+"\n" != string(b.GetLines(0, 1, 100)[0]) {
+	if text != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert2(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "øøø"
+	b.Insert(0, 0, []byte(string('ø')))
+	b.Insert(0, 0, []byte(string('ø')))
+	b.Insert(0, 0, []byte(string('ø')))
+	if text != string(b.GetLines(0, 1, 100)[0]) {
 		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
 	}
@@ -19,6 +32,7 @@ func TestBufferDeleteEmpty(t *testing.T) {
 	b.New()
 	b.RemoveRow(0)
 }
+
 func TestBufferDelete(t *testing.T) {
 	b := Buffer{}
 	b.New()
@@ -38,7 +52,7 @@ func TestBufferDeleteChar(t *testing.T) {
 	b.Insert(0, 0, []byte(text))
 	b.Delete(0, 7)
 	b.Delete(0, 7)
-	if "Buffer insert test\n" != string(b.GetLines(0, 1, 100)[0]) {
+	if "Buffer insert test" != string(b.GetLines(0, 1, 100)[0]) {
 		fmt.Println("Buffer insert test" + "!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
 	}
