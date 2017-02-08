@@ -143,8 +143,9 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		}
 	}
 	c := GetCursor()
-
-	backing[c.loc.row][c.loc.column].style = tcell.StyleDefault.Reverse(true)
+	if len(backing) > c.loc.row && len(backing[c.loc.row]) > c.loc.column {
+		backing[c.loc.row][c.loc.column].style = tcell.StyleDefault.Reverse(true)
+	}
 	re := []rune{}
 	for ir, row := range backing {
 		x := offset
