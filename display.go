@@ -93,7 +93,7 @@ func Display(buffer *Buffer) {
 					evName = ev.Name()
 					c := GetCursor()
 					//Move cursor further if two bytes?
-					buffer.Insert(c.loc.row, c.loc.column, []byte(string(ev.Rune())))
+					buffer.Insert(c.loc.row, c.loc.column, []rune(string(ev.Rune())))
 					c.MoveRight()
 				default:
 					evName = ev.Name()
@@ -128,13 +128,13 @@ var style = tcell.StyleDefault.
 	Foreground(tcell.ColorWhite).
 	Background(tcell.ColorDefault)
 
-func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]byte) {
+func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]rune) {
 	for i := range backing {
 		if len(lines)-1 < i {
 			continue
 		}
 		jj := 0
-		for _, r := range string(lines[i]) {
+		for _, r := range lines[i] {
 			backing[i][jj].value = r
 			backing[i][jj].style = tcell.StyleDefault
 			jj++

@@ -8,7 +8,7 @@ func TestBufferInsert(t *testing.T) {
 	b := Buffer{}
 	b.New()
 	text := "Buffer insert test"
-	b.Insert(0, 0, []byte(text))
+	b.Insert(0, 0, []rune(text))
 	if text != string(b.GetLines(0, 1, 100)[0]) {
 		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
@@ -19,9 +19,9 @@ func TestBufferInsert2(t *testing.T) {
 	b := Buffer{}
 	b.New()
 	text := "øøø"
-	b.Insert(0, 0, []byte(string('ø')))
-	b.Insert(0, 0, []byte(string('ø')))
-	b.Insert(0, 0, []byte(string('ø')))
+	b.Insert(0, 0, []rune(string('ø')))
+	b.Insert(0, 0, []rune(string('ø')))
+	b.Insert(0, 0, []rune(string('ø')))
 	if text != string(b.GetLines(0, 1, 100)[0]) {
 		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
 		t.Fail()
@@ -29,6 +29,27 @@ func TestBufferInsert2(t *testing.T) {
 }
 
 func TestBufferInsert3(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "øøø"
+	b.Insert(0, 0, []rune(string('ø')))
+	if "ø" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+		t.Fail()
+	}
+	b.Insert(0, 0, []rune(string('ø')))
+	if "øø" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+		t.Fail()
+	}
+	b.Insert(0, 0, []rune(string('ø')))
+	if "øøø" != string(b.GetLines(0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert4(t *testing.T) {
 	b := Buffer{}
 	b.Open("main.go")
 	by, _ := ioutil.ReadFile("main.go")
@@ -48,7 +69,7 @@ func TestBufferDelete(t *testing.T) {
 	b := Buffer{}
 	b.New()
 	text := "Buffer insert test"
-	b.Insert(0, 0, []byte(text))
+	b.Insert(0, 0, []rune(text))
 	b.RemoveRow(0)
 	if "" != string(b.GetLines(0, 1, 100)[0]) {
 		fmt.Println("!=" + string(b.GetLines(0, 1, 100)[0]))
@@ -60,7 +81,7 @@ func TestBufferDeleteChar(t *testing.T) {
 	b := Buffer{}
 	b.New()
 	text := "Buffer h insert test"
-	b.Insert(0, 0, []byte(text))
+	b.Insert(0, 0, []rune(text))
 	b.Delete(0, 7)
 	b.Delete(0, 7)
 	if "Buffer insert test" != string(b.GetLines(0, 1, 100)[0]) {
