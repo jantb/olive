@@ -40,3 +40,15 @@ func (c *Cursor) MoveLeft() {
 		c.loc.column--
 	}
 }
+
+// MoveDown the cursor
+func (c *Cursor) MoveDown() {
+	c.loc.row++
+}
+
+// MoveUp the cursor
+func (c *Cursor) MoveUp() {
+	if c.loc.row > 0 {
+		c.loc.row--
+	}
+}

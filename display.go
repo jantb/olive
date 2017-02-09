@@ -73,9 +73,13 @@ func Display(buffer *Buffer) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyDown:
-					topRow = Min(topRow+1, buffer.Len())
+					//topRow = Min(topRow+1, buffer.Len())
+					c := GetCursor()
+					c.MoveDown()
 				case tcell.KeyUp:
-					topRow = Max(0, topRow-1)
+					//topRow = Max(0, topRow-1)
+					c := GetCursor()
+					c.MoveUp()
 				case tcell.KeyLeft:
 					c := GetCursor()
 					c.MoveLeft()
@@ -89,6 +93,8 @@ func Display(buffer *Buffer) {
 					c := GetCursor()
 					buffer.Delete(c.loc.row, c.loc.column-1)
 					c.MoveLeft()
+				case tcell.KeyCtrlS:
+					buffer.Save()
 				case tcell.KeyRune:
 					evName = ev.Name()
 					c := GetCursor()
@@ -126,9 +132,10 @@ type Backing struct {
 var backing = [][]Backing{}
 var style = tcell.StyleDefault.
 	Foreground(tcell.ColorWhite).
-	Background(tcell.ColorDefault)
+	Background(tcell.GetColor("#464742"))
 
 func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]rune) {
+	c := GetCursor()
 	for i := range backing {
 		if len(lines)-1 < i {
 			continue
@@ -136,18 +143,19 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		jj := 0
 		for _, r := range lines[i] {
 			backing[i][jj].value = r
-			backing[i][jj].style = tcell.StyleDefault
+			backing[i][jj].style = style
 			jj++
 		}
 		for index := len(lines[i]); index < w; index++ {
 			backing[i][index].value = ' '
-			backing[i][index].style = tcell.StyleDefault
+			backing[i][index].style = style
 		}
 	}
-	c := GetCursor()
+
 	if len(backing) > c.loc.row && len(backing[c.loc.row]) > c.loc.column {
 		backing[c.loc.row][c.loc.column].style = tcell.StyleDefault.Reverse(true)
 	}
+
 	re := []rune{}
 	for ir, row := range backing {
 		x := offset

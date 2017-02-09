@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -13,12 +14,14 @@ import (
 
 //Buffer holds the current buffer
 type Buffer struct {
-	r *rope.RopeRuneRope
+	r        *rope.RopeRuneRope
+	filename string
 }
 
 // Open initializes a new buffer
 func (b *Buffer) Open(filename string) {
 	file, err := os.Open(filename)
+	b.filename = filename
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,4 +114,9 @@ func (b *Buffer) New() {
 // Bytes returns all bytes from buffer
 func (b *Buffer) Bytes() []byte {
 	return b.r.Bytes()
+}
+
+// Saves the buffer
+func (b *Buffer) Save() {
+	ioutil.WriteFile(b.filename, b.Bytes(), 0644)
 }
