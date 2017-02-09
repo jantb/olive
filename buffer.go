@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/jantb/rope"
@@ -16,8 +15,6 @@ import (
 type Buffer struct {
 	r *rope.RopeRope
 }
-
-var m sync.Mutex
 
 // Open initializes a new buffer
 func (b *Buffer) Open(filename string) {
@@ -31,7 +28,7 @@ func (b *Buffer) Open(filename string) {
 
 	b.r = rope.NewFromRope([]rope.Rope{})
 
-	ropes := make([]rope.Rope, 0, 512)
+	ropes := make([]rope.Rope, 0, 4096)
 
 	t := time.Now()
 	i := 0
@@ -42,14 +39,10 @@ func (b *Buffer) Open(filename string) {
 			break
 		}
 
-		ropes = append(ropes, *rope.NewFromBytes(line))
-		if i == 512 {
-			go func(ropes *[]rope.Rope) {
-				m.Lock()
-				b.r = b.r.Insert(b.r.Len(), *ropes)
-				m.Unlock()
-			}(&ropes)
-			ropes = make([]rope.Rope, 0, 512)
+		ropes = append(ropes, *rope.NewFromBytes([]byte(string(line) + "\n")))
+		if i == 4096 {
+			b.r = b.r.Insert(b.r.Len(), ropes)
+			ropes = make([]rope.Rope, 0, 4096)
 			i = 0
 			continue
 		}
@@ -112,4 +105,9 @@ func (b *Buffer) Len() int {
 // New buffer
 func (b *Buffer) New() {
 	b.r = rope.NewFromRope([]rope.Rope{})
+}
+
+// Bytes returns all bytes from buffer
+func (b *Buffer) Bytes() []byte {
+	return b.r.Bytes()
 }
