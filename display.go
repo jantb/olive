@@ -47,9 +47,9 @@ func Display(buffer *Buffer) {
 	//backing := [][]Backing{}
 	go func() {
 		for {
-			var offset = drawRuler(topRow, h-1, s)
+			var offset = drawRuler(topRow, height-1, s)
 			var w = width - offset
-			lines := buffer.GetLines(topRow, h-1, w)
+			lines := buffer.GetLines(topRow, height-1, w)
 
 			t := time.Now()
 			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
@@ -61,12 +61,13 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), 0, height-1, time)
+			var of = width - len(strconv.Itoa(GetCursor().loc.row)+"/"+strconv.Itoa(buffer.Len()))
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len())), height-1, strconv.Itoa(buffer.Len()))
+				Background(tcell.ColorDefault), of, height-1, strconv.Itoa(GetCursor().loc.row)+"/"+strconv.Itoa(buffer.Len()))
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), width-len(strconv.Itoa(buffer.Len()))-2-len(evName), height-1, evName)
+				Background(tcell.ColorDefault), of-2-len(evName), height-1, evName)
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
@@ -152,8 +153,8 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		}
 	}
 
-	if len(backing) > c.loc.row && len(backing[c.loc.row]) > c.loc.column {
-		backing[c.loc.row][c.loc.column].style = tcell.StyleDefault.Reverse(true)
+	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column {
+		backing[c.loc.row-topRow][c.loc.column].style = tcell.StyleDefault.Reverse(true)
 	}
 
 	re := []rune{}

@@ -43,12 +43,25 @@ func (c *Cursor) MoveLeft() {
 
 // MoveDown the cursor
 func (c *Cursor) MoveDown() {
-	c.loc.row++
+	if buffer.Len() > c.loc.row {
+		c.loc.row++
+		c.showCursorInView()
+	}
 }
 
 // MoveUp the cursor
 func (c *Cursor) MoveUp() {
 	if c.loc.row > 0 {
 		c.loc.row--
+		c.showCursorInView()
+	}
+}
+
+func (c Cursor) showCursorInView() {
+	if c.loc.row > topRow+height-6 {
+		topRow = Min(buffer.Len()-5, topRow+1)
+	}
+	if c.loc.row < topRow+5 {
+		topRow = Max(0, topRow-1)
 	}
 }
