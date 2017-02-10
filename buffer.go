@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 
 	"github.com/jantb/rope"
 )
@@ -33,7 +31,6 @@ func (b *Buffer) Open(filename string) {
 
 	ropes := make([]rope.RuneRope, 0, 512)
 
-	t := time.Now()
 	i := 0
 	for {
 		line, _, err := reader.ReadLine()
@@ -52,9 +49,6 @@ func (b *Buffer) Open(filename string) {
 		i++
 	}
 	b.r = b.r.Insert(b.r.Len(), ropes)
-
-	fmt.Print(time.Now().Sub(t))
-
 }
 
 // GetLines return lines from the buffer
@@ -116,7 +110,7 @@ func (b *Buffer) Bytes() []byte {
 	return b.r.Bytes()
 }
 
-// Saves the buffer
+// Save the buffer
 func (b *Buffer) Save() {
 	ioutil.WriteFile(b.filename, b.Bytes(), 0644)
 }

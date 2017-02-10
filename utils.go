@@ -8,6 +8,7 @@ import (
 	"github.com/jantb/tcell"
 )
 
+// Min of int
 func Min(x, y int) int {
 	if x < y {
 		return x
@@ -15,6 +16,7 @@ func Min(x, y int) int {
 	return y
 }
 
+// Max of int
 func Max(x, y int) int {
 	if x > y {
 		return x
@@ -22,6 +24,7 @@ func Max(x, y int) int {
 	return y
 }
 
+// TermMessage Quit and sgow termmessage
 func TermMessage(s tcell.Screen, msg ...interface{}) {
 	s.Fini()
 
