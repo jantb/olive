@@ -9,8 +9,8 @@ func TestBufferInsert(t *testing.T) {
 	b.New()
 	text := "Buffer insert test"
 	b.Insert(0, 0, []rune(text))
-	if text != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if text != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 }
@@ -22,8 +22,8 @@ func TestBufferInsert2(t *testing.T) {
 	b.Insert(0, 0, []rune(string('ø')))
 	b.Insert(0, 0, []rune(string('ø')))
 	b.Insert(0, 0, []rune(string('ø')))
-	if text != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if text != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 }
@@ -33,18 +33,18 @@ func TestBufferInsert3(t *testing.T) {
 	b.New()
 	text := "øøø"
 	b.Insert(0, 0, []rune(string('ø')))
-	if "ø" != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if "ø" != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 	b.Insert(0, 0, []rune(string('ø')))
-	if "øø" != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if "øø" != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 	b.Insert(0, 0, []rune(string('ø')))
-	if "øøø" != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println(text + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if "øøø" != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 }
@@ -71,8 +71,8 @@ func TestBufferDelete(t *testing.T) {
 	text := "Buffer insert test"
 	b.Insert(0, 0, []rune(text))
 	b.RemoveRow(0)
-	if "" != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println("!=" + string(b.GetLines(0, 1, 100)[0]))
+	if "" != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println("!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 }
@@ -84,8 +84,8 @@ func TestBufferDeleteChar(t *testing.T) {
 	b.Insert(0, 0, []rune(text))
 	b.Delete(0, 7)
 	b.Delete(0, 7)
-	if "Buffer insert test" != string(b.GetLines(0, 1, 100)[0]) {
-		fmt.Println("Buffer insert test" + "!=" + string(b.GetLines(0, 1, 100)[0]))
+	if "Buffer insert test" != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println("Buffer insert test" + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
 	}
 }

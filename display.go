@@ -63,7 +63,10 @@ func Display(buffer *Buffer) {
 				Background(tcell.ColorDefault), 0, height-1, "                                                                                                                                                                                                                                                               ")
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), 0, height-1, time)
+				Background(tcell.ColorDefault), 0, height-1, buffer.filename)
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time)
 
 			var text = strconv.Itoa(GetCursor().loc.row) + ":" + strconv.Itoa(GetCursor().loc.column) +
 				"/" + strconv.Itoa(buffer.Len()) + ":" + strconv.Itoa(len(buffer.GetLine(GetCursor().loc.row)))
@@ -209,12 +212,8 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 			}
 			s.SetContent(x, ir, column.value, nil, column.style)
 			x++
-
-			//put(s, column.style, x, ir, column.value)
-			//	fmt.Printf("%s", string(column.value))
 		}
 	}
-
 }
 
 func drawRuler(topRow, h int, s tcell.Screen) int {
