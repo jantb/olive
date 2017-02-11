@@ -66,8 +66,11 @@ func (b *Buffer) GetLines(top, left, length, w int) [][]rune {
 
 // GetLine return line from the buffer
 func (b *Buffer) GetLine(line int) []rune {
-	rr := b.r.Index(line)
-	return rr.Runes()
+	if buffer.Len() > line {
+		rr := b.r.Index(line)
+		return rr.Runes()
+	}
+	return []rune{}
 }
 
 // Insert into the buffer
@@ -84,6 +87,23 @@ func (b *Buffer) Insert(row, column int, bytes []rune) {
 	b.r = b.r.Insert(row, []rope.RuneRope{*r.Insert(column, bytes)})
 }
 
+// InsertEnter into the buffer
+func (b *Buffer) InsertEnter(row, column int) {
+	if row >= b.r.Len() {
+		b.r = b.r.Insert(b.r.Len(), []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
+		return
+	}
+	ro := b.r.Index(row)
+	l, r := ro.Split(column)
+	b.r = b.r.Delete(row, 1)
+	l = l.Insert(l.Len(), []rune{'\n'})
+	if r == nil {
+		b.r = b.r.Insert(row, []rope.RuneRope{*l})
+	} else {
+		b.r = b.r.Insert(row, []rope.RuneRope{*l, *r})
+	}
+}
+
 // Delete char from
 func (b *Buffer) Delete(row, column int) {
 	for row >= b.r.Len() {
@@ -93,11 +113,23 @@ func (b *Buffer) Delete(row, column int) {
 	for r.Len() < column {
 		r = *r.Insert(column, []rune(" "))
 	}
-	if column < 0 {
+	if column < -1 || (row == 0 && column < 0) {
 		return
 	}
-	b.r = b.r.Delete(row, 1)
-	b.r = b.r.Insert(row, []rope.RuneRope{*r.Delete(column, 1)})
+	if column == -1 && row > 0 {
+		rPrev := b.r.Index(row - 1)
+		rPrev = *rPrev.Delete(rPrev.Len()-1, 1)
+		if rPrev.Len() == 0 {
+			rPrev = r
+		} else {
+			rPrev = *rPrev.Concat(&r)
+		}
+		b.r = b.r.Insert(row-1, []rope.RuneRope{rPrev})
+		b.r = b.r.Delete(row, 2)
+	} else {
+		b.r = b.r.Delete(row, 1)
+		b.r = b.r.Insert(row, []rope.RuneRope{*r.Delete(column, 1)})
+	}
 }
 
 // RemoveRow removes row

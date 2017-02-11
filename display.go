@@ -74,7 +74,7 @@ func Display(buffer *Buffer) {
 
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), len(text)-2-len(evName), height-1, evName)
+				Background(tcell.ColorDefault), width-len(text)-2-len(evName), height-1, evName)
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
@@ -98,7 +98,12 @@ func Display(buffer *Buffer) {
 				case tcell.KeyBackspace2:
 					c := GetCursor()
 					buffer.Delete(c.loc.row, c.loc.column-1)
-					c.MoveLeft()
+					if c.loc.column == 0 {
+						c.MoveUp()
+						c.MoveToEndOfLine()
+					} else {
+						c.MoveLeft()
+					}
 				case tcell.KeyCtrlS:
 					buffer.Save()
 				case tcell.KeyRune:
@@ -106,6 +111,11 @@ func Display(buffer *Buffer) {
 					c := GetCursor()
 					buffer.Insert(c.loc.row, c.loc.column, []rune(string(ev.Rune())))
 					c.MoveRight()
+				case tcell.KeyEnter:
+					c := GetCursor()
+					buffer.InsertEnter(c.loc.row, c.loc.column)
+					c.MoveDown()
+					c.MoveStartOfLine()
 				default:
 					evName = ev.Name()
 				}
@@ -161,7 +171,12 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		for i := range backing[c.loc.row-topRow] {
 			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#545B4A"))
 		}
-		backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
+		// No cursor on enter
+		if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
+			backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
+		} else {
+			backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
+		}
 	}
 
 	re := []rune{}
@@ -174,6 +189,9 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 				s.SetContent(x+2, ir, ' ', re, column.style)
 				s.SetContent(x+3, ir, ' ', re, column.style)
 				x += 4
+				continue
+			}
+			if column.value == '\n' {
 				continue
 			}
 			s.SetContent(x, ir, column.value, nil, column.style)
