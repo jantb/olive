@@ -51,7 +51,7 @@ func Display(buffer *Buffer) {
 	go func() {
 		for {
 			offset = drawRuler(topRow, height-1, s)
-			var w = width - offset
+			var w = width - offset + 1
 			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
 
 			t := time.Now()
@@ -92,6 +92,12 @@ func Display(buffer *Buffer) {
 				case tcell.KeyRight:
 					c := GetCursor()
 					c.MoveRight()
+				case tcell.KeyPgDn:
+					c := GetCursor()
+					c.MovePageDown()
+				case tcell.KeyPgUp:
+					c := GetCursor()
+					c.MovePageUp()
 				case tcell.KeyEscape:
 					close(quit)
 					return
@@ -147,7 +153,7 @@ type Backing struct {
 var backing = [][]Backing{}
 var style = tcell.StyleDefault.
 	Foreground(tcell.ColorWhite).
-	Background(tcell.GetColor("#464742"))
+	Background(tcell.GetColor("#1E1E1E"))
 
 func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]rune) {
 	c := GetCursor()
@@ -161,7 +167,7 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 			backing[i][jj].style = style
 			jj++
 		}
-		for index := len(lines[i]); index < w; index++ {
+		for index := len(lines[i]); index < width; index++ {
 			backing[i][index].value = ' '
 			backing[i][index].style = style
 		}
@@ -169,7 +175,7 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 
 	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column-leftColumn {
 		for i := range backing[c.loc.row-topRow] {
-			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#545B4A"))
+			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#282828"))
 		}
 		// No cursor on enter
 		if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
@@ -209,8 +215,8 @@ func drawRuler(topRow, h int, s tcell.Screen) int {
 	ret := len(fmt.Sprintf("%d", topRow+h))
 	for index := 0; index < h; index++ {
 		puts(s, tcell.StyleDefault.
-			Foreground(tcell.ColorDarkSlateGrey).
-			Background(tcell.Color234), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
+			Foreground(tcell.GetColor("#5A5A5A")).
+			Background(tcell.GetColor("#1E1E1E")), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
 	}
 	return ret + 1
 }

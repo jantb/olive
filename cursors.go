@@ -56,6 +56,32 @@ func (c *Cursor) MoveDown() {
 	}
 }
 
+// MovePageDown the cursor
+func (c *Cursor) MovePageDown() {
+	if buffer.Len() > c.loc.row+height {
+		c.loc.row += height
+	} else {
+		c.loc.row = buffer.Len()
+	}
+	for c.loc.column > len(buffer.GetLine(c.loc.row)) {
+		c.MoveLeft()
+	}
+	c.showCursorInView()
+}
+
+// MovePageUp the cursor
+func (c *Cursor) MovePageUp() {
+	if c.loc.row-height >= 0 {
+		c.loc.row -= height
+	} else {
+		c.loc.row = 0
+	}
+	for c.loc.column > len(buffer.GetLine(c.loc.row)) {
+		c.MoveLeft()
+	}
+	c.showCursorInView()
+}
+
 // MoveStartOfLine the cursor to start of line
 func (c *Cursor) MoveStartOfLine() {
 	c.loc.column = 0
