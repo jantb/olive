@@ -101,6 +101,13 @@ func Display(buffer *Buffer) {
 				case tcell.KeyEscape:
 					close(quit)
 					return
+				case tcell.KeyCtrlD:
+					c := GetCursor()
+					buffer.Insert(c.loc.row, 0, buffer.GetLine(c.loc.row))
+					c.MoveDown()
+				case tcell.KeyCtrlY:
+					c := GetCursor()
+					buffer.RemoveRow(c.loc.row)
 				case tcell.KeyBackspace2:
 					c := GetCursor()
 					buffer.Delete(c.loc.row, c.loc.column-1)

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jantb/rope"
 )
@@ -85,6 +86,10 @@ func (b *Buffer) Insert(row, column int, bytes []rune) {
 	b.r = b.r.Delete(row, 1)
 
 	b.r = b.r.Insert(row, []rope.RuneRope{*r.Insert(column, bytes)})
+	indexOfLineshift := strings.Index(string(b.GetLine(row)), "\n")
+	if indexOfLineshift != -1 {
+		b.InsertEnter(row, indexOfLineshift)
+	}
 }
 
 // InsertEnter into the buffer
