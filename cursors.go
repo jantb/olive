@@ -31,13 +31,17 @@ func GetCursor() Cursor {
 
 // MoveRight the cursor
 func (c *Cursor) MoveRight() {
-	c.loc.column++
+	if c.loc.column < len(buffer.GetLine(c.loc.row)) {
+		c.loc.column++
+		c.showCursorInView()
+	}
 }
 
 // MoveLeft the cursor
 func (c *Cursor) MoveLeft() {
 	if c.loc.column > 0 {
 		c.loc.column--
+		c.showCursorInView()
 	}
 }
 
@@ -63,5 +67,12 @@ func (c Cursor) showCursorInView() {
 	}
 	if c.loc.row < topRow+5 {
 		topRow = Max(0, topRow-1)
+	}
+	if c.loc.column < leftColumn+5 {
+		leftColumn = Max(0, leftColumn-1)
+	}
+	if c.loc.column > leftColumn+width-offset-5 {
+		lengthOfLine := len(buffer.GetLine(c.loc.row))
+		leftColumn = Min(lengthOfLine, leftColumn+1)
 	}
 }

@@ -52,12 +52,22 @@ func (b *Buffer) Open(filename string) {
 }
 
 // GetLines return lines from the buffer
-func (b *Buffer) GetLines(start, length, w int) [][]rune {
+func (b *Buffer) GetLines(top, left, length, w int) [][]rune {
 	ret := make([][]rune, length)
-	for i, rope := range b.r.Sub(start, length) {
-		ret[i] = rope.Sub(0, w)
+	for i, rope := range b.r.Sub(top, length) {
+		if rope.Len() < left {
+			ret[i] = []rune{}
+			continue
+		}
+		ret[i] = rope.Sub(left, w)
 	}
 	return ret
+}
+
+// GetLine return line from the buffer
+func (b *Buffer) GetLine(line int) []rune {
+	rr := b.r.Index(line)
+	return rr.Runes()
 }
 
 // Insert into the buffer

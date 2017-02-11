@@ -13,11 +13,14 @@ import (
 )
 
 var topRow = 0
+var leftColumn = 0
 var height = 0
 var width = 0
+var offset = 0
 
 //Display renders the editor
 func Display(buffer *Buffer) {
+	os.Setenv("TERM", "xterm-truecolor")
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -47,9 +50,9 @@ func Display(buffer *Buffer) {
 	//backing := [][]Backing{}
 	go func() {
 		for {
-			var offset = drawRuler(topRow, height-1, s)
+			offset = drawRuler(topRow, height-1, s)
 			var w = width - offset
-			lines := buffer.GetLines(topRow, height-1, w)
+			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
 
 			t := time.Now()
 			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
@@ -61,24 +64,26 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), 0, height-1, time)
-			var of = width - len(strconv.Itoa(GetCursor().loc.row)+"/"+strconv.Itoa(buffer.Len()))
+
+			var text = strconv.Itoa(GetCursor().loc.row) + ":" + strconv.Itoa(GetCursor().loc.column) +
+				"/" + strconv.Itoa(buffer.Len()) + ":" + strconv.Itoa(len(buffer.GetLine(GetCursor().loc.row)))
+
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), of, height-1, strconv.Itoa(GetCursor().loc.row)+"/"+strconv.Itoa(buffer.Len()))
+				Background(tcell.ColorDefault), width-len(text), height-1, text)
+
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), of-2-len(evName), height-1, evName)
+				Background(tcell.ColorDefault), len(text)-2-len(evName), height-1, evName)
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyDown:
-					//topRow = Min(topRow+1, buffer.Len())
 					c := GetCursor()
 					c.MoveDown()
 				case tcell.KeyUp:
-					//topRow = Max(0, topRow-1)
 					c := GetCursor()
 					c.MoveUp()
 				case tcell.KeyLeft:
@@ -99,7 +104,6 @@ func Display(buffer *Buffer) {
 				case tcell.KeyRune:
 					evName = ev.Name()
 					c := GetCursor()
-					//Move cursor further if two bytes?
 					buffer.Insert(c.loc.row, c.loc.column, []rune(string(ev.Rune())))
 					c.MoveRight()
 				default:
@@ -153,8 +157,11 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		}
 	}
 
-	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column {
-		backing[c.loc.row-topRow][c.loc.column].style = tcell.StyleDefault.Reverse(true)
+	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column-leftColumn {
+		for i := range backing[c.loc.row-topRow] {
+			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#545B4A"))
+		}
+		backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
 	}
 
 	re := []rune{}
@@ -162,10 +169,10 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 		x := offset
 		for _, column := range row {
 			if column.value == '\t' {
-				s.SetContent(x, ir, ' ', re, style)
-				s.SetContent(x+1, ir, ' ', re, style)
-				s.SetContent(x+2, ir, ' ', re, style)
-				s.SetContent(x+3, ir, ' ', re, style)
+				s.SetContent(x, ir, ' ', re, column.style)
+				s.SetContent(x+1, ir, ' ', re, column.style)
+				s.SetContent(x+2, ir, ' ', re, column.style)
+				s.SetContent(x+3, ir, ' ', re, column.style)
 				x += 4
 				continue
 			}
@@ -185,7 +192,7 @@ func drawRuler(topRow, h int, s tcell.Screen) int {
 	for index := 0; index < h; index++ {
 		puts(s, tcell.StyleDefault.
 			Foreground(tcell.ColorDarkSlateGrey).
-			Background(tcell.ColorDefault), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
+			Background(tcell.Color234), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
 	}
 	return ret + 1
 }
