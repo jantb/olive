@@ -72,6 +72,9 @@ func (c *Cursor) MoveToEndOfLine() {
 func (c *Cursor) MoveUp() {
 	if c.loc.row > 0 {
 		c.loc.row--
+		for c.loc.column > len(buffer.GetLine(c.loc.row)) {
+			c.MoveLeft()
+		}
 		c.showCursorInView()
 	}
 }
