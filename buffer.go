@@ -55,6 +55,7 @@ func (b *Buffer) Open(filename string) {
 // GetLines return lines from the buffer
 func (b *Buffer) GetLines(top, left, length, w int) [][]rune {
 	ret := make([][]rune, length)
+
 	for i, rope := range b.r.Sub(top, length) {
 		if rope.Len() < left {
 			ret[i] = []rune{}
@@ -110,31 +111,36 @@ func (b *Buffer) InsertEnter(row, column int) {
 }
 
 // Delete char from
-func (b *Buffer) Delete(row, column int) {
-	for row >= b.r.Len() {
-		b.r = b.r.Insert(b.r.Len(), []rope.RuneRope{*rope.NewFromRunes([]rune(""))})
-	}
-	r := b.r.Index(row)
-	for r.Len() < column {
-		r = *r.Insert(column, []rune(" "))
-	}
-	if column < -1 || (row == 0 && column < 0) {
-		return
-	}
-	if column == -1 && row > 0 {
-		rPrev := b.r.Index(row - 1)
-		rPrev = *rPrev.Delete(rPrev.Len()-1, 1)
-		if rPrev.Len() == 0 {
-			rPrev = r
-		} else {
-			rPrev = *rPrev.Concat(&r)
+func (b *Buffer) Delete(row, column int) int {
+	if column == -1 {
+		if row > 0 {
+			prevr := b.r.Index(row - 1)
+			prevr = *prevr.Delete(prevr.Len()-1, 1)
+			if b.Len() > row {
+				r := b.r.Index(row)
+				if r.Len() > 0 {
+					prevr = *prevr.Concat(&r)
+				}
+				b.r = b.r.Delete(row-1, 2)
+				b.r = b.r.Insert(row, []rope.RuneRope{prevr})
+				return r.Len()
+			} else {
+				r := b.r.Index(row - 1)
+				if r.Len() > 0 {
+					prevr = *prevr.Concat(&r)
+				}
+				b.r = b.r.Delete(row-1, 2)
+				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
+				return r.Len()
+			}
 		}
-		b.r = b.r.Insert(row-1, []rope.RuneRope{rPrev})
-		b.r = b.r.Delete(row, 2)
 	} else {
+		r := b.r.Index(row)
 		b.r = b.r.Delete(row, 1)
 		b.r = b.r.Insert(row, []rope.RuneRope{*r.Delete(column, 1)})
+		return 0
 	}
+	return 0
 }
 
 // RemoveRow removes row

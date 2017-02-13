@@ -116,6 +116,7 @@ type TmLanguage struct {
 
 func syntax(liner []rune) {
 	line := []byte(string(liner))
+
 	if strings.HasSuffix(buffer.filename, ".go") {
 		for _, pattern := range golang.Patterns {
 
@@ -125,7 +126,10 @@ func syntax(liner []rune) {
 			// loc = reEnd.FindIndex(line)
 			if pattern.Match != "" {
 				reMatch := regexp.MustCompile(pattern.Match)
-				reMatch.FindIndex(line)
+				loc := reMatch.FindIndex(line)
+				if loc != nil {
+					//	pattern.Name
+				}
 			}
 		}
 	}

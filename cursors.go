@@ -47,7 +47,7 @@ func (c *Cursor) MoveLeft() {
 
 // MoveDown the cursor
 func (c *Cursor) MoveDown() {
-	if buffer.Len() > c.loc.row+1 {
+	if buffer.Len() >= c.loc.row+1 {
 		c.loc.row++
 		for c.loc.column > len(buffer.GetLine(c.loc.row)) {
 			c.MoveLeft()

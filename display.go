@@ -17,11 +17,12 @@ var leftColumn = 0
 var height = 0
 var width = 0
 var offset = 0
+var s tcell.Screen
 
-//Display renders the editor
-func Display(buffer *Buffer) {
+func createDisplay() {
 	os.Setenv("TERM", "xterm-truecolor")
-	s, e := tcell.NewScreen()
+	sc, e := tcell.NewScreen()
+	s = sc
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
@@ -37,7 +38,6 @@ func Display(buffer *Buffer) {
 		Foreground(tcell.ColorWhite).
 		Background(tcell.ColorDefault))
 	s.Clear()
-	quit := make(chan struct{})
 	s.Show()
 	w, h := s.Size()
 	width = w
@@ -46,14 +46,18 @@ func Display(buffer *Buffer) {
 	for i := range backing {
 		backing[i] = make([]Backing, w, w)
 	}
+}
+
+//Display renders the editor
+func Display(buffer *Buffer) {
+	createDisplay()
+	quit := make(chan struct{})
 	evName := ""
-	//backing := [][]Backing{}
 	go func() {
 		for {
 			offset = drawRuler(topRow, height-1, s)
 			var w = width - offset + 1
 			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
-
 			t := time.Now()
 			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
 			time := time.Now().Sub(t).String()
@@ -64,11 +68,12 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), 0, height-1, buffer.filename)
+
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time)
 
-			var text = strconv.Itoa(GetCursor().loc.row) + ":" + strconv.Itoa(GetCursor().loc.column) +
+			var text = strconv.Itoa(GetCursor().loc.row+1) + ":" + strconv.Itoa(GetCursor().loc.column+1) +
 				"/" + strconv.Itoa(buffer.Len()) + ":" + strconv.Itoa(len(buffer.GetLine(GetCursor().loc.row)))
 
 			puts(s, tcell.StyleDefault.
@@ -113,10 +118,13 @@ func Display(buffer *Buffer) {
 					buffer.RemoveRow(c.loc.row)
 				case tcell.KeyBackspace2:
 					c := GetCursor()
-					buffer.Delete(c.loc.row, c.loc.column-1)
-					if c.loc.column == 0 {
+					l := buffer.Delete(c.loc.row, c.loc.column-1)
+					if c.loc.column == 0 && c.loc.row > 0 {
 						c.MoveUp()
 						c.MoveToEndOfLine()
+						for index := 0; index < l; index++ {
+							c.MoveLeft()
+						}
 					} else {
 						c.MoveLeft()
 					}

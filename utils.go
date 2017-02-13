@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-
-	"github.com/jantb/tcell"
 )
 
 // Min of int
@@ -25,7 +23,7 @@ func Max(x, y int) int {
 }
 
 // TermMessage Quit and sgow termmessage
-func TermMessage(s tcell.Screen, msg ...interface{}) {
+func TermMessage(msg ...interface{}) {
 	s.Fini()
 
 	fmt.Println(msg...)
@@ -33,5 +31,5 @@ func TermMessage(s tcell.Screen, msg ...interface{}) {
 
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
-
+	createDisplay()
 }
