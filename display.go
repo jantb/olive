@@ -118,7 +118,7 @@ func Display(buffer *Buffer) {
 					buffer.RemoveRow(c.loc.row)
 				case tcell.KeyBackspace2:
 					c := GetCursor()
-					l := buffer.Delete(c.loc.row, c.loc.column-1)
+					l := buffer.Backspace(c.loc.row, c.loc.column)
 					if c.loc.column == 0 && c.loc.row > 0 {
 						c.MoveUp()
 						c.MoveToEndOfLine()
@@ -137,6 +137,7 @@ func Display(buffer *Buffer) {
 					c.MoveRight()
 				case tcell.KeyEnter:
 					c := GetCursor()
+					//buffer.Insert(c.loc.row, c.loc.column, []rune(string(ev.Rune())))
 					buffer.InsertEnter(c.loc.row, c.loc.column)
 					c.MoveDown()
 					c.MoveStartOfLine()
@@ -196,10 +197,12 @@ func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, li
 			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#282828"))
 		}
 		// No cursor on enter
-		if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
-			backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
-		} else {
-			backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
+		if c.loc.column != -1 {
+			if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
+				backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
+			} else {
+				backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
+			}
 		}
 	}
 

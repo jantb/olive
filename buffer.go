@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/jantb/rope"
 )
@@ -75,31 +74,37 @@ func (b *Buffer) GetLine(line int) []rune {
 	return []rune{}
 }
 
+// GetLineLen return line len from the buffer
+func (b *Buffer) GetLineLen(line int) int {
+	if buffer.Len() > line {
+		rr := b.r.Index(line)
+		return rr.Len()
+	}
+	return 0
+}
+
 // Insert into the buffer
 func (b *Buffer) Insert(row, column int, bytes []rune) {
-	for row >= b.r.Len() {
-		b.r = b.r.Insert(b.r.Len(), []rope.RuneRope{*rope.NewFromRunes([]rune(""))})
+	// Empthy buffer just insert a new line
+	if b.r.Len() <= row {
+		b.r = b.r.Insert(0, []rope.RuneRope{*rope.NewFromRunes([]rune(""))})
 	}
 	r := b.r.Index(row)
-	for r.Len() < column {
-		r = *r.Insert(column, []rune(" "))
-	}
 	b.r = b.r.Delete(row, 1)
-
 	b.r = b.r.Insert(row, []rope.RuneRope{*r.Insert(column, bytes)})
-	indexOfLineshift := strings.Index(string(b.GetLine(row)), "\n")
-	if indexOfLineshift != -1 {
-		b.InsertEnter(row, indexOfLineshift)
-	}
 }
 
 // InsertEnter into the buffer
 func (b *Buffer) InsertEnter(row, column int) {
-	if row >= b.r.Len() {
-		b.r = b.r.Insert(b.r.Len(), []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
+	if b.r.Len() < row+1 {
+		b.r = b.r.Insert(row, []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
 		return
 	}
 	ro := b.r.Index(row)
+	if column == ro.Len()-1 {
+		b.r = b.r.Insert(row+1, []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
+		return
+	}
 	l, r := ro.Split(column)
 	b.r = b.r.Delete(row, 1)
 	l = l.Insert(l.Len(), []rune{'\n'})
@@ -108,6 +113,17 @@ func (b *Buffer) InsertEnter(row, column int) {
 	} else {
 		b.r = b.r.Insert(row, []rope.RuneRope{*l, *r})
 	}
+}
+
+func (b *Buffer) Backspace(row, column int) int {
+	// if row == 0 && column == 0 {
+	// 	return 0
+	// }
+	// if column == 0 {
+	// 	b.Delete(row-1, len(b.GetLine(row-1)))
+	// 	return 0
+	// }
+	return b.Delete(row, column-1)
 }
 
 // Delete char from
@@ -126,16 +142,22 @@ func (b *Buffer) Delete(row, column int) int {
 				return r.Len()
 			} else {
 				r := b.r.Index(row - 1)
-				if r.Len() > 0 {
+				if r.Len() > 1 {
 					prevr = *prevr.Concat(&r)
 				}
 				b.r = b.r.Delete(row-1, 2)
 				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
 				return r.Len()
 			}
+		} else {
+			buffer.RemoveRow(0)
 		}
 	} else {
 		r := b.r.Index(row)
+		if row == 0 && column == 0 && r.Len() == 1 {
+			buffer.RemoveRow(0)
+			return 0
+		}
 		b.r = b.r.Delete(row, 1)
 		b.r = b.r.Insert(row, []rope.RuneRope{*r.Delete(column, 1)})
 		return 0

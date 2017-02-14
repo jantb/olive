@@ -31,12 +31,14 @@ func GetCursor() Cursor {
 
 // MoveRight the cursor
 func (c *Cursor) MoveRight() {
-	if c.loc.column < len(buffer.GetLine(c.loc.row))-1 {
+	if c.loc.column < buffer.GetLineLen(c.loc.row) &&
+		buffer.GetLine(c.loc.row)[c.loc.column] != '\n' {
 		c.loc.column++
 		c.showCursorInView()
 	} else {
-		c.MoveDown()
-		c.MoveStartOfLine()
+		if c.MoveDown() {
+			c.MoveStartOfLine()
+		}
 	}
 }
 
@@ -52,14 +54,18 @@ func (c *Cursor) MoveLeft() {
 }
 
 // MoveDown the cursor
-func (c *Cursor) MoveDown() {
-	if buffer.Len() > c.loc.row+1 {
+func (c *Cursor) MoveDown() bool {
+	if buffer.Len() > c.loc.row &&
+		len(buffer.GetLine(c.loc.row)) > 0 &&
+		buffer.GetLine(c.loc.row)[buffer.GetLineLen(c.loc.row)-1] == '\n' {
 		c.loc.row++
 		for c.loc.column > len(buffer.GetLine(c.loc.row)) {
 			c.MoveLeft()
 		}
 		c.showCursorInView()
+		return true
 	}
+	return false
 }
 
 // MovePageDown the cursor
