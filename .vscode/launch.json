@@ -27,7 +27,7 @@
             "args": [
                 "-test.v",
                 "-test.run",
-                "TestMySuperCoolTestName"
+                "TestBufferInsert11"
             ],
             "showLog": true
         }

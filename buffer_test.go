@@ -138,6 +138,18 @@ func TestBufferInsert10(t *testing.T) {
 	}
 }
 
+func TestBufferInsert11(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := ""
+	b.InsertEnter(0, 0)
+	b.Delete(1, -1)
+	if expexted != string(b.Bytes()) {
+		fmt.Println(expexted + "\n!=" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
 func TestBufferDeleteEmpty(t *testing.T) {
 	b := Buffer{}
 	b.New()
