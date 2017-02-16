@@ -2,7 +2,10 @@ package main
 
 import "testing"
 import "fmt"
-import "io/ioutil"
+import (
+	"io/ioutil"
+	"strings"
+)
 
 func TestBufferInsert(t *testing.T) {
 	b := Buffer{}
@@ -54,7 +57,7 @@ func TestBufferInsert4(t *testing.T) {
 	b.Open("main.go")
 	by, _ := ioutil.ReadFile("main.go")
 	if string(by) != string(b.Bytes()) {
-		fmt.Println("file content in buffer is not the same as in the file: " + string(b.Bytes()))
+		fmt.Println("file content in buffer is not the same as in the file: \"" + string(b.Bytes()) + "\"")
 		t.Fail()
 	}
 }
@@ -67,23 +70,15 @@ func TestBufferInsert5(t *testing.T) {
 	b.InsertEnter(1, 0)
 	b.InsertEnter(0, 0)
 	if expexted != string(b.Bytes()) {
-		fmt.Println(expexted + "!=" + string(b.Bytes()))
+		fmt.Println("\"" + expexted + "\"" + "!=" + "\"" + string(b.Bytes()) + "\"")
 		t.Fail()
 	}
 }
 
-func TestBufferInsert6(t *testing.T) {
-	b := Buffer{}
-	b.New()
-	expexted := "hei\npå\ndeg\n"
-	b.Insert(0, 0, []rune("heipådeg"))
-	b.InsertEnter(0, 3)
-	b.InsertEnter(1, 2)
-	b.InsertEnter(3, 3)
-	if expexted != string(b.Bytes()) {
-		fmt.Println(expexted + "\n!=\n" + string(b.Bytes()))
-		t.Fail()
-	}
+func TestBufferInsert15(t *testing.T) {
+	split := strings.Split(string("\n"), "\n")
+	fmt.Println(split[1])
+	fmt.Println(len(split))
 }
 
 func TestBufferInsert7(t *testing.T) {
@@ -150,6 +145,22 @@ func TestBufferInsert11(t *testing.T) {
 	}
 }
 
+func TestBufferInsert12(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := "\n1"
+	b.InsertEnter(0, 0)
+	if "\n" != string(b.Bytes()) {
+		fmt.Println("\n" + "\n!=" + string(b.Bytes()))
+		t.Fail()
+	}
+	b.Insert(1, 0, []rune("1"))
+	if expexted != string(b.Bytes()) {
+		fmt.Println("\"" + expexted + "\"" + "\n!=\n" + "\"" + string(b.Bytes()) + "\"")
+		t.Fail()
+	}
+}
+
 func TestBufferDeleteEmpty(t *testing.T) {
 	b := Buffer{}
 	b.New()
@@ -177,6 +188,60 @@ func TestBufferDeleteChar(t *testing.T) {
 	b.Delete(0, 7)
 	if "Buffer insert test" != string(b.GetLines(0, 0, 1, 100)[0]) {
 		fmt.Println("Buffer insert test" + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
+		t.Fail()
+	}
+}
+
+func TestBufferBackspace1(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "\n\n\n"
+	b.Insert(0, 0, []rune(text))
+	b.Backspace(2, 0)
+	if "\n\n" != string(b.Bytes()) {
+		fmt.Println("\n\n" + "!=" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
+func TestBufferBackspace2(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "\n\n\n"
+	b.Insert(0, 0, []rune(text))
+	b.Backspace(1, 0)
+	b.Backspace(1, 0)
+	if "\n" != string(b.Bytes()) {
+		fmt.Println("\n" + "!=" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
+func TestBufferBackspace3(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "\n\n\nHello"
+	b.Insert(0, 0, []rune(text))
+	b.Backspace(1, 0)
+	if "\n\nHello" != string(b.Bytes()) {
+		fmt.Println("\n\nHello" + "!=" + string(b.Bytes()))
+		t.Fail()
+	}
+	b.Backspace(1, 0)
+	if "\nHello" != string(b.Bytes()) {
+		fmt.Println("\"\nHello" + "!=" + string(b.Bytes()) + "\"")
+		t.Fail()
+	}
+}
+
+func TestBufferBackspace4(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "Hello"
+	b.Insert(0, 0, []rune(text))
+	b.Backspace(0, 0)
+	if "Hello" != string(b.Bytes()) {
+		fmt.Println("Hello" + "!=" + string(b.Bytes()))
 		t.Fail()
 	}
 }

@@ -39,7 +39,7 @@ func (b *Buffer) Open(filename string) {
 			break
 		}
 
-		ropes = append(ropes, *rope.NewFromRunes([]rune(string(line) + "\n")))
+		ropes = append(ropes, *rope.NewFromRunes([]rune(string(line))))
 		if i == 4096 {
 			b.r = b.r.Insert(b.r.Len(), ropes)
 			ropes = make([]rope.RuneRope, 0, 512)
@@ -86,43 +86,45 @@ func (b *Buffer) GetLineLen(line int) int {
 // Insert into the buffer
 func (b *Buffer) Insert(row, column int, bytes []rune) {
 	// Empthy buffer just insert a new line
-	if b.r.Len() <= row {
-		b.r = b.r.Insert(0, []rope.RuneRope{*rope.NewFromRunes([]rune(""))})
+	if b.r.Len() == row {
+		b.r = b.r.Insert(row, []rope.RuneRope{*rope.NewFromRunes([]rune(""))})
 	}
 	r := b.r.Index(row)
-	b.r = b.r.Delete(row, 1)
-	b.r = b.r.Insert(row, []rope.RuneRope{*r.Insert(column, bytes)})
+	x := column
+	rrow := row
+	for _, ru := range bytes {
+		if ru == '\n' {
+			r1, r2 := r.Split(x)
+			// finish line
+			b.r = b.r.Delete(rrow, 1)
+			b.r = b.r.Insert(rrow, []rope.RuneRope{*r1})
+
+			// insert new line or split
+			if r2 == nil {
+				r = *rope.NewFromRunes([]rune(""))
+			} else {
+				r = *r2
+			}
+
+			rrow++
+			b.r = b.r.Insert(rrow, []rope.RuneRope{r})
+			x = 0
+			continue
+		} else {
+			r = *r.Insert(x, []rune{ru})
+		}
+		x++
+	}
+	b.r = b.r.Delete(rrow, 1)
+	b.r = b.r.Insert(rrow, []rope.RuneRope{r})
 }
 
 // InsertEnter into the buffer
 func (b *Buffer) InsertEnter(row, column int) {
-	if b.r.Len() < row+1 {
-		b.r = b.r.Insert(row, []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
-		return
-	}
-	ro := b.r.Index(row)
-	if column == ro.Len()-1 {
-		b.r = b.r.Insert(row+1, []rope.RuneRope{*rope.NewFromRunes([]rune("\n"))})
-		return
-	}
-	l, r := ro.Split(column)
-	b.r = b.r.Delete(row, 1)
-	l = l.Insert(l.Len(), []rune{'\n'})
-	if r == nil {
-		b.r = b.r.Insert(row, []rope.RuneRope{*l})
-	} else {
-		b.r = b.r.Insert(row, []rope.RuneRope{*l, *r})
-	}
+	b.Insert(row, column, []rune{'\n'})
 }
 
 func (b *Buffer) Backspace(row, column int) int {
-	// if row == 0 && column == 0 {
-	// 	return 0
-	// }
-	// if column == 0 {
-	// 	b.Delete(row-1, len(b.GetLine(row-1)))
-	// 	return 0
-	// }
 	return b.Delete(row, column-1)
 }
 
@@ -131,14 +133,13 @@ func (b *Buffer) Delete(row, column int) int {
 	if column == -1 {
 		if row > 0 {
 			prevr := b.r.Index(row - 1)
-			prevr = *prevr.Delete(prevr.Len()-1, 1)
 			if b.Len() > row {
 				r := b.r.Index(row)
 				if r.Len() > 0 {
 					prevr = *prevr.Concat(&r)
 				}
 				b.r = b.r.Delete(row-1, 2)
-				b.r = b.r.Insert(row, []rope.RuneRope{prevr})
+				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
 				return r.Len()
 			} else {
 				r := b.r.Index(row - 1)
@@ -149,8 +150,6 @@ func (b *Buffer) Delete(row, column int) int {
 				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
 				return r.Len()
 			}
-		} else {
-			buffer.RemoveRow(0)
 		}
 	} else {
 		r := b.r.Index(row)
@@ -182,7 +181,15 @@ func (b *Buffer) New() {
 
 // Bytes returns all bytes from buffer
 func (b *Buffer) Bytes() []byte {
-	return b.r.Bytes()
+	by := []byte{}
+	b.r.Iter(0, func(r []rope.RuneRope) bool {
+		for _, ro := range r {
+			by = append(by, []byte(string(ro.Runes())+"\n")...)
+		}
+		return true
+	})
+
+	return by[:Max(len(by)-1, 0)]
 }
 
 // Save the buffer
