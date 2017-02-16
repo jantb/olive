@@ -59,8 +59,8 @@ func Display(buffer *Buffer) {
 			var w = width - offset + 1
 			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
 			t := time.Now()
-			drawBuffer(w, topRow, height-1, buffer, s, offset, lines)
-			time := time.Now().Sub(t).String()
+			drawBuffer(topRow, s, offset, lines)
+			time2 := time.Now().Sub(t).String()
 
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
@@ -71,7 +71,7 @@ func Display(buffer *Buffer) {
 
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time)
+				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time2)
 
 			var text = strconv.Itoa(GetCursor().loc.row+1) + ":" + strconv.Itoa(GetCursor().loc.column+1) +
 				"/" + strconv.Itoa(buffer.Len()) + ":" + strconv.Itoa(len(buffer.GetLine(GetCursor().loc.row)))
@@ -116,6 +116,9 @@ func Display(buffer *Buffer) {
 				case tcell.KeyCtrlY:
 					c := GetCursor()
 					buffer.RemoveRow(c.loc.row)
+				case tcell.KeyDelete:
+					c := GetCursor()
+					buffer.Delete(c.loc.row, c.loc.column)
 				case tcell.KeyBackspace2:
 					c := GetCursor()
 					l := buffer.Backspace(c.loc.row, c.loc.column)
@@ -174,7 +177,7 @@ var style = tcell.StyleDefault.
 	Foreground(tcell.ColorWhite).
 	Background(tcell.GetColor("#1E1E1E"))
 
-func drawBuffer(w, topRow, h int, buffer *Buffer, s tcell.Screen, offset int, lines [][]rune) {
+func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 	c := GetCursor()
 	for i := range backing {
 		if len(lines)-1 < i {
