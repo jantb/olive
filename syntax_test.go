@@ -4,5 +4,5 @@ import "testing"
 
 func TestSyntax(t *testing.T) {
 
-	syntax([]rune("func TestSyntax(t *testing.T) {"), "main.go")
+	syntax([]rune("package main"), "main.go")
 }

@@ -20,6 +20,7 @@ var offset = 0
 var s tcell.Screen
 
 func createDisplay() {
+	loadDark()
 	os.Setenv("TERM", "xterm-truecolor")
 	sc, e := tcell.NewScreen()
 	s = sc
@@ -173,11 +174,9 @@ type Backing struct {
 }
 
 var backing = [][]Backing{}
-var style = tcell.StyleDefault.
-	Foreground(tcell.ColorWhite).
-	Background(tcell.GetColor("#1E1E1E"))
 
 func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
+	var style = getThemeColor("editor")
 	c := GetCursor()
 	for i := range backing {
 		if len(lines)-1 < i {
@@ -233,10 +232,9 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 func drawRuler(topRow, h int, s tcell.Screen) int {
 	length := strconv.Itoa(len(fmt.Sprintf("%d", topRow+h)))
 	ret := len(fmt.Sprintf("%d", topRow+h))
+	style := getThemeColor("editor.ruler")
 	for index := 0; index < h; index++ {
-		puts(s, tcell.StyleDefault.
-			Foreground(tcell.GetColor("#5A5A5A")).
-			Background(tcell.GetColor("#1E1E1E")), 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
+		puts(s, style, 0, index, fmt.Sprintf("%"+length+"d ", topRow+index+1))
 	}
 	return ret + 1
 }
