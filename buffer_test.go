@@ -3,7 +3,6 @@ package main
 import "testing"
 import "fmt"
 import (
-	"io/ioutil"
 	"strings"
 )
 
@@ -48,16 +47,6 @@ func TestBufferInsert3(t *testing.T) {
 	b.Insert(0, 0, []rune(string('ø')))
 	if "øøø" != string(b.GetLines(0, 0, 1, 100)[0]) {
 		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
-		t.Fail()
-	}
-}
-
-func TestBufferInsert4(t *testing.T) {
-	b := Buffer{}
-	b.Open("main.go")
-	by, _ := ioutil.ReadFile("main.go")
-	if string(by) != string(b.Bytes()) {
-		fmt.Println("file content in buffer is not the same as in the file: \"" + string(b.Bytes()) + "\"")
 		t.Fail()
 	}
 }
