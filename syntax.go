@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 )
@@ -15,28 +18,45 @@ type TmLanguage struct {
 	FoldingStopMarker  string   `json:"foldingStopMarker"`
 	Patterns           []struct {
 		Comment  string `json:"comment,omitempty"`
-		Begin    string `json:"begin,omitempty"`
-		End      string `json:"end,omitempty"`
+		Match    string `json:"match,omitempty"`
 		Captures struct {
-			Num0 struct {
+			Num1 struct {
 				Name string `json:"name"`
-			} `json:"0"`
+			} `json:"1"`
 		} `json:"captures,omitempty"`
 		Name          string `json:"name,omitempty"`
+		Begin         string `json:"begin,omitempty"`
 		BeginCaptures struct {
-			Num0 struct {
+			Num1 struct {
 				Name string `json:"name"`
-			} `json:"0"`
+			} `json:"1"`
 		} `json:"beginCaptures,omitempty"`
+		Patterns []struct {
+			Match    string `json:"match"`
+			Captures struct {
+				Num1 struct {
+					Name string `json:"name"`
+				} `json:"1"`
+				Num2 struct {
+					Name string `json:"name"`
+				} `json:"2"`
+				Num3 struct {
+					Name string `json:"name"`
+				} `json:"3"`
+				Num4 struct {
+					Name string `json:"name"`
+				} `json:"4"`
+				Num5 struct {
+					Name string `json:"name"`
+				} `json:"5"`
+			} `json:"captures"`
+		} `json:"patterns,omitempty"`
+		End         string `json:"end,omitempty"`
 		EndCaptures struct {
 			Num0 struct {
 				Name string `json:"name"`
 			} `json:"0"`
 		} `json:"endCaptures,omitempty"`
-		Patterns []struct {
-			Include string `json:"include"`
-		} `json:"patterns,omitempty"`
-		Match   string `json:"match,omitempty"`
 		Include string `json:"include,omitempty"`
 	} `json:"patterns"`
 	Repository struct {
@@ -114,12 +134,13 @@ type TmLanguage struct {
 	Version string `json:"version"`
 }
 
-func syntax(liner []rune) {
+func syntax(liner []rune, filename string) {
 	line := []byte(string(liner))
-
-	if strings.HasSuffix(buffer.filename, ".go") {
-		for _, pattern := range golang.Patterns {
-
+	b, _ := ioutil.ReadFile("syntaxes/go.json")
+	t := TmLanguage{}
+	json.Unmarshal(b, &t)
+	if strings.HasSuffix(filename, ".go") {
+		for _, pattern := range t.Patterns {
 			// reBegin := regexp.MustCompile(pattern.Begin)
 			// reEnd := regexp.MustCompile(pattern.End)
 			// loc := reBegin.FindIndex(line)
@@ -128,7 +149,9 @@ func syntax(liner []rune) {
 				reMatch := regexp.MustCompile(pattern.Match)
 				loc := reMatch.FindIndex(line)
 				if loc != nil {
-					//	pattern.Name
+					l := string(line)
+					fmt.Println(pattern.Name)
+					fmt.Println(l)
 				}
 			}
 		}

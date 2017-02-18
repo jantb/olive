@@ -245,3 +245,15 @@ func TestBufferBackspace4(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestBufferBackspace5(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "Hello"
+	b.Insert(0, 0, []rune(text))
+	b.Backspace(1, 0)
+	if "Hello" != string(b.Bytes()) {
+		fmt.Println("Hello" + "!=" + string(b.Bytes()))
+		t.Fail()
+	}
+}

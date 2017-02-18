@@ -142,13 +142,9 @@ func (b *Buffer) Delete(row, column int) int {
 				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
 				return r.Len()
 			} else {
-				r := b.r.Index(row - 1)
-				if r.Len() > 1 {
-					prevr = *prevr.Concat(&r)
-				}
 				b.r = b.r.Delete(row-1, 2)
 				b.r = b.r.Insert(row-1, []rope.RuneRope{prevr})
-				return r.Len()
+				return 0
 			}
 		}
 	} else {
