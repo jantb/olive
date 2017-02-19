@@ -1,9 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"regexp"
 	"strings"
 )
@@ -134,14 +131,14 @@ type TmLanguage struct {
 	Version string `json:"version"`
 }
 
-func syntax(liner []rune, filename string) {
+func syntax(liner []rune, filename string) []Backing {
 	line := []byte(string(liner))
-	b, _ := ioutil.ReadFile("syntaxes/go.json")
-	t := TmLanguage{}
-	json.Unmarshal(b, &t)
-	loadDark()
+	backing := make([]Backing, len(liner), len(liner))
+	for key := range backing {
+		backing[key].style = getThemeColor("editor")
+	}
 	if strings.HasSuffix(filename, ".go") {
-		for _, pattern := range t.Patterns {
+		for _, pattern := range golang.Patterns {
 			// reBegin := regexp.MustCompile(pattern.Begin)
 			// reEnd := regexp.MustCompile(pattern.End)
 			// loc := reBegin.FindIndex(line)
@@ -150,11 +147,15 @@ func syntax(liner []rune, filename string) {
 				reMatch := regexp.MustCompile(pattern.Match)
 				loc := reMatch.FindIndex(line)
 				if loc != nil {
-					l := string(line)
-					fmt.Println(pattern.Name)
-					fmt.Println(l)
+					for index := loc[0]; index < loc[1]; index++ {
+						b := backing[index]
+						b.style = getThemeColor(pattern.Captures.Num1.Name)
+						b.value = liner[index]
+						backing[index] = b
+					}
 				}
 			}
 		}
 	}
+	return backing
 }

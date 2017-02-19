@@ -632,7 +632,43 @@ var dark = Theme{Name: "Dark", Settings: []struct {
 	FontStyle  string "json:\"fontStyle,omitempty\""
 	Foreground string "json:\"foreground,omitempty\""
 	Background string "json:\"background,omitempty\""
-}{FontStyle: "", Foreground: "#5A5A5A", Background: "#1E1E1E"}, Name: ""}, struct {
+}{FontStyle: "", Foreground: "#FFFFFF", Background: "#1E1E1E"}, Name: ""}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "entity.name.package.go", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#D7BA7D", Background: "#1E1E1E"}, Name: ""}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "entity.name.type.go", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#698857", Background: "#1E1E1E"}, Name: ""}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "keyword.function.go", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#DCDDA7", Background: "#1E1E1E"}, Name: ""}, struct {
 	Scope    string "json:\"scope\""
 	Settings struct {
 		FontStyle  string "json:\"fontStyle,omitempty\""

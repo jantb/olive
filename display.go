@@ -183,9 +183,10 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 			continue
 		}
 		jj := 0
-		for _, r := range lines[i] {
+		s := syntax(lines[i], buffer.filename)
+		for o, r := range lines[i] {
 			backing[i][jj].value = r
-			backing[i][jj].style = style
+			backing[i][jj].style = s[o].style
 			jj++
 		}
 		for index := len(lines[i]); index < width; index++ {

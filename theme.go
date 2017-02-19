@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jantb/tcell"
+	"strings"
 )
 
 var theme = Theme{}
@@ -25,19 +26,24 @@ func loadDark() {
 
 func getThemeColor(scope string) tcell.Style {
 	for _, value := range theme.Settings {
-		if value.Scope == scope {
-			style := tcell.StyleDefault
-			switch value.Settings.FontStyle {
-			case "bold":
-				style = style.Bold(true)
+		s := ""
+		splits := strings.Split(scope, ".")
+		for i := len(splits); i > 0; i-- {
+			s = strings.Join(splits[:i], ".")
+			if value.Scope == s {
+				style := tcell.StyleDefault
+				switch value.Settings.FontStyle {
+				case "bold":
+					style = style.Bold(true)
+				}
+				if value.Settings.Foreground != "" {
+					style = style.Foreground(tcell.GetColor(value.Settings.Foreground))
+				}
+				if value.Settings.Background != "" {
+					style = style.Background(tcell.GetColor(value.Settings.Background))
+				}
+				return style
 			}
-			if value.Settings.Foreground != "" {
-				style = style.Foreground(tcell.GetColor(value.Settings.Foreground))
-			}
-			if value.Settings.Background != "" {
-				style = style.Background(tcell.GetColor(value.Settings.Background))
-			}
-			return style
 		}
 	}
 	TermMessage("Unknown scope please add to theme:" + scope)

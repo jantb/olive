@@ -22,7 +22,7 @@ type Theme struct {
 }
 
 func main() {
-	b, _ := ioutil.ReadFile("dark-vs.json")
+	b, _ := ioutil.ReadFile("themes/dark-vs.json")
 	t := Theme{}
 	json.Unmarshal(b, &t)
 	code := fmt.Sprintf("package main\n var dark = %#v", t)

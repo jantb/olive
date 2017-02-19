@@ -9,21 +9,54 @@ import (
 
 //TmLanguage struct
 type TmLanguage struct {
+	ScopeName          string   `json:"scopeName"`
+	Name               string   `json:"name"`
 	Comment            string   `json:"comment"`
 	FileTypes          []string `json:"fileTypes"`
 	FoldingStartMarker string   `json:"foldingStartMarker"`
 	FoldingStopMarker  string   `json:"foldingStopMarker"`
-	Name               string   `json:"name"`
 	Patterns           []struct {
-		Begin    string `json:"begin"`
+		Comment  string `json:"comment,omitempty"`
+		Match    string `json:"match,omitempty"`
 		Captures struct {
-			Zero struct {
+			Num1 struct {
+				Name string `json:"name"`
+			} `json:"1"`
+		} `json:"captures,omitempty"`
+		Name          string `json:"name,omitempty"`
+		Begin         string `json:"begin,omitempty"`
+		BeginCaptures struct {
+			Num1 struct {
+				Name string `json:"name"`
+			} `json:"1"`
+		} `json:"beginCaptures,omitempty"`
+		Patterns []struct {
+			Match    string `json:"match"`
+			Captures struct {
+				Num1 struct {
+					Name string `json:"name"`
+				} `json:"1"`
+				Num2 struct {
+					Name string `json:"name"`
+				} `json:"2"`
+				Num3 struct {
+					Name string `json:"name"`
+				} `json:"3"`
+				Num4 struct {
+					Name string `json:"name"`
+				} `json:"4"`
+				Num5 struct {
+					Name string `json:"name"`
+				} `json:"5"`
+			} `json:"captures"`
+		} `json:"patterns,omitempty"`
+		End         string `json:"end,omitempty"`
+		EndCaptures struct {
+			Num0 struct {
 				Name string `json:"name"`
 			} `json:"0"`
-		} `json:"captures"`
-		Comment string `json:"comment"`
-		End     string `json:"end"`
-		Name    string `json:"name"`
+		} `json:"endCaptures,omitempty"`
+		Include string `json:"include,omitempty"`
 	} `json:"patterns"`
 	Repository struct {
 		Brackets struct {
@@ -40,7 +73,7 @@ type TmLanguage struct {
 		} `json:"delimiters"`
 		Keywords struct {
 			Patterns []struct {
-				Comment string `json:"comment"`
+				Comment string `json:"comment,omitempty"`
 				Match   string `json:"match"`
 				Name    string `json:"name"`
 			} `json:"patterns"`
@@ -79,29 +112,29 @@ type TmLanguage struct {
 		Variables struct {
 			Comment  string `json:"comment"`
 			Patterns []struct {
+				Match    string `json:"match"`
 				Captures struct {
-					One struct {
+					Num1 struct {
 						Patterns []struct {
-							Match string `json:"match"`
-							Name  string `json:"name"`
+							Match   string `json:"match,omitempty"`
+							Name    string `json:"name,omitempty"`
+							Include string `json:"include,omitempty"`
 						} `json:"patterns"`
 					} `json:"1"`
-					Two struct {
+					Num2 struct {
 						Patterns []struct {
 							Include string `json:"include"`
 						} `json:"patterns"`
 					} `json:"2"`
 				} `json:"captures"`
-				Match string `json:"match"`
 			} `json:"patterns"`
 		} `json:"variables"`
 	} `json:"repository"`
-	ScopeName string `json:"scopeName"`
-	Version   string `json:"version"`
+	Version string `json:"version"`
 }
 
 func main() {
-	b, _ := ioutil.ReadFile("go.json")
+	b, _ := ioutil.ReadFile("syntaxes/go.json")
 	t := TmLanguage{}
 	json.Unmarshal(b, &t)
 	code := fmt.Sprintf("package main\n var golang = %#v", t)

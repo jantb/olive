@@ -1,8 +1,12 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSyntax(t *testing.T) {
 
-	syntax([]rune("package main"), "main.go")
+	syntax := syntax([]rune("package main"), "main.go")
+	fmt.Println(syntax)
 }
