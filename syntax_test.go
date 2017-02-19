@@ -7,6 +7,6 @@ import (
 
 func TestSyntax(t *testing.T) {
 
-	syntax := syntax([]rune("package main"), "main.go")
-	fmt.Println(syntax)
+	//syntax := syntax([]rune("package main"), "main.go")
+	//fmt.Println(syntax)
 }
