@@ -135,7 +135,7 @@ func syntax(liner []rune, filename string) []Backing {
 	line := []byte(string(liner))
 	backing := make([]Backing, len(liner), len(liner))
 	for key := range backing {
-		backing[key].style = getThemeColor("editor")
+		backing[key].style = getEditorStyle()
 	}
 	if strings.HasSuffix(filename, ".go") {
 		for _, pattern := range golang.Patterns {
@@ -147,9 +147,13 @@ func syntax(liner []rune, filename string) []Backing {
 				reMatch := regexp.MustCompile(pattern.Match)
 				loc := reMatch.FindIndex(line)
 				if loc != nil {
+					style := getThemeColor(pattern.Captures.Num1.Name)
 					for index := loc[0]; index < loc[1]; index++ {
 						b := backing[index]
-						b.style = getThemeColor(pattern.Captures.Num1.Name)
+						b.style = style
+						if pattern.Captures.Num1.Name == "" {
+
+						}
 						b.value = liner[index]
 						backing[index] = b
 					}
