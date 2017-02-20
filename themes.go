@@ -16,6 +16,90 @@ var dark = Theme{Name: "Dark", Settings: []struct {
 		Background string "json:\"background,omitempty\""
 	} "json:\"settings\""
 	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#DCDCAA", Background: ""}, Name: "Function declarations"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#4EC9B0", Background: ""}, Name: "Types declaration and references"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#4EC9B0", Background: ""}, Name: "Types declaration and references, TS grammar specific"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "keyword.control", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#C586C0", Background: ""}, Name: "Control flow keywords"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#9CDCFE", Background: ""}, Name: "Variable and parameter name"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#9CDCFE", Background: ""}, Name: "Object keys, TS grammar specific"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
+}{Scope: "", Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#CE9178", Background: ""}, Name: "CSS property value"}, struct {
+	Scope    string "json:\"scope\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
 }{Scope: "emphasis", Settings: struct {
 	FontStyle  string "json:\"fontStyle,omitempty\""
 	Foreground string "json:\"foreground,omitempty\""
