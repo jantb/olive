@@ -138,25 +138,28 @@ func syntax(liner []rune, filename string) []Backing {
 			}
 			if pattern.Match != "" {
 				reMatch := regexp.MustCompile(pattern.Match)
-				locs := reMatch.FindAllIndex(line, -1)
+				locs := reMatch.FindAllSubmatchIndex(line, -1)
 				if locs == nil {
 					continue
 				}
-				l := len(locs)
-				if l > 0 {
-					backing = colorLock(locs[0], backing, liner, pattern.Captures.Num1.Name)
-				}
-				if l > 1 {
-					backing = colorLock(locs[1], backing, liner, pattern.Captures.Num2.Name)
-				}
-				if l > 2 {
-					backing = colorLock(locs[2], backing, liner, pattern.Captures.Num3.Name)
-				}
-				if l > 3 {
-					backing = colorLock(locs[3], backing, liner, pattern.Captures.Num4.Name)
-				}
-				if l > 4 {
-					backing = colorLock(locs[4], backing, liner, pattern.Captures.Num5.Name)
+				for _, ll := range locs {
+
+					l := len(ll)
+					if l > 3 {
+						backing = colorLock([]int{ll[2], ll[3]}, backing, liner, pattern.Captures.Num1.Name)
+					}
+					if l > 5 {
+						backing = colorLock([]int{ll[4], ll[5]}, backing, liner, pattern.Captures.Num2.Name)
+					}
+					if l > 7 {
+						backing = colorLock([]int{ll[6], ll[7]}, backing, liner, pattern.Captures.Num3.Name)
+					}
+					if l > 9 {
+						backing = colorLock([]int{ll[8], ll[9]}, backing, liner, pattern.Captures.Num4.Name)
+					}
+					if l > 11 {
+						backing = colorLock([]int{ll[10], ll[11]}, backing, liner, pattern.Captures.Num5.Name)
+					}
 				}
 
 			}
