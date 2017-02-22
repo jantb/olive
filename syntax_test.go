@@ -22,3 +22,11 @@ func TestSyntax2(t *testing.T) {
 	fmt.Printf("%x", fg.Hex())
 	fmt.Println()
 }
+func TestSyntax3(t *testing.T) {
+	loadDark()
+	syntaxs := syntax([]rune("type Buffer struct {"), "main.go")
+	fg, _, _ := syntaxs[6].style.Decompose()
+	fmt.Println(fg == tcell.GetColor("#569cd6"))
+	fmt.Printf("%x", fg.Hex())
+	fmt.Println()
+}

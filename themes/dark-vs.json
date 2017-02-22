@@ -21,6 +21,7 @@
         "support.type",
         "entity.name.type",
         "entity.name.class",
+        "entity.name.package",
 
         "storage.type.cs",
         "storage.type.generic.cs",
@@ -422,27 +423,6 @@
       "scope": "editor",
       "settings": {
         "foreground": "#FFFFFF",
-        "background": "#1E1E1E"
-      }
-    },
-    {
-      "scope": "entity.name.package.go",
-      "settings": {
-        "foreground": "#D7BA7D",
-        "background": "#1E1E1E"
-      }
-    },
-    {
-      "scope": "entity.name.type.go",
-      "settings": {
-        "foreground": "#698857",
-        "background": "#1E1E1E"
-      }
-    },
-    {
-      "scope": "keyword.function.go",
-      "settings": {
-        "foreground": "#DCDDA7",
         "background": "#1E1E1E"
       }
     },

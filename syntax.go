@@ -143,19 +143,19 @@ func syntax(liner []rune, filename string) []Backing {
 					continue
 				}
 				l := len(locs)
-				if l > 1 {
+				if l > 0 {
 					backing = colorLock(locs[0], backing, liner, pattern.Captures.Num1.Name)
 				}
-				if l > 2 {
+				if l > 1 {
 					backing = colorLock(locs[1], backing, liner, pattern.Captures.Num2.Name)
 				}
-				if l > 3 {
+				if l > 2 {
 					backing = colorLock(locs[2], backing, liner, pattern.Captures.Num3.Name)
 				}
-				if l > 4 {
+				if l > 3 {
 					backing = colorLock(locs[3], backing, liner, pattern.Captures.Num4.Name)
 				}
-				if l > 5 {
+				if l > 4 {
 					backing = colorLock(locs[4], backing, liner, pattern.Captures.Num5.Name)
 				}
 
@@ -165,7 +165,7 @@ func syntax(liner []rune, filename string) []Backing {
 	return backing
 }
 func colorLock(loc []int, backing []Backing, liner []rune, name string) []Backing {
-	if loc != nil {
+	if loc != nil && name != "" {
 		style := getThemeColor(name)
 		for index := loc[0]; index < loc[1]; index++ {
 			b := backing[index]

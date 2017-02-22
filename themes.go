@@ -31,7 +31,7 @@ var dark = Theme{Name: "Dark", Settings: []struct {
 		Background string "json:\"background,omitempty\""
 	} "json:\"settings\""
 	Name string "json:\"name,omitempty\""
-}{Scope: "", Scopes: []string{"meta.return-type", "support.class", "support.type", "entity.name.type", "entity.name.class", "storage.type.cs", "storage.type.generic.cs", "storage.type.modifier.cs", "storage.type.variable.cs", "storage.type.annotation.java", "storage.type.generic.java", "storage.type.java", "storage.type.object.array.java", "storage.type.primitive.array.java", "storage.type.primitive.java", "storage.type.token.java", "storage.type.groovy", "storage.type.annotation.groovy", "storage.type.parameters.groovy", "storage.type.generic.groovy", "storage.type.object.array.groovy", "storage.type.primitive.array.groovy", "storage.type.primitive.groovy"}, Settings: struct {
+}{Scope: "", Scopes: []string{"meta.return-type", "support.class", "support.type", "entity.name.type", "entity.name.class", "entity.name.package", "storage.type.cs", "storage.type.generic.cs", "storage.type.modifier.cs", "storage.type.variable.cs", "storage.type.annotation.java", "storage.type.generic.java", "storage.type.java", "storage.type.object.array.java", "storage.type.primitive.array.java", "storage.type.primitive.java", "storage.type.token.java", "storage.type.groovy", "storage.type.annotation.groovy", "storage.type.parameters.groovy", "storage.type.generic.groovy", "storage.type.object.array.groovy", "storage.type.primitive.array.groovy", "storage.type.primitive.groovy"}, Settings: struct {
 	FontStyle  string "json:\"fontStyle,omitempty\""
 	Foreground string "json:\"foreground,omitempty\""
 	Background string "json:\"background,omitempty\""
@@ -777,45 +777,6 @@ var dark = Theme{Name: "Dark", Settings: []struct {
 	Foreground string "json:\"foreground,omitempty\""
 	Background string "json:\"background,omitempty\""
 }{FontStyle: "", Foreground: "#FFFFFF", Background: "#1E1E1E"}, Name: ""}, struct {
-	Scope    string   "json:\"scope\""
-	Scopes   []string "json:\"scopes\""
-	Settings struct {
-		FontStyle  string "json:\"fontStyle,omitempty\""
-		Foreground string "json:\"foreground,omitempty\""
-		Background string "json:\"background,omitempty\""
-	} "json:\"settings\""
-	Name string "json:\"name,omitempty\""
-}{Scope: "entity.name.package.go", Scopes: []string(nil), Settings: struct {
-	FontStyle  string "json:\"fontStyle,omitempty\""
-	Foreground string "json:\"foreground,omitempty\""
-	Background string "json:\"background,omitempty\""
-}{FontStyle: "", Foreground: "#D7BA7D", Background: "#1E1E1E"}, Name: ""}, struct {
-	Scope    string   "json:\"scope\""
-	Scopes   []string "json:\"scopes\""
-	Settings struct {
-		FontStyle  string "json:\"fontStyle,omitempty\""
-		Foreground string "json:\"foreground,omitempty\""
-		Background string "json:\"background,omitempty\""
-	} "json:\"settings\""
-	Name string "json:\"name,omitempty\""
-}{Scope: "entity.name.type.go", Scopes: []string(nil), Settings: struct {
-	FontStyle  string "json:\"fontStyle,omitempty\""
-	Foreground string "json:\"foreground,omitempty\""
-	Background string "json:\"background,omitempty\""
-}{FontStyle: "", Foreground: "#698857", Background: "#1E1E1E"}, Name: ""}, struct {
-	Scope    string   "json:\"scope\""
-	Scopes   []string "json:\"scopes\""
-	Settings struct {
-		FontStyle  string "json:\"fontStyle,omitempty\""
-		Foreground string "json:\"foreground,omitempty\""
-		Background string "json:\"background,omitempty\""
-	} "json:\"settings\""
-	Name string "json:\"name,omitempty\""
-}{Scope: "keyword.function.go", Scopes: []string(nil), Settings: struct {
-	FontStyle  string "json:\"fontStyle,omitempty\""
-	Foreground string "json:\"foreground,omitempty\""
-	Background string "json:\"background,omitempty\""
-}{FontStyle: "", Foreground: "#DCDDA7", Background: "#1E1E1E"}, Name: ""}, struct {
 	Scope    string   "json:\"scope\""
 	Scopes   []string "json:\"scopes\""
 	Settings struct {
