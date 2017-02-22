@@ -10,7 +10,8 @@ var theme = Theme{}
 type Theme struct {
 	Name     string `json:"name"`
 	Settings []struct {
-		Scope    string `json:"scope"`
+		Scope    string   `json:"scope"`
+		Scopes   []string `json:"scopes"`
 		Settings struct {
 			FontStyle  string `json:"fontStyle,omitempty"`
 			Foreground string `json:"foreground,omitempty"`
@@ -81,6 +82,29 @@ func getThemeColor(scope string) tcell.Style {
 				}
 				syntaxScopes[scope] = style
 				return style
+			}
+		}
+
+		for _, valueScope := range value.Scopes {
+			s := ""
+			splits := strings.Split(scope, ".")
+			for i := len(splits); i > 0; i-- {
+				s = strings.Join(splits[:i], ".")
+				if valueScope == s {
+					style := getEditorStyle()
+					switch value.Settings.FontStyle {
+					case "bold":
+						style = style.Bold(true)
+					}
+					if value.Settings.Foreground != "" {
+						style = style.Foreground(tcell.GetColor(value.Settings.Foreground))
+					}
+					if value.Settings.Background != "" {
+						style = style.Background(tcell.GetColor(value.Settings.Background))
+					}
+					syntaxScopes[scope] = style
+					return style
+				}
 			}
 		}
 	}

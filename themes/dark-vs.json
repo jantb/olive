@@ -3,7 +3,7 @@
   "settings": [
     {
       "name": "Function declarations",
-      "scope": [
+      "scopes": [
         "entity.name.function",
         "support.function",
 
@@ -15,7 +15,7 @@
     },
     {
       "name": "Types declaration and references",
-      "scope": [
+      "scopes": [
         "meta.return-type",
         "support.class",
         "support.type",
@@ -49,7 +49,7 @@
     },
     {
       "name": "Types declaration and references, TS grammar specific",
-      "scope": [
+      "scopes": [
         "meta.return.type",
         "meta.type.cast.expr",
         "meta.type.new.expr",
@@ -72,7 +72,7 @@
     },
     {
       "name": "Variable and parameter name",
-      "scope": [
+      "scopes": [
         "variable",
         "meta.definition.variable.name",
         "support.variable"
@@ -83,7 +83,7 @@
     },
     {
       "name": "Object keys, TS grammar specific",
-      "scope": [
+      "scopes": [
         "meta.object-literal.key",
         "meta.object-literal.key entity.name.function"
       ],
@@ -93,7 +93,7 @@
     },
     {
       "name": "CSS property value",
-      "scope": [
+      "scopes": [
         "support.constant.property-value",
         "support.constant.font-name",
         "support.constant.media-type",
@@ -255,7 +255,7 @@
       }
     },
     {
-      "scope": ["markup.quote", "markup.list"],
+      "scopes": ["markup.quote", "markup.list"],
       "settings": {
         "foreground": "#d4d4d4"
       }
@@ -274,7 +274,7 @@
     },
     {
       "name": "brackets of XML tags",
-      "scope": ["meta.tag", "punctuation.tag.js", "punctuation.tag.tsx"],
+      "scopes": ["meta.tag", "punctuation.tag.js", "punctuation.tag.tsx"],
       "settings": {
         "foreground": "#808080"
       }
@@ -448,7 +448,7 @@
     },
     {
       "name": "coloring of the Java import and package identifiers",
-      "scope": ["storage.modifier.import.java", "storage.modifier.package.java"],
+      "scopes": ["storage.modifier.import.java", "storage.modifier.package.java"],
       "settings": {
         "foreground": "#d4d4d4"
       }

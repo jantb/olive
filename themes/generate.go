@@ -11,7 +11,8 @@ import (
 type Theme struct {
 	Name     string `json:"name"`
 	Settings []struct {
-		Scope    string `json:"scope"`
+		Scope    string   `json:"scope"`
+		Scopes   []string `json:"scopes"`
 		Settings struct {
 			FontStyle  string `json:"fontStyle,omitempty"`
 			Foreground string `json:"foreground,omitempty"`
