@@ -8,6 +8,7 @@ import (
 
 	"time"
 
+	"github.com/golang/groupcache/lru"
 	"github.com/jantb/tcell"
 	"github.com/jantb/tcell/encoding"
 )
@@ -178,6 +179,7 @@ type Backing struct {
 }
 
 var backing = [][]Backing{}
+var cache = lru.New(1000)
 
 func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 	var style = getThemeColor("editor")
@@ -187,7 +189,16 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 			continue
 		}
 		jj := 0
-		s := syntax(lines[i], buffer.filename)
+		key := string(lines[i])
+		s := []Backing{}
+		if val, ok := cache.Get(key); !ok {
+			val := syntax(lines[i], buffer.filename)
+			cache.Add(key, val)
+			s = val
+		} else {
+			s = val.([]Backing)
+		}
+
 		for o, r := range lines[i] {
 			backing[i][jj].value = r
 			backing[i][jj].style = s[o].style
