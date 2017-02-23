@@ -44,8 +44,16 @@ type TmLanguageCaptures struct {
 	Num4 TmLanguageName `json:"4"`
 	Num5 TmLanguageName `json:"5"`
 }
+
 type TmLanguageName struct {
-	Name string `json:"name"`
+	Name     string                               `json:"name"`
+	Patterns []TmLanguagePatternsNameMatchInclude `json:"patterns,omitempty"`
+}
+
+type TmLanguagePatternsNameMatchInclude struct {
+	Name    string `json:"name"`
+	Match   string `json:"match"`
+	Include string `json:"include,omitempty"`
 }
 
 type TmLanguageRepository struct {
@@ -198,10 +206,13 @@ func getStyle(patterns []TmLanguagePatterns, line []byte) ([][]int, []tcell.Styl
 	for _, pattern := range patterns {
 		if pattern.Match != "" {
 			reMatch := regexp.MustCompile(pattern.Match)
-			loc := reMatch.FindIndex(line)
-			if loc != nil {
-				styles = append(styles, getThemeColor(pattern.Name))
-				locs = append(locs, loc)
+			locsAll := reMatch.FindAllIndex(line, -1)
+			if locsAll != nil {
+				for _, loc := range locsAll {
+					styles = append(styles, getThemeColor(pattern.Name))
+					locs = append(locs, loc)
+				}
+
 			}
 		}
 	}

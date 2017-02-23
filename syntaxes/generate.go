@@ -46,7 +46,14 @@ type TmLanguageCaptures struct {
 	Num5 TmLanguageName `json:"5"`
 }
 type TmLanguageName struct {
-	Name string `json:"name"`
+	Name     string                               `json:"name"`
+	Patterns []TmLanguagePatternsNameMatchInclude `json:"patterns,omitempty"`
+}
+
+type TmLanguagePatternsNameMatchInclude struct {
+	Name    string `json:"name"`
+	Match   string `json:"match"`
+	Include string `json:"include,omitempty"`
 }
 
 type TmLanguageRepository struct {

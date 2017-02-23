@@ -39,3 +39,28 @@ func TestSyntax4(t *testing.T) {
 	fmt.Printf("%x", fg.Hex())
 	fmt.Println()
 }
+func TestSyntax5(t *testing.T) {
+	loadDark()
+	syntaxs := syntax([]rune("for i, rope := range b.r.Sub(top, length) {"), "main.go")
+	fg, _, _ := syntaxs[2].style.Decompose()
+	if fg != tcell.GetColor("#c586c0") {
+		fmt.Printf("%x", fg.Hex())
+		t.Fail()
+	}
+	fg, _, _ = syntaxs[16].style.Decompose()
+	if fg != tcell.GetColor("#c586c0") {
+		fmt.Printf("%x", fg.Hex())
+		t.Fail()
+	}
+
+}
+func TestSyntax6(t *testing.T) {
+	loadDark()
+	syntaxs := syntax([]rune("file, err := os.Open(filename)"), "main.go")
+	fg, _, _ := syntaxs[2].style.Decompose()
+	if fg != tcell.GetColor("#9cdcfe") {
+		fmt.Printf("%x", fg.Hex())
+		t.Fail()
+	}
+
+}
