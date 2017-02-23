@@ -136,7 +136,7 @@ func Display(buffer *Buffer) {
 					buffer.Save()
 				case tcell.KeyTab:
 					c := GetCursor()
-					buffer.Insert(c.loc.row, c.loc.column, []rune('\t'))
+					buffer.Insert(c.loc.row, c.loc.column, []rune(string('\t')))
 					c.MoveRight()
 				case tcell.KeyRune:
 					evName = ev.Name()
