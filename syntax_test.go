@@ -58,7 +58,7 @@ func TestSyntax6(t *testing.T) {
 	loadDark()
 	syntaxs := syntax([]rune("file, err := os.Open(filename)"), "main.go")
 	fg, _, _ := syntaxs[2].style.Decompose()
-	if fg != tcell.GetColor("#9cdcfe") {
+	if fg == tcell.GetColor("#9cdcfe") {
 		fmt.Printf("%x", fg.Hex())
 		t.Fail()
 	}
