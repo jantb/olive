@@ -104,12 +104,15 @@ type TmLanguageRepository struct {
 }
 
 func main() {
-	b, _ := ioutil.ReadFile("syntaxes/go.json")
+	generate("syntaxes/go.json", "golang")
+	generate("syntaxes/json.json", "json")
+}
+func generate(path, language string) {
+	b, _ := ioutil.ReadFile(path)
 	t := TmLanguage{}
 	json.Unmarshal(b, &t)
-	code := fmt.Sprintf("package main\n var golang = %#v", t)
+	code := fmt.Sprintf("package main\n var %s = %#v", language, t)
 	code = strings.Replace(code, "main.", "", -1)
 	b, _ = format.Source([]byte(code))
-	fmt.Println(string(b))
-	ioutil.WriteFile("golang.go", b, 0644)
+	ioutil.WriteFile(language+".go", b, 0644)
 }

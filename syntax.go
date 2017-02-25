@@ -110,67 +110,74 @@ func syntax(liner []rune, filename string) []Backing {
 		backing[key].style = getEditorStyle()
 	}
 	if strings.HasSuffix(filename, ".go") {
-		for _, pattern := range golang.Patterns {
-			// reBegin := regexp.MustCompile(pattern.Begin)
-			// reEnd := regexp.MustCompile(pattern.End)
-			// loc := reBegin.FindIndex(line)
-			// loc = reEnd.FindIndex(line)
-			if pattern.Include != "" {
-				switch pattern.Include {
-				case "#brackets":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#delimiters":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#keywords":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#operators":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#runes":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#storage_types":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#string_escaped_char":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				case "#string_placeholder":
-					locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
-					backing, liner = style(locs, backing, styles, liner)
-				}
-
+		backing = highlight(line, backing, liner, golang)
+	}
+	if strings.HasSuffix(filename, ".json") {
+		backing = highlight(line, backing, liner, json)
+	}
+	return backing
+}
+func highlight(line []byte, backing []Backing, liner []rune, lang TmLanguage) []Backing {
+	for _, pattern := range lang.Patterns {
+		// reBegin := regexp.MustCompile(pattern.Begin)
+		// reEnd := regexp.MustCompile(pattern.End)
+		// loc := reBegin.FindIndex(line)
+		// loc = reEnd.FindIndex(line)
+		if pattern.Include != "" {
+			switch pattern.Include {
+			case "#brackets":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#delimiters":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#keywords":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#operators":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#runes":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#storage_types":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#string_escaped_char":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
+			case "#string_placeholder":
+				locs, styles := getStyle(golang.Repository.Keywords.Patterns, line)
+				backing, liner = style(locs, backing, styles, liner)
 			}
-			if pattern.Match != "" {
-				reMatch := regexp.MustCompile(pattern.Match)
-				locs := reMatch.FindAllSubmatchIndex(line, -1)
-				if locs == nil {
-					continue
-				}
-				for _, ll := range locs {
 
-					l := len(ll)
-					if l > 3 {
-						backing = colorLock([]int{ll[2], ll[3]}, backing, liner, pattern.Captures.Num1.Name)
-					}
-					if l > 5 {
-						backing = colorLock([]int{ll[4], ll[5]}, backing, liner, pattern.Captures.Num2.Name)
-					}
-					if l > 7 {
-						backing = colorLock([]int{ll[6], ll[7]}, backing, liner, pattern.Captures.Num3.Name)
-					}
-					if l > 9 {
-						backing = colorLock([]int{ll[8], ll[9]}, backing, liner, pattern.Captures.Num4.Name)
-					}
-					if l > 11 {
-						backing = colorLock([]int{ll[10], ll[11]}, backing, liner, pattern.Captures.Num5.Name)
-					}
-				}
-
+		}
+		if pattern.Match != "" {
+			reMatch := regexp.MustCompile(pattern.Match)
+			locs := reMatch.FindAllSubmatchIndex(line, -1)
+			if locs == nil {
+				continue
 			}
+			for _, ll := range locs {
+
+				l := len(ll)
+				if l > 3 {
+					backing = colorLock([]int{ll[2], ll[3]}, backing, liner, pattern.Captures.Num1.Name)
+				}
+				if l > 5 {
+					backing = colorLock([]int{ll[4], ll[5]}, backing, liner, pattern.Captures.Num2.Name)
+				}
+				if l > 7 {
+					backing = colorLock([]int{ll[6], ll[7]}, backing, liner, pattern.Captures.Num3.Name)
+				}
+				if l > 9 {
+					backing = colorLock([]int{ll[8], ll[9]}, backing, liner, pattern.Captures.Num4.Name)
+				}
+				if l > 11 {
+					backing = colorLock([]int{ll[10], ll[11]}, backing, liner, pattern.Captures.Num5.Name)
+				}
+			}
+
 		}
 	}
 	return backing
