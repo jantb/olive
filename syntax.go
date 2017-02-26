@@ -7,11 +7,13 @@ import (
 	"strings"
 )
 
-func syntax(textr []rune, filename string) []string {
+type Token struct {
+	Scope []string
+	Loc   []int
+}
+
+func syntax(textr []rune, filename string) []Token {
 	text := string(textr)
-	//for key := range backing {
-	//	backing[key].style = getEditorStyle()
-	//}
 	for _, syntax := range syntaxes {
 		filetypes := syntax["fileTypes"]
 		for _, language := range filetypes.([]interface{}) {
@@ -20,31 +22,33 @@ func syntax(textr []rune, filename string) []string {
 			}
 		}
 	}
-	return []string{}
+	return []Token{}
 }
 
-func highlight(lines string, lang map[string]interface{}) []string {
+func highlight(lines string, lang map[string]interface{}) []Token {
 	scope := []string{}
+	tokens := []Token{}
 	scope = append(scope, lang["scopeName"].(string))
 	for _, line := range strings.Split(lines, "\n") {
 		//fmt.Println(line)
 		patterns := lang["patterns"]
 		repository := lang["repository"]
 		for _, pattern := range patterns.([]interface{}) {
-			highlightPattern(&scope, []byte(line), pattern, repository.(map[string]interface{}))
+			highlightPattern(scope, &tokens, []byte(line), pattern, repository.(map[string]interface{}))
 		}
 		fmt.Println(scope)
-		break
 	}
-	return scope
+	return tokens
 }
 
-func highlightPattern(scope *[]string, line []byte, pattern interface{}, repository map[string]interface{}) {
+func highlightPattern(scope []string, tokens *[]Token, line []byte, pattern interface{}, repository map[string]interface{}) {
 	p := pattern.(map[string]interface{})
 	match := p["match"]
 	name := p["name"]
 	begin := p["begin"]
+	end := p["end"]
 	beginCaptures := p["beginCaptures"]
+	endCaptures := p["endCaptures"]
 	patterns := p["patterns"]
 	if match != nil {
 		r := regexp.MustCompile(match.(string))
@@ -53,7 +57,7 @@ func highlightPattern(scope *[]string, line []byte, pattern interface{}, reposit
 			fmt.Println(name)
 			fmt.Println(string(line))
 			fmt.Println(locs)
-			*scope = append(*scope, name.(string))
+			scope = append(scope, name.(string))
 			fmt.Println(scope)
 		}
 		return
@@ -61,27 +65,25 @@ func highlightPattern(scope *[]string, line []byte, pattern interface{}, reposit
 	if begin != nil {
 		r := regexp.MustCompile(begin.(string))
 		locs := r.FindAllSubmatchIndex(line, -1)
-		if name != nil && locs != nil {
-			fmt.Println(name)
-			fmt.Println(string(line))
-			fmt.Println(locs)
-			*scope = append(*scope, name.(string))
-			fmt.Println(scope)
+		if locs != nil {
+			handleBeginEnd(name, line, locs, scope, beginCaptures, tokens)
 		}
-		if beginCaptures != nil {
-			for i, _ := range locs {
-				capt := beginCaptures.(map[string]interface{})[strconv.Itoa(i)]
-				name := capt.(map[string]interface{})["name"]
-				*scope = append(*scope, name.(string))
-				fmt.Println(scope)
-			}
+	}
+
+	if end != nil {
+		r := regexp.MustCompile(end.(string))
+		locs := r.FindAllSubmatchIndex(line, -1)
+
+		if locs != nil {
+			handleBeginEnd(name, line, locs, scope, endCaptures, tokens)
 		}
 
 		return
 	}
+
 	if patterns != nil {
 		for _, pattern := range patterns.([]interface{}) {
-			highlightPattern(scope, []byte(line), pattern, repository)
+			highlightPattern(scope, tokens, []byte(line), pattern, repository)
 		}
 	}
 
@@ -89,9 +91,22 @@ func highlightPattern(scope *[]string, line []byte, pattern interface{}, reposit
 	if include != nil {
 		includeString := include.(string)[1:]
 		fmt.Println(includeString)
-		highlightPattern(scope, []byte(line), repository[includeString].(map[string]interface{}), repository)
+		highlightPattern(scope, tokens, []byte(line), repository[includeString].(map[string]interface{}), repository)
 	}
 
+}
+func handleBeginEnd(name interface{}, line []byte, locs [][]int, scope []string, captures interface{}, tokens *[]Token) {
+	if name != nil {
+		scope = append(scope, name.(string))
+	}
+	if captures != nil {
+		for i, loc := range locs {
+			capt := captures.(map[string]interface{})[strconv.Itoa(i)]
+			name := capt.(map[string]interface{})["name"]
+			scope = append(scope, name.(string))
+			*tokens = append(*tokens, Token{Scope: scope, Loc: loc})
+		}
+	}
 }
 
 //func highlight(line []byte, backing []Backing, liner []rune, lang map[string]interface{}) []Backing {

@@ -1,15 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
 func TestSyntaxCurlyStartJson(t *testing.T) {
 	loadDark()
-	syntaxs := syntax([]rune("{\n  \"scopeName\": \"source.json\",\n  \"name\": \"JSON\",\n  \"fileTypes\": [\n    \"avsc\",\n    \"babelrc\",\n    \"bowerrc\",\n    \"composer.lock\",\n    \"geojson\",\n    \"gltf\",\n    \"ipynb\",\n    \"jscsrc\",\n    \"jshintrc\",\n    \"jslintrc\",\n    \"json\",\n    \"jsonl\",\n    \"jsonld\",\n    \"languagebabel\",\n    \"ldj\",\n    \"ldjson\",\n    \"schema\",\n    \"stylintrc\",\n    \"template\",\n    \"tern-config\",\n    \"tern-project\",\n    \"tfstate\",\n    \"tfstate.backup\",\n    \"topojson\",\n    \"webapp\",\n    \"webmanifest\"\n  ],\n  \"patterns\": [\n    {\n      \"include\": \"#value\"\n    }\n  ],\n  \"repository\": {\n    \"array\": {\n      \"begin\": \"\\\\[\",\n      \"beginCaptures\": {\n        \"0\": {\n          \"name\": \"punctuation.definition.array.begin.json\"\n        }\n      },\n      \"end\": \"(,)?[\\\\s\\\\n]*(\\\\])\",\n      \"endCaptures\": {\n        \"1\": {\n          \"name\": \"invalid.illegal.trailing-array-separator.json\"\n        },\n        \"2\": {\n          \"name\": \"punctuation.definition.array.end.json\"\n        }\n      },\n      \"name\": \"meta.structure.array.json\",\n      \"patterns\": [\n        {\n          \"include\": \"#value\"\n        },\n        {\n          \"match\": \",\",\n          \"name\": \"punctuation.separator.array.json\"\n        },\n        {\n          \"match\": \"[^\\\\s\\\\]]\",\n          \"name\": \"invalid.illegal.expected-array-separator.json\"\n        }\n      ]\n    },\n    \"constant\": {\n      \"match\": \"\\\\b(true|false|null)\\\\b\",\n      \"name\": \"constant.language.json\"\n    },\n    \"number\": {\n      \"match\": \"-?(?=[1-9]|0(?!\\\\d))\\\\d+(\\\\.\\\\d+)?([eE][+-]?\\\\d+)?\",\n      \"name\": \"constant.numeric.json\"\n    },\n    \"object\": {\n      \"begin\": \"{\",\n      \"beginCaptures\": {\n        \"0\": {\n          \"name\": \"punctuation.definition.dictionary.begin.json\"\n        }\n      },\n      \"end\": \"}\",\n      \"endCaptures\": {\n        \"0\": {\n          \"name\": \"punctuation.definition.dictionary.end.json\"\n        }\n      },\n      \"name\": \"meta.structure.dictionary.json\",\n      \"patterns\": [\n        {\n          \"begin\": \"(?=\\\")\",\n          \"end\": \"(?<=\\\")\",\n          \"name\": \"meta.structure.dictionary.key.json\",\n          \"patterns\": [\n            {\n              \"include\": \"#string\"\n            }\n          ]\n        },\n        {\n          \"begin\": \":\",\n          \"beginCaptures\": {\n            \"0\": {\n              \"name\": \"punctuation.separator.dictionary.key-value.json\"\n            }\n          },\n          \"end\": \"(,)(?=[\\\\s\\\\n]*})|(,)|(?=})\",\n          \"endCaptures\": {\n            \"1\": {\n              \"name\": \"invalid.illegal.trailing-dictionary-separator.json\"\n            },\n            \"2\": {\n              \"name\": \"punctuation.separator.dictionary.pair.json\"\n            }\n          },\n          \"name\": \"meta.structure.dictionary.value.json\",\n          \"patterns\": [\n            {\n              \"include\": \"#value\"\n            },\n            {\n              \"match\": \"[^\\\\s,]\",\n              \"name\": \"invalid.illegal.expected-dictionary-separator.json\"\n            }\n          ]\n        },\n        {\n          \"match\": \"[^\\\\s}]\",\n          \"name\": \"invalid.illegal.expected-dictionary-separator.json\"\n        }\n      ]\n    },\n    \"string\": {\n      \"begin\": \"\\\"\",\n      \"beginCaptures\": {\n        \"0\": {\n          \"name\": \"punctuation.definition.string.begin.json\"\n        }\n      },\n      \"end\": \"\\\"\",\n      \"endCaptures\": {\n        \"0\": {\n          \"name\": \"punctuation.definition.string.end.json\"\n        }\n      },\n      \"name\": \"string.quoted.double.json\",\n      \"patterns\": [\n        {\n          \"match\": \"(?x)\\n\\\\\\\\                # a literal backslash\\n(                   # followed by\\n  [\\\"\\\\\\\\/bfnrt]     # one of these characters\\n  |                 # or\\n  u[0-9a-fA-F]{4}   # a u and four hex digits\\n)\",\n          \"name\": \"constant.character.escape.json\"\n        },\n        {\n          \"match\": \"\\\\\\\\.\",\n          \"name\": \"invalid.illegal.unrecognized-string-escape.json\"\n        }\n      ]\n    },\n    \"value\": {\n      \"patterns\": [\n        {\n          \"include\": \"#constant\"\n        },\n        {\n          \"include\": \"#number\"\n        },\n        {\n          \"include\": \"#string\"\n        },\n        {\n          \"include\": \"#array\"\n        },\n        {\n          \"include\": \"#object\"\n        }\n      ]\n    }\n  }\n}"), "main.json")
-
-	if syntaxs[0] != "source.json" && syntaxs[1] != "meta.structure.dictionary.json" && syntaxs[1] != "punctuation.definition.dictionary.begin.json" {
-		t.Fail()
+	syntax := syntax([]rune("{}"), "main.json")
+	for _, s := range syntax {
+		fmt.Println(s)
 	}
-
 }
+
+//func TestSyntaxCurlyStartJson2(t *testing.T) {
+//	loadDark()
+//	syntax := syntax([]rune("{\"h\":\"x\"}"), "main.json")
+//	for _, s := range syntax {
+//		fmt.Println(s)
+//	}
+//}
