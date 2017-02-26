@@ -189,19 +189,10 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 			continue
 		}
 		jj := 0
-		key := string(lines[i])
-		s := []Backing{}
-		if val, ok := cache.Get(key); !ok {
-			val := syntax(lines[i], buffer.filename)
-			cache.Add(key, val)
-			s = val
-		} else {
-			s = val.([]Backing)
-		}
 
-		for o, r := range lines[i] {
+		for _, r := range lines[i] {
 			backing[i][jj].value = r
-			backing[i][jj].style = s[o].style
+			backing[i][jj].style = style
 			jj++
 		}
 		for index := len(lines[i]); index < width; index++ {

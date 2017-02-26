@@ -1,137 +1,154 @@
 {
+  "scopeName": "source.json",
+  "name": "JSON",
   "fileTypes": [
+    "avsc",
+    "babelrc",
+    "bowerrc",
+    "composer.lock",
+    "geojson",
+    "gltf",
+    "ipynb",
+    "jscsrc",
+    "jshintrc",
+    "jslintrc",
     "json",
-    "sublime-settings",
-    "sublime-menu",
-    "sublime-keymap",
-    "sublime-mousemap",
-    "sublime-theme",
-    "sublime-build",
-    "sublime-project",
-    "sublime-completions"
+    "jsonl",
+    "jsonld",
+    "languagebabel",
+    "ldj",
+    "ldjson",
+    "schema",
+    "stylintrc",
+    "template",
+    "tern-config",
+    "tern-project",
+    "tfstate",
+    "tfstate.backup",
+    "topojson",
+    "webapp",
+    "webmanifest"
   ],
-  "foldingStartMarker": "(?x)       # turn on extended mode\n^        # a line beginning with\n\\s*      # some optional space\n[{\\[]    # the start of an object or array\n(?!      # but not followed by\n.*     # whatever\n[}\\]]  # and the close of an object or array\n,?     # an optional comma\n\\s*    # some optional space\n$      # at the end of the line\n)\n|        # ...or...\n[{\\[]    # the start of an object or array\n\\s*      # some optional space\n$        # at the end of the line",
-  "foldingStopMarker": "(?x)     # turn on extended mode\n^      # a line beginning with\n\\s*    # some optional space\n[}\\]]  # and the close of an object or array",
-  "keyEquivalent": "^~J",
+  "patterns": [
+    {
+      "include": "#value"
+    }
+  ],
   "repository": {
-    "comments": {
+    "array": {
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.array.begin.json"
+        }
+      },
+      "end": "(,)?[\\s\\n]*(\\])",
+      "endCaptures": {
+        "1": {
+          "name": "invalid.illegal.trailing-array-separator.json"
+        },
+        "2": {
+          "name": "punctuation.definition.array.end.json"
+        }
+      },
+      "name": "meta.structure.array.json",
       "patterns": [
         {
-          "end": "\\*\/",
-          "begin": "\/\\*\\*",
-          "captures": {
-            "0": {
-              "name": "punctuation.definition.comment.json"
-            }
-          },
-          "name": "comment.block.documentation.json"
+          "include": "#value"
         },
         {
-          "end": "\\*\/",
-          "begin": "\/\\*",
-          "captures": {
-            "0": {
-              "name": "punctuation.definition.comment.json"
-            }
-          },
-          "name": "comment.block.json"
+          "match": ",",
+          "name": "punctuation.separator.array.json"
         },
         {
-          "match": "(\/\/).*$\\n?",
-          "captures": {
-            "1": {
-              "name": "punctuation.definition.comment.json"
-            }
-          },
-          "name": "comment.line.double-slash.js"
+          "match": "[^\\s\\]]",
+          "name": "invalid.illegal.expected-array-separator.json"
         }
       ]
     },
+    "constant": {
+      "match": "\\b(true|false|null)\\b",
+      "name": "constant.language.json"
+    },
     "number": {
-      "match": "(?x)        # turn on extended mode\n-?        # an optional minus\n(?:\n0       # a zero\n|       # ...or...\n[1-9]   # a 1-9 character\n\\d*     # followed by zero or more digits\n)\n(?:\n(?:\n\\.    # a period\n\\d+   # followed by one or more digits\n)?\n(?:\n[eE]  # an e character\n[+-]? # followed by an option +\/-\n\\d+   # followed by one or more digits\n)?      # make exponent optional\n)?        # make decimal portion optional",
+      "match": "-?(?=[1-9]|0(?!\\d))\\d+(\\.\\d+)?([eE][+-]?\\d+)?",
       "name": "constant.numeric.json"
     },
     "object": {
-      "end": "\\}",
-      "begin": "\\{",
+      "begin": "{",
       "beginCaptures": {
         "0": {
           "name": "punctuation.definition.dictionary.begin.json"
         }
       },
+      "end": "}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.dictionary.end.json"
+        }
+      },
+      "name": "meta.structure.dictionary.json",
       "patterns": [
         {
-          "include": "#objectkey",
-          "comment": "the JSON object key"
+          "begin": "(?=\")",
+          "end": "(?<=\")",
+          "name": "meta.structure.dictionary.key.json",
+          "patterns": [
+            {
+              "include": "#string"
+            }
+          ]
         },
         {
-          "include": "#comments"
-        },
-        {
-          "end": "(,)|(?=\\})",
           "begin": ":",
           "beginCaptures": {
             "0": {
               "name": "punctuation.separator.dictionary.key-value.json"
             }
           },
+          "end": "(,)(?=[\\s\\n]*})|(,)|(?=})",
+          "endCaptures": {
+            "1": {
+              "name": "invalid.illegal.trailing-dictionary-separator.json"
+            },
+            "2": {
+              "name": "punctuation.separator.dictionary.pair.json"
+            }
+          },
+          "name": "meta.structure.dictionary.value.json",
           "patterns": [
             {
-              "include": "#value",
-              "comment": "the JSON object value"
+              "include": "#value"
             },
             {
               "match": "[^\\s,]",
               "name": "invalid.illegal.expected-dictionary-separator.json"
             }
-          ],
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.separator.dictionary.pair.json"
-            }
-          },
-          "name": "meta.structure.dictionary.value.json"
+          ]
         },
         {
-          "match": "[^\\s\\}]",
+          "match": "[^\\s}]",
           "name": "invalid.illegal.expected-dictionary-separator.json"
         }
-      ],
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.dictionary.end.json"
-        }
-      },
-      "name": "meta.structure.dictionary.json"
-    },
-    "constant": {
-      "match": "\\b(?:true|false|null)\\b",
-      "name": "constant.language.json"
+      ]
     },
     "string": {
-      "end": "\"",
       "begin": "\"",
       "beginCaptures": {
         "0": {
           "name": "punctuation.definition.string.begin.json"
         }
       },
-      "patterns": [
-        {
-          "include": "#stringcontent"
-        }
-      ],
+      "end": "\"",
       "endCaptures": {
         "0": {
           "name": "punctuation.definition.string.end.json"
         }
       },
-      "name": "string.quoted.double.json"
-    },
-    "stringcontent": {
+      "name": "string.quoted.double.json",
       "patterns": [
         {
-          "match": "(?x)                # turn on extended mode\n\\\\                # a literal backslash\n(?:               # ...followed by...\n[\"\\\\\/bfnrt]     # one of these characters\n|               # ...or...\nu               # a u\n[0-9a-fA-F]{4}) # and four hex digits",
+          "match": "(?x)\n\\\\                # a literal backslash\n(                   # followed by\n  [\"\\\\/bfnrt]     # one of these characters\n  |                 # or\n  u[0-9a-fA-F]{4}   # a u and four hex digits\n)",
           "name": "constant.character.escape.json"
         },
         {
@@ -156,67 +173,8 @@
         },
         {
           "include": "#object"
-        },
-        {
-          "include": "#comments"
         }
       ]
-    },
-    "array": {
-      "end": "\\]",
-      "begin": "\\[",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.definition.array.begin.json"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#value"
-        },
-        {
-          "match": ",",
-          "name": "punctuation.separator.array.json"
-        },
-        {
-          "match": "[^\\s\\]]",
-          "name": "invalid.illegal.expected-array-separator.json"
-        }
-      ],
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.array.end.json"
-        }
-      },
-      "name": "meta.structure.array.json"
-    },
-    "objectkey": {
-      "end": "\"",
-      "begin": "\"",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.support.type.property-name.begin.json"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#stringcontent"
-        }
-      ],
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.support.type.property-name.end.json"
-        }
-      },
-      "name": "support.type.property-name.json"
     }
-  },
-  "uuid": "8f97457b-516e-48ce-83c7-08ae12fb327a",
-  "patterns": [
-    {
-      "include": "#value"
-    }
-  ],
-  "name": "JSON (Javascript Next)",
-  "scopeName": "source.json"
+  }
 }

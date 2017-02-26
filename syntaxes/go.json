@@ -9,26 +9,7 @@
   "foldingStopMarker": "(}|\\))\\s*$",
   "patterns": [
     {
-      "comment": "Block comments",
-      "begin": "/\\*",
-      "end": "\\*/",
-      "captures": {
-        "0": {
-          "name": "punctuation.definition.comment.go"
-        }
-      },
-      "name": "comment.block.go"
-    },
-    {
-      "comment": "Line comments",
-      "begin": "//",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.definition.comment.go"
-        }
-      },
-      "end": "$",
-      "name": "comment.line.double-slash.go"
+      "include": "#comments"
     },
     {
       "comment": "Interpreted string literals",
@@ -109,12 +90,12 @@
     },
     {
       "comment": "Built-in functions",
-      "match": "\\b(append|cap|close|complex|copy|delete|imag|len|make|new|panic|print|println|real|recover)\\b\\(",
+      "match": "\\b(append|cap|close|complex|copy|delete|imag|len|make|new|panic|print|println|real|recover)\\b(?=\\()",
       "name": "support.function.builtin.go"
     },
     {
       "comment": "Function declarations",
-      "match": "^(\\bfunc\\b)",
+      "match": "^(\\bfunc\\b)(?:\\s+(\\([^\\)]+\\)\\s+)?([a-zA-Z_]\\w*)(?=\\())?",
       "captures": {
         "1": {
           "name": "keyword.function.go"
@@ -130,13 +111,13 @@
           ]
         },
         "3": {
-          "name": "entity.name.function"
+          "name": "entity.name.function.go"
         }
       }
     },
     {
       "comment": "Functions",
-      "match": "(\\bfunc\\b)|([a-zA-Z_]\\w*)(\\()",
+      "match": "(\\bfunc\\b)|([a-zA-Z_]\\w*)(?=\\()",
       "captures": {
         "1": {
           "name": "keyword.function.go"
@@ -163,7 +144,7 @@
     },
     {
       "comment": "Package declarations",
-      "match": "(package)\\s+([a-zA-Z_]\\w*)",
+      "match": "(?<=package)\\s+([a-zA-Z_]\\w*)",
       "captures": {
         "1": {
           "name": "entity.name.package.go"
@@ -172,7 +153,7 @@
     },
     {
       "comment": "Single line import declarations",
-      "match": "(import)(\\s+((!\\s+\")[^\\s]*)?\\s*)((\")([^\"]*)(\"))",
+      "match": "(?<=import)(\\s+((?!\\s+\")[^\\s]*)?\\s*)((\")([^\"]*)(\"))",
       "captures": {
         "2": {
           "name": "entity.alias.import.go"
@@ -219,6 +200,9 @@
               "name": "punctuation.definition.string.end.go"
             }
           }
+        },
+        {
+          "include": "#comments"
         }
       ],
       "end": "\\)",
@@ -230,7 +214,7 @@
     },
     {
       "comment": "Type declarations",
-      "match": "(type)\\s+([a-zA-Z_]\\w*)",
+      "match": "(?<=type)\\s+([a-zA-Z_]\\w*)",
       "captures": {
         "1": {
           "name": "entity.name.type.go"
@@ -239,7 +223,7 @@
     },
     {
       "comment": "Shorthand variable declaration and assignments",
-      "match": "[a-zA-Z_]\\w*(?:,\\s*[a-zA-Z_]\\w*)*(\\s*)",
+      "match": "[a-zA-Z_]\\w*(?:,\\s*[a-zA-Z_]\\w*)*(?=\\s*:=)",
       "captures": {
         "0": {
           "patterns": [
@@ -256,7 +240,7 @@
     },
     {
       "comment": "Assignments to existing variables",
-      "match": "(!var )\\s*([a-zA-Z_]\\w*(?:,\\s*[a-zA-Z_]\\w*)*)(\\s*=[^=])",
+      "match": "(?<!var )\\s*([a-zA-Z_]\\w*(?:,\\s*[a-zA-Z_]\\w*)*)(?=\\s*=[^=])",
       "captures": {
         "1": {
           "patterns": [
@@ -273,7 +257,7 @@
     },
     {
       "comment": "Single line variable declarations/assignments",
-      "match": "(var)\\s+(.*)$",
+      "match": "(?<=var)\\s+(.*)$",
       "captures": {
         "1": {
           "patterns": [
@@ -348,6 +332,30 @@
         {
           "match": "\\[|\\]",
           "name": "punctuation.other.bracket.square.go"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "begin": "/\\*",
+          "end": "\\*/",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.go"
+            }
+          },
+          "name": "comment.block.go"
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.go"
+            }
+          },
+          "end": "$",
+          "name": "comment.line.double-slash.go"
         }
       ]
     },
@@ -606,6 +614,5 @@
         }
       ]
     }
-  },
-  "version": "https://github.com/atom/language-go/commit/d941ce3155b500e65b4d7fbc53ea51b9c92ec1cb"
+  }
 }
