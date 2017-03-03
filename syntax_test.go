@@ -43,3 +43,7 @@ func TestSyntax5(t *testing.T) {
 		fmt.Println(s)
 	}
 }
+
+func TestSyntax6(t *testing.T) {
+	transforSyntax()
+}

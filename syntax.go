@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/dlclark/regexp2"
+	"go/format"
 	"strconv"
 	"strings"
 )
@@ -10,6 +11,28 @@ import (
 type Token struct {
 	Scope []string
 	Loc   []int
+}
+
+type Syntax struct {
+	ScopeName      string
+	Name           string
+	FileTypes      []string
+	FirstLineMatch regexp2.Regexp
+	Patterns       []Pattern
+	Repository     map[string]Pattern
+}
+
+type Pattern struct {
+	Comment       string
+	Match         regexp2.Regexp
+	Captures      map[int]Pattern
+	Begin         regexp2.Regexp
+	BeginCaptures map[int]Pattern
+	End           regexp2.Regexp
+	EndCaptures   map[int]Pattern
+	Name          string
+	Patterns      []Pattern
+	Include       string
 }
 
 func syntax(textr []rune, filename string) []Token {
@@ -27,6 +50,89 @@ func syntax(textr []rune, filename string) []Token {
 
 var line = []rune{}
 var lineOffset = 0
+
+func transforSyntax() []Syntax {
+	syntaxDef := []Syntax{}
+	for _, syntax := range syntaxes {
+		syn := Syntax{
+			ScopeName: syntax["scopeName"].(string),
+			Name:      syntax["name"].(string),
+		}
+		syn.Repository = make(map[string]Pattern)
+		if syntax["firstLineMatch"] != nil {
+			syn.FirstLineMatch = *regexp2.MustCompile(syntax["firstLineMatch"].(string), 0)
+		}
+
+		filetypes := []string{}
+		for _, filetype := range syntax["fileTypes"].([]interface{}) {
+			filetypes = append(filetypes, filetype.(string))
+		}
+		syn.FileTypes = filetypes
+
+		for _, pattern := range syntax["patterns"].([]interface{}) {
+			syn.Patterns = append(syn.Patterns, transferPattern(pattern))
+		}
+
+		if syntax["repository"] != nil {
+			for key, pattern := range syntax["repository"].(map[string]interface{}) {
+				syn.Repository[key] = transferPattern(pattern)
+			}
+		}
+		syntaxDef = append(syntaxDef, syn)
+	}
+	return syntaxDef
+}
+func transferPattern(pattern interface{}) Pattern {
+	p := pattern.(map[string]interface{})
+	pat := Pattern{}
+	pat.Captures = make(map[int]Pattern)
+	pat.BeginCaptures = make(map[int]Pattern)
+	pat.EndCaptures = make(map[int]Pattern)
+	if p["comment"] != nil {
+		pat.Comment = p["comment"].(string)
+	}
+	if p["name"] != nil {
+		pat.Name = p["name"].(string)
+	}
+	if p["include"] != nil {
+		pat.Include = p["include"].(string)
+	}
+
+	if p["match"] != nil {
+		pat.Match = *regexp2.MustCompile(p["match"].(string), 0)
+	}
+	if p["begin"] != nil {
+		pat.Begin = *regexp2.MustCompile(p["begin"].(string), 0)
+	}
+	if p["end"] != nil {
+		pat.End = *regexp2.MustCompile(p["end"].(string), 0)
+	}
+
+	if p["captures"] != nil {
+		for key, pattern := range p["captures"].(map[string]interface{}) {
+			atoi, _ := strconv.Atoi(key)
+			pat.Captures[atoi] = transferPattern(pattern)
+		}
+	}
+	if p["beginCaptures"] != nil {
+		for key, pattern := range p["beginCaptures"].(map[string]interface{}) {
+			atoi, _ := strconv.Atoi(key)
+			pat.BeginCaptures[atoi] = transferPattern(pattern)
+		}
+	}
+	if p["endCaptures"] != nil {
+		for key, pattern := range p["endCaptures"].(map[string]interface{}) {
+			atoi, _ := strconv.Atoi(key)
+			pat.EndCaptures[atoi] = transferPattern(pattern)
+		}
+	}
+	if p["patterns"] != nil {
+		for _, pattern := range p["patterns"].([]interface{}) {
+			pat.Patterns = append(pat.Patterns, transferPattern(pattern))
+		}
+	}
+	return pat
+}
 
 func highlight(lines string, lang map[string]interface{}) []Token {
 	scope := []string{}

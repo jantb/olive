@@ -80,7 +80,7 @@
           "name": "punctuation.definition.tag.local.yaml"
         }
       },
-      "end": "^(?!\\1 \\4\\s+)(?=\\s*(-|[^!@#%&*>,].*:|#))",
+      "end": "^(?!\\1 \\s+)(?=\\s*(-|[^!@#%&*>,].*:|#))",
       "contentName": "string.unquoted.block.yaml",
       "patterns": [
         {
