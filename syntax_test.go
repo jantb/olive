@@ -87,3 +87,17 @@ func TestSyntax8(t *testing.T) {
 		}
 	}
 }
+func TestSyntax9(t *testing.T) {
+	syntax := transforSyntax()
+	for _, s := range syntax {
+		for _, f := range s.FileTypes {
+			if f == "go" {
+				tokens := highlightLine([]rune("package main"), s)
+				for _, token := range tokens {
+					fmt.Println(token)
+				}
+				return
+			}
+		}
+	}
+}

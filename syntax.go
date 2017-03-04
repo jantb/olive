@@ -101,8 +101,9 @@ func highlightLinePattern(syntax Syntax, tokens *[]Token, scope []string, line [
 
 }
 
+var syntaxDef = []Syntax{}
+
 func transforSyntax() []Syntax {
-	syntaxDef := []Syntax{}
 	for _, syntax := range syntaxes {
 		syn := Syntax{
 			ScopeName: syntax["scopeName"].(string),
@@ -275,11 +276,14 @@ func handleBeginEnd(name interface{}, match *regexp2.Match, scope []string, capt
 
 func handleMatch(match *regexp2.Match, scope []string, captures map[int]Pattern, tokens *[]Token) {
 	if len(captures) > 0 {
-		for i, group := range match.Groups() {
+		for _, group := range match.Groups() {
+			i, _ := strconv.Atoi(group.Name)
 			pattern := captures[i]
-			scope = append(scope, pattern.Name)
-			*tokens = append(*tokens, Token{Scope: scope, Loc: []int{group.Index + lineOffset, group.Index + group.Length + lineOffset}})
-			lineOffset = lineOffset + match.GroupByNumber(i).Length
+			if pattern.Name != "" {
+				scope = append(scope, pattern.Name)
+				*tokens = append(*tokens, Token{Scope: scope, Loc: []int{group.Index + lineOffset, group.Index + group.Length + lineOffset}})
+				lineOffset = lineOffset + group.Length
+			}
 		}
 	} else {
 		*tokens = append(*tokens, Token{Scope: scope, Loc: []int{lineOffset, match.Index + lineOffset}})

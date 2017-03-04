@@ -785,6 +785,19 @@ var dark = Theme{Name: "Dark", Settings: []struct {
 		Background string "json:\"background,omitempty\""
 	} "json:\"settings\""
 	Name string "json:\"name,omitempty\""
+}{Scope: "source", Scopes: []string(nil), Settings: struct {
+	FontStyle  string "json:\"fontStyle,omitempty\""
+	Foreground string "json:\"foreground,omitempty\""
+	Background string "json:\"background,omitempty\""
+}{FontStyle: "", Foreground: "#AAAAAA", Background: "#1E1E1E"}, Name: ""}, struct {
+	Scope    string   "json:\"scope\""
+	Scopes   []string "json:\"scopes\""
+	Settings struct {
+		FontStyle  string "json:\"fontStyle,omitempty\""
+		Foreground string "json:\"foreground,omitempty\""
+		Background string "json:\"background,omitempty\""
+	} "json:\"settings\""
+	Name string "json:\"name,omitempty\""
 }{Scope: "", Scopes: []string{"storage.modifier.import.java", "storage.modifier.package.java"}, Settings: struct {
 	FontStyle  string "json:\"fontStyle,omitempty\""
 	Foreground string "json:\"foreground,omitempty\""

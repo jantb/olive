@@ -189,10 +189,30 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 			continue
 		}
 		jj := 0
-
+		tokens := []Token{}
+		for _, s := range syntaxDef {
+			for _, f := range s.FileTypes {
+				if f == "go" {
+					tokens = highlightLine(lines[i], s)
+					break
+				}
+			}
+		}
 		for _, r := range lines[i] {
+			found := false
+			for _, token := range tokens {
+				if jj >= token.Loc[0] && jj < token.Loc[1] {
+					backing[i][jj].style = getThemeColor(token.Scope...)
+					//TermMessage(getThemeColor(token.Scope ...))
+					found = true
+					break
+				}
+			}
+
 			backing[i][jj].value = r
-			backing[i][jj].style = style
+			if !found {
+				backing[i][jj].style = style
+			}
 			jj++
 		}
 		for index := len(lines[i]); index < width; index++ {

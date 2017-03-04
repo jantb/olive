@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jantb/tcell"
 	"strings"
 )
@@ -53,44 +54,27 @@ func getEditorStyle() tcell.Style {
 
 var syntaxScopes = make(map[string]tcell.Style)
 
-func getThemeColor(scope string) tcell.Style {
-	splits := strings.Split(scope, ".")
-	for i := len(splits); i > 0; i-- {
-		sub := strings.Join(splits[:i], ".")
-		s := syntaxScopes[sub]
-		if s != 0 {
-			return s
+func getThemeColor(scopes ...string) tcell.Style {
+	for i := len(scopes) - 1; i >= 0; i-- {
+		scope := scopes[i]
+		if scope == "" {
+			continue
 		}
-	}
-
-	for _, value := range theme.Settings {
-		s := ""
 		splits := strings.Split(scope, ".")
 		for i := len(splits); i > 0; i-- {
-			s = strings.Join(splits[:i], ".")
-			if value.Scope == s {
-				style := getEditorStyle()
-				switch value.Settings.FontStyle {
-				case "bold":
-					style = style.Bold(true)
-				}
-				if value.Settings.Foreground != "" {
-					style = style.Foreground(tcell.GetColor(value.Settings.Foreground))
-				}
-				if value.Settings.Background != "" {
-					style = style.Background(tcell.GetColor(value.Settings.Background))
-				}
-				syntaxScopes[scope] = style
-				return style
+			sub := strings.Join(splits[:i], ".")
+			s := syntaxScopes[sub]
+			if s != 0 {
+				return s
 			}
 		}
 
-		for _, valueScope := range value.Scopes {
+		for _, value := range theme.Settings {
 			s := ""
 			splits := strings.Split(scope, ".")
 			for i := len(splits); i > 0; i-- {
 				s = strings.Join(splits[:i], ".")
-				if valueScope == s {
+				if value.Scope == s {
 					style := getEditorStyle()
 					switch value.Settings.FontStyle {
 					case "bold":
@@ -106,8 +90,31 @@ func getThemeColor(scope string) tcell.Style {
 					return style
 				}
 			}
+
+			for _, valueScope := range value.Scopes {
+				s := ""
+				splits := strings.Split(scope, ".")
+				for i := len(splits); i > 0; i-- {
+					s = strings.Join(splits[:i], ".")
+					if valueScope == s {
+						style := getEditorStyle()
+						switch value.Settings.FontStyle {
+						case "bold":
+							style = style.Bold(true)
+						}
+						if value.Settings.Foreground != "" {
+							style = style.Foreground(tcell.GetColor(value.Settings.Foreground))
+						}
+						if value.Settings.Background != "" {
+							style = style.Background(tcell.GetColor(value.Settings.Background))
+						}
+						syntaxScopes[scope] = style
+						return style
+					}
+				}
+			}
 		}
 	}
-	TermMessage("Unknown scope please add to theme:" + scope)
+	TermMessage(fmt.Sprintf("Unknown scope please add to theme: %v", scopes))
 	return tcell.StyleDefault
 }
