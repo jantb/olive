@@ -45,5 +45,45 @@ func TestSyntax5(t *testing.T) {
 }
 
 func TestSyntax6(t *testing.T) {
-	transforSyntax()
+	syntax := transforSyntax()
+	for _, s := range syntax {
+		for _, f := range s.FileTypes {
+			if f == "go" {
+				tokens := highlightLine([]rune("//Loc holds a location"), s)
+				for _, token := range tokens {
+					fmt.Println(token)
+				}
+				return
+			}
+		}
+	}
+}
+func TestSyntax7(t *testing.T) {
+	syntax := transforSyntax()
+	for _, s := range syntax {
+		for _, f := range s.FileTypes {
+			if f == "json" {
+				tokens := highlightLine([]rune("{}"), s)
+				for _, token := range tokens {
+					fmt.Println(token)
+				}
+				return
+			}
+		}
+	}
+}
+
+func TestSyntax8(t *testing.T) {
+	syntax := transforSyntax()
+	for _, s := range syntax {
+		for _, f := range s.FileTypes {
+			if f == "json" {
+				tokens := highlightLine([]rune("{\"h\":\"x\"}"), s)
+				for _, token := range tokens {
+					fmt.Println(token)
+				}
+				return
+			}
+		}
+	}
 }

@@ -51,6 +51,56 @@ func syntax(textr []rune, filename string) []Token {
 var line = []rune{}
 var lineOffset = 0
 
+func highlightLine(line []rune, syntax Syntax) []Token {
+	tokens := []Token{}
+	scope := []string{syntax.ScopeName}
+	for _, pattern := range syntax.Patterns {
+		highlightLinePattern(syntax, &tokens, scope, line, pattern)
+	}
+	lineOffset = 0
+	return tokens
+}
+
+func highlightLinePattern(syntax Syntax, tokens *[]Token, scope []string, line []rune, pattern Pattern) {
+	if len(line) < lineOffset {
+		return
+	}
+	if pattern.Match.String() != "" {
+		if m, _ := pattern.Match.FindRunesMatch(line[lineOffset:]); m != nil {
+			if pattern.Name != "" {
+				scope = append(scope, pattern.Name)
+			}
+			handleMatch(m, scope, pattern.Captures, tokens)
+		}
+	}
+	if pattern.Begin.String() != "" {
+		if m, _ := pattern.Begin.FindRunesMatch(line[lineOffset:]); m != nil {
+			if pattern.Name != "" {
+				scope = append(scope, pattern.Name)
+			}
+			if len(pattern.Captures) > 0 {
+				handleMatch(m, scope, pattern.Captures, tokens)
+			} else {
+				handleMatch(m, scope, pattern.BeginCaptures, tokens)
+			}
+			for _, p := range pattern.Patterns {
+				highlightLinePattern(syntax, tokens, scope, line, p)
+			}
+			if m, _ := pattern.End.FindRunesMatch(line[lineOffset:]); m != nil {
+				handleMatch(m, scope, pattern.EndCaptures, tokens)
+			}
+		}
+		return
+	}
+	for _, p := range pattern.Patterns {
+		highlightLinePattern(syntax, tokens, scope, line, p)
+	}
+	if pattern.Include != "" {
+		highlightLinePattern(syntax, tokens, scope, line, syntax.Repository[pattern.Include[1:]])
+	}
+
+}
+
 func transforSyntax() []Syntax {
 	syntaxDef := []Syntax{}
 	for _, syntax := range syntaxes {
@@ -220,5 +270,19 @@ func handleBeginEnd(name interface{}, match *regexp2.Match, scope []string, capt
 			*tokens = append(*tokens, Token{Scope: scope, Loc: []int{group.Index + lineOffset, group.Index + group.Length + lineOffset}})
 			lineOffset = lineOffset + match.GroupByNumber(i).Length
 		}
+	}
+}
+
+func handleMatch(match *regexp2.Match, scope []string, captures map[int]Pattern, tokens *[]Token) {
+	if len(captures) > 0 {
+		for i, group := range match.Groups() {
+			pattern := captures[i]
+			scope = append(scope, pattern.Name)
+			*tokens = append(*tokens, Token{Scope: scope, Loc: []int{group.Index + lineOffset, group.Index + group.Length + lineOffset}})
+			lineOffset = lineOffset + match.GroupByNumber(i).Length
+		}
+	} else {
+		*tokens = append(*tokens, Token{Scope: scope, Loc: []int{lineOffset, match.Index + lineOffset}})
+		lineOffset = lineOffset + match.Index
 	}
 }
