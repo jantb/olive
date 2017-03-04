@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/dlclark/regexp2"
-	"go/format"
 	"strconv"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 )
 
 type Token struct {
