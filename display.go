@@ -11,6 +11,7 @@ import (
 	"github.com/golang/groupcache/lru"
 	"github.com/jantb/tcell"
 	"github.com/jantb/tcell/encoding"
+	"strings"
 )
 
 var topRow = 0
@@ -192,7 +193,7 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 		tokens := []Token{}
 		for _, s := range syntaxDef {
 			for _, f := range s.FileTypes {
-				if f == "go" {
+				if strings.HasSuffix(buffer.filename, f) {
 					tokens = highlightLine(lines[i], s)
 					break
 				}
