@@ -191,20 +191,28 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 		}
 		jj := 0
 		tokens := []Token{}
-		for _, s := range syntaxDef {
-			for _, f := range s.FileTypes {
-				if strings.HasSuffix(buffer.filename, f) {
-					tokens = highlightLine(lines[i], s)
-					break
+		key := string(lines[i])
+		if val, ok := cache.Get(key); !ok {
+			for _, s := range syntaxDef {
+				for _, f := range s.FileTypes {
+					if strings.HasSuffix(buffer.filename, f) {
+						val = highlightLine(lines[i], s)
+						break
+					}
 				}
 			}
+
+			cache.Add(key, val)
+			tokens = val.([]Token)
+		} else {
+			tokens = val.([]Token)
 		}
+
 		for _, r := range lines[i] {
 			found := false
 			for _, token := range tokens {
 				if jj >= token.Loc[0] && jj < token.Loc[1] {
 					backing[i][jj].style = getThemeColor(token.Scope...)
-					//TermMessage(getThemeColor(token.Scope ...))
 					found = true
 					break
 				}
