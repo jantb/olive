@@ -79,9 +79,9 @@ func highlightLinePattern(syntax Syntax, tokens *[]Token, scope []string, line [
 				scope = append(scope, pattern.Name)
 			}
 			if len(pattern.Captures) > 0 {
-				handleMatch(m, scope, pattern.Captures, tokens)
+				handleMatchBegin(m, scope, pattern.Captures, tokens)
 			} else {
-				handleMatch(m, scope, pattern.BeginCaptures, tokens)
+				handleMatchBegin(m, scope, pattern.BeginCaptures, tokens)
 			}
 			for _, p := range pattern.Patterns {
 				highlightLinePattern(syntax, tokens, scope, line, p)
@@ -274,7 +274,25 @@ func handleBeginEnd(name interface{}, match *regexp2.Match, scope []string, capt
 	}
 }
 
-func handleMatch(match *regexp2.Match, scope []string, captures map[int]Pattern, tokens *[]Token) {
+func handleMatch(match *regexp2.Match, scope []string, captures map[int]Pattern, tokens *[]Token) bool {
+	if len(captures) > 0 {
+		for _, group := range match.Groups() {
+			i, _ := strconv.Atoi(group.Name)
+			pattern := captures[i]
+			if pattern.Name != "" {
+				scope = append(scope, pattern.Name)
+				*tokens = append(*tokens, Token{Scope: scope, Loc: []int{group.Index + lineOffset, group.Index + group.Length + lineOffset}})
+				//lineOffset = lineOffset + group.Length
+			}
+		}
+	} else {
+		*tokens = append(*tokens, Token{Scope: scope, Loc: []int{lineOffset, match.Length + lineOffset}})
+		//	lineOffset = lineOffset + match.Length
+	}
+	return true
+}
+
+func handleMatchBegin(match *regexp2.Match, scope []string, captures map[int]Pattern, tokens *[]Token) bool {
 	if len(captures) > 0 {
 		for _, group := range match.Groups() {
 			i, _ := strconv.Atoi(group.Name)
@@ -286,7 +304,8 @@ func handleMatch(match *regexp2.Match, scope []string, captures map[int]Pattern,
 			}
 		}
 	} else {
-		*tokens = append(*tokens, Token{Scope: scope, Loc: []int{lineOffset, match.Index + lineOffset}})
-		lineOffset = lineOffset + match.Index
+		*tokens = append(*tokens, Token{Scope: scope, Loc: []int{lineOffset, match.Length + lineOffset}})
+		lineOffset = lineOffset + match.Length
 	}
+	return true
 }
