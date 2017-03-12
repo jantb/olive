@@ -3,15 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"strconv"
-
+	"strings"
 	"time"
 
 	"github.com/golang/groupcache/lru"
 	"github.com/jantb/tcell"
 	"github.com/jantb/tcell/encoding"
-	"strings"
 )
 
 var topRow = 0
@@ -185,6 +183,16 @@ var cache = lru.New(1000)
 func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 	var style = getThemeColor("editor")
 	c := GetCursor()
+	var syn = Syntax{}
+	for _, s := range syntaxDef {
+		for _, f := range s.FileTypes {
+			if strings.HasSuffix(buffer.filename, f) {
+				syn = s
+				break
+			}
+		}
+	}
+
 	for i := range backing {
 		if len(lines)-1 < i {
 			continue
@@ -193,21 +201,12 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 		tokens := []Token{}
 		key := string(lines[i])
 		if val, ok := cache.Get(key); !ok {
-			for _, s := range syntaxDef {
-				for _, f := range s.FileTypes {
-					if strings.HasSuffix(buffer.filename, f) {
-						val = highlightLine(lines[i], s)
-						break
-					}
-				}
-			}
-
+			val = highlightLine(lines[i], syn)
 			cache.Add(key, val)
 			tokens = val.([]Token)
 		} else {
 			tokens = val.([]Token)
 		}
-
 		for _, r := range lines[i] {
 			found := false
 			for _, token := range tokens {
