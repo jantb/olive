@@ -97,8 +97,9 @@ func (b *Buffer) Insert(row, column int, bytes []rune) {
 			r1, r2 := r.Split(x)
 			// finish line
 			b.r = b.r.Delete(rrow, 1)
-			b.r = b.r.Insert(rrow, []rope.RuneRope{*r1})
-
+			if r1 != nil {
+				b.r = b.r.Insert(rrow, []rope.RuneRope{*r1})
+			}
 			// insert new line or split
 			if r2 == nil {
 				r = *rope.NewFromRunes([]rune(""))
