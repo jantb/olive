@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/golang/groupcache/lru"
-	"github.com/jantb/tcell"
-	"github.com/jantb/tcell/encoding"
+	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/encoding"
 )
 
 var topRow = 0

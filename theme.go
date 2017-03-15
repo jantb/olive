@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jantb/tcell"
+	"github.com/zyedidia/tcell"
 	"strings"
 )
 
