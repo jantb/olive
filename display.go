@@ -53,14 +53,22 @@ func createDisplay() {
 func Display(buffer *Buffer) {
 	createDisplay()
 	quit := make(chan struct{})
+	b := make(chan [][]Backing)
 	evName := ""
+	go func() {
+		for {
+			backing = <-b
+			drawBack(backing)
+		}
+	}()
 	go func() {
 		for {
 			offset = drawRuler(topRow, height-1, s)
 			var w = width - offset + 1
 			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
 			t := time.Now()
-			drawBuffer(topRow, s, offset, lines)
+
+			drawBuffer(b, topRow, lines)
 			time2 := time.Now().Sub(t).String()
 
 			puts(s, tcell.StyleDefault.
@@ -180,7 +188,7 @@ type Backing struct {
 var backing = [][]Backing{}
 var cache = lru.New(1000)
 
-func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
+func drawBuffer(b chan [][]Backing, topRow int, lines [][]rune) {
 	var style = getThemeColor("editor")
 	c := GetCursor()
 	var syn = Syntax{}
@@ -242,16 +250,19 @@ func drawBuffer(topRow int, s tcell.Screen, offset int, lines [][]rune) {
 			}
 		}
 	}
+	//drawBack(backing)
+	b <- backing
+}
 
-	re := []rune{}
+func drawBack(backing [][]Backing) {
 	for ir, row := range backing {
 		x := offset
 		for _, column := range row {
 			if column.value == '\t' {
-				s.SetContent(x, ir, ' ', re, column.style)
-				s.SetContent(x+1, ir, ' ', re, column.style)
-				s.SetContent(x+2, ir, ' ', re, column.style)
-				s.SetContent(x+3, ir, ' ', re, column.style)
+				s.SetContent(x, ir, ' ', nil, column.style)
+				s.SetContent(x+1, ir, ' ', nil, column.style)
+				s.SetContent(x+2, ir, ' ', nil, column.style)
+				s.SetContent(x+3, ir, ' ', nil, column.style)
 				x += 4
 				continue
 			}
