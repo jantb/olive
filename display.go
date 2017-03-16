@@ -43,10 +43,6 @@ func createDisplay() {
 	w, h := s.Size()
 	width = w
 	height = h
-	backing = make([][]Backing, h-1, h-1)
-	for i := range backing {
-		backing[i] = make([]Backing, w, w)
-	}
 }
 
 //Display renders the editor
@@ -57,19 +53,11 @@ func Display(buffer *Buffer) {
 	evName := ""
 	go func() {
 		for {
-			backing = <-b
-			drawBack(backing)
-		}
-	}()
-	go func() {
-		for {
+			t := time.Now()
 			offset = drawRuler(topRow, height-1, s)
 			var w = width - offset + 1
 			lines := buffer.GetLines(topRow, leftColumn, height-1, w)
-			t := time.Now()
-
-			drawBuffer(b, topRow, lines)
-			time2 := time.Now().Sub(t).String()
+			go drawBufferHighlight(b, topRow, lines)
 
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
@@ -77,10 +65,6 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), 0, height-1, buffer.filename)
-
-			puts(s, tcell.StyleDefault.
-				Foreground(tcell.ColorWhite).
-				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time2)
 
 			var text = strconv.Itoa(GetCursor().loc.row+1) + ":" + strconv.Itoa(GetCursor().loc.column+1) +
 				"/" + strconv.Itoa(buffer.Len()) + ":" + strconv.Itoa(len(buffer.GetLine(GetCursor().loc.row)))
@@ -92,6 +76,13 @@ func Display(buffer *Buffer) {
 			puts(s, tcell.StyleDefault.
 				Foreground(tcell.ColorWhite).
 				Background(tcell.ColorDefault), width-len(text)-2-len(evName), height-1, evName)
+
+			drawBack(<-b)
+			time2 := time.Now().Sub(t).String()
+			puts(s, tcell.StyleDefault.
+				Foreground(tcell.ColorWhite).
+				Background(tcell.ColorDefault), len(buffer.filename)+1, height-1, time2)
+
 			s.Show()
 			ev := s.PollEvent()
 			switch ev := ev.(type) {
@@ -163,13 +154,6 @@ func Display(buffer *Buffer) {
 
 			case *tcell.EventResize:
 				s.Sync()
-				w, h := s.Size()
-				width = w
-				height = h
-				backing = make([][]Backing, h-1, h-1)
-				for i := range backing {
-					backing[i] = make([]Backing, w, w)
-				}
 			}
 		}
 	}()
@@ -185,12 +169,43 @@ type Backing struct {
 	style tcell.Style
 }
 
-var backing = [][]Backing{}
 var cache = lru.New(1000)
 
+func drawBufferHighlight(b chan [][]Backing, topRow int, lines [][]rune) {
+	backing := highlightLines(lines)
+	backing = paintCursor(backing, topRow)
+	b <- backing
+}
 func drawBuffer(b chan [][]Backing, topRow int, lines [][]rune) {
-	var style = getThemeColor("editor")
+	backing := drawLines(lines)
+	backing = paintCursor(backing, topRow)
+	b <- backing
+}
+func paintCursor(backing [][]Backing, topRow int) [][]Backing {
 	c := GetCursor()
+	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column-leftColumn {
+		for i := range backing[c.loc.row-topRow] {
+			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#282828"))
+		}
+		// No cursor on enter
+		if c.loc.column != -1 {
+			if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
+				backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
+			} else {
+				backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
+			}
+		}
+	}
+	return backing
+}
+func highlightLines(lines [][]rune) [][]Backing {
+	w, h := s.Size()
+	backing := make([][]Backing, h-1, h-1)
+	for i := range backing {
+		backing[i] = make([]Backing, w, w)
+	}
+
+	var style = getThemeColor("editor")
 	var syn = Syntax{}
 	for _, s := range syntaxDef {
 		for _, f := range s.FileTypes {
@@ -200,7 +215,6 @@ func drawBuffer(b chan [][]Backing, topRow int, lines [][]rune) {
 			}
 		}
 	}
-
 	for i := range backing {
 		if len(lines)-1 < i {
 			continue
@@ -236,24 +250,34 @@ func drawBuffer(b chan [][]Backing, topRow int, lines [][]rune) {
 			backing[i][index].style = style
 		}
 	}
+	return backing
+}
+func drawLines(lines [][]rune) [][]Backing {
+	w, h := s.Size()
+	backing := make([][]Backing, h-1, h-1)
+	for i := range backing {
+		backing[i] = make([]Backing, w, w)
+	}
 
-	if len(backing) > c.loc.row-topRow && len(backing[c.loc.row-topRow]) > c.loc.column-leftColumn {
-		for i := range backing[c.loc.row-topRow] {
-			backing[c.loc.row-topRow][i].style = backing[c.loc.row-topRow][i].style.Background(tcell.GetColor("#282828"))
+	var style = getThemeColor("editor")
+
+	for i := range backing {
+		if len(lines)-1 < i {
+			continue
 		}
-		// No cursor on enter
-		if c.loc.column != -1 {
-			if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
-				backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
-			} else {
-				backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
-			}
+		jj := 0
+		for _, r := range lines[i] {
+			backing[i][jj].value = r
+			backing[i][jj].style = style
+			jj++
+		}
+		for index := len(lines[i]); index < width; index++ {
+			backing[i][index].value = ' '
+			backing[i][index].style = style
 		}
 	}
-	//drawBack(backing)
-	b <- backing
+	return backing
 }
-
 func drawBack(backing [][]Backing) {
 	for ir, row := range backing {
 		x := offset
