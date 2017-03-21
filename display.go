@@ -151,6 +151,13 @@ func Display(buffer *Buffer) {
 				default:
 					evName = ev.Name()
 				}
+			case *tcell.EventPaste:
+				clip := ev.Text()
+				c := GetCursor()
+				buffer.Insert(c.loc.row, c.loc.column, []rune(clip))
+				for range clip {
+					c.MoveRight()
+				}
 
 			case *tcell.EventResize:
 				s.Sync()
