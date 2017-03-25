@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+//go:generate go run generate.go
 type Theme struct {
 	Name     string `json:"name"`
 	Settings []struct {
@@ -23,12 +24,11 @@ type Theme struct {
 }
 
 func main() {
-	b, _ := ioutil.ReadFile("themes/dark-vs.json")
+	b, _ := ioutil.ReadFile("dark-vs.json")
 	t := Theme{}
 	json.Unmarshal(b, &t)
 	code := fmt.Sprintf("package main\n var dark = %#v", t)
 	code = strings.Replace(code, "main.", "", -1)
 	b, _ = format.Source([]byte(code))
-	fmt.Println(string(b))
-	ioutil.WriteFile("themes.go", b, 0644)
+	ioutil.WriteFile("../themes.go", b, 0644)
 }
