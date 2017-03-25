@@ -144,7 +144,6 @@ func Display(buffer *Buffer) {
 					c.MoveRight()
 				case tcell.KeyEnter:
 					c := GetCursor()
-					//buffer.Insert(c.loc.row, c.loc.column, []rune(string(ev.Rune())))
 					buffer.InsertEnter(c.loc.row, c.loc.column)
 					c.MoveDown()
 					c.MoveStartOfLine()
@@ -196,11 +195,7 @@ func paintCursor(backing [][]Backing, topRow int) [][]Backing {
 		}
 		// No cursor on enter
 		if c.loc.column != -1 {
-			if backing[c.loc.row-topRow][c.loc.column-leftColumn].value == '\n' {
-				backing[c.loc.row-topRow][c.loc.column-leftColumn+1].style = tcell.StyleDefault.Reverse(true)
-			} else {
-				backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
-			}
+			backing[c.loc.row-topRow][c.loc.column-leftColumn].style = tcell.StyleDefault.Reverse(true)
 		}
 	}
 	return backing
