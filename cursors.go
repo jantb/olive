@@ -56,7 +56,7 @@ func (c *Cursor) MoveLeft() {
 func (c *Cursor) MoveDown() bool {
 	if buffer.Len() > c.loc.row {
 		c.loc.row++
-		for c.loc.column > len(buffer.GetLine(c.loc.row)) {
+		for c.loc.column > buffer.GetLineLen(c.loc.row) {
 			c.MoveLeft()
 		}
 		c.showCursorInView()

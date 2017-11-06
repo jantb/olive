@@ -2,6 +2,7 @@ package main
 
 import "testing"
 import "fmt"
+import "github.com/stretchr/testify/assert"
 import (
 	"strings"
 )
@@ -11,6 +12,16 @@ func TestBufferInsert(t *testing.T) {
 	b.New()
 	text := "Buffer insert test"
 	b.Insert(0, 0, []rune(text))
+	if text != string(b.GetLines(0, 0, 1, 100)[0]) {
+		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert_1(t *testing.T) {
+	b := Buffer{}
+	b.NewText("Buffer insert test")
+	text := "Buffer insert test"
 	if text != string(b.GetLines(0, 0, 1, 100)[0]) {
 		fmt.Println(text + "!=" + string(b.GetLines(0, 0, 1, 100)[0]))
 		t.Fail()
@@ -83,6 +94,66 @@ func TestBufferInsert7(t *testing.T) {
 	}
 }
 
+func TestBufferInsert71(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := "ieh"
+	b.Insert(0, 0, []rune("h"))
+	b.Insert(0, 0, []rune("e"))
+	b.Insert(0, 0, []rune("i"))
+	if expexted != string(b.Bytes()) {
+		fmt.Println(expexted + "\n!=\n" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert72(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := "hei"
+	b.Insert(0, 0, []rune("h"))
+	b.Insert(0, 1, []rune("e"))
+	b.Insert(0, 2, []rune("i"))
+	if expexted != string(b.Bytes()) {
+		fmt.Println(expexted + "\n!=\n" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert74(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := "\n1"
+	b.InsertEnter(0, 0)
+	b.Insert(1, 0, []rune("1"))
+	if expexted != string(b.Bytes()) {
+		fmt.Println(expexted + "\n!=\n" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
+func TestBufferInsert73(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	expexted := "hei\nhei"
+	b.Insert(0, 0, []rune("h"))
+	b.Insert(0, 1, []rune("e"))
+	b.Insert(0, 2, []rune("i"))
+
+	b.InsertEnter(0, 3)
+	if "hei\n" != string(b.Bytes()) {
+		fmt.Println("hei\n" + "\n!=\n" + string(b.Bytes()))
+		t.Fail()
+	}
+	b.Insert(1, 0, []rune("h"))
+	b.Insert(1, 1, []rune("e"))
+	b.Insert(1, 2, []rune("i"))
+	if expexted != string(b.Bytes()) {
+		fmt.Println(expexted + "\n!=\n" + string(b.Bytes()))
+		t.Fail()
+	}
+}
+
 func TestBufferInsert8(t *testing.T) {
 	b := Buffer{}
 	b.New()
@@ -127,7 +198,7 @@ func TestBufferInsert11(t *testing.T) {
 	b.New()
 	expexted := ""
 	b.InsertEnter(0, 0)
-	b.Delete(1, -1)
+	b.Delete(1, 0)
 	if expexted != string(b.Bytes()) {
 		fmt.Println(expexted + "\n!=" + string(b.Bytes()))
 		t.Fail()
@@ -193,6 +264,19 @@ func TestBufferBackspace1(t *testing.T) {
 	}
 }
 
+func TestBufferGetLineLength(t *testing.T) {
+	b := Buffer{}
+	b.New()
+	text := "123456\n\nabcdef\n98765"
+	b.Insert(0, 0, []rune(text))
+	len1 := b.GetLineLen(0)
+	len2 := b.GetLineLen(1)
+	len3 := b.GetLineLen(2)
+	assert.Equal(t, 6, len1, "")
+	assert.Equal(t, 0, len2, "")
+	assert.Equal(t, 6, len3, "")
+}
+
 func TestBufferBackspace2(t *testing.T) {
 	b := Buffer{}
 	b.New()
@@ -235,14 +319,57 @@ func TestBufferBackspace4(t *testing.T) {
 	}
 }
 
-func TestBufferBackspace5(t *testing.T) {
+func TestGetLines2(t *testing.T) {
 	b := Buffer{}
 	b.New()
-	text := "Hello"
+	text := "1\n2\n3\n4"
 	b.Insert(0, 0, []rune(text))
-	b.Backspace(1, 0)
-	if "Hello" != string(b.Bytes()) {
-		fmt.Println("Hello" + "!=" + string(b.Bytes()))
+	if text != string(b.Bytes()) {
+		fmt.Println(text + "!=" + string(b.Bytes()))
 		t.Fail()
+	}
+	line := b.GetLine(1)
+	if "2" != string(line) {
+		fmt.Println("2" + "!=" + string(line))
+		t.Fail()
+	}
+}
+
+func TestGetLines(t *testing.T) {
+	b := Buffer{}
+	b.NewText(`package main
+
+import (
+	"os"
+	"path/filepath"
+	"syscall"
+	"log"
+	"os/user"
+)
+
+var buffer = Buffer{}
+
+func main() {
+
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	logFile, _ := os.OpenFile(filepath.Join(usr.HomeDir, ".olive.log"), os.O_WRONLY|os.O_CREATE|os.O_SYNC, 0755)
+	syscall.Dup2(int(logFile.Fd()), 1)
+	syscall.Dup2(int(logFile.Fd()), 2)
+
+	if len(os.Args) == 2 {
+		buffer.Open(os.Args[1])
+		loadDark()
+		transforSyntax()
+		Display(&buffer)
+	}
+}
+`)
+	lines := b.GetLines(0, 0, 59, 100)
+	for _, value := range lines {
+		fmt.Println(string(value))
 	}
 }
