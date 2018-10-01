@@ -31,6 +31,8 @@ func GetCursor() Cursor {
 
 // MoveRight the cursor
 func (c *Cursor) MoveRight() {
+	//log.Println(c.loc.column)
+	//log.Println(buffer.GetLineLen(c.loc.row))
 	if c.loc.column < buffer.GetLineLen(c.loc.row) {
 		c.loc.column++
 		c.showCursorInView()

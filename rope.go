@@ -34,14 +34,13 @@ func (r *Rope) GetLines(start, end int) [][]rune {
 		return nil
 	}
 	lineOffsetStart := r.GetLineOffset(0, start)
-
 	lineOffsetEnd := r.GetLineOffset(lineOffsetStart, end-start)
-	ret := [][]rune{}
+	var ret [][]rune
 	for _, value := range strings.Split(string(r.Sub(lineOffsetStart, lineOffsetEnd)), "\n") {
 		ret = append(ret, []rune(value))
 	}
 
-	return ret
+	return ret[:Min(end-start, len(ret))]
 }
 
 // GetLineOffset return lineoffset from the buffer

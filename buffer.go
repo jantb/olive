@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"strings"
 )
 
@@ -17,10 +16,17 @@ func (b *Buffer) Open(filename string) {
 	bytes, err := ioutil.ReadFile(filename)
 	b.filename = filename
 	if err != nil {
-		log.Fatal(err)
+		b.r = NewFromRunes([]rune(string("")))
+		return
 	}
 
 	b.r = NewFromRunes([]rune(string(bytes)))
+}
+
+// OpenNew initializes a new buffer from scratch
+func (b *Buffer) OpenNew() {
+	b.filename = "untitled"
+	b.r = NewFromRunes([]rune(string("")))
 }
 
 // GetLines return lines from the buffer
@@ -40,7 +46,7 @@ func (b *Buffer) GetLine(line int) []rune {
 
 // GetLineLen return line len from the buffer
 func (b *Buffer) GetLineLen(line int) int {
-	return len(b.r.GetLine(line)) - 1
+	return len(b.r.GetLine(line))
 }
 
 // Insert into the buffer
