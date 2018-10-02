@@ -106,6 +106,9 @@ func Display(buffer *Buffer) {
 				case tcell.KeyPgUp:
 					c := GetCursor()
 					c.MovePageUp()
+				case tcell.KeyCtrlQ:
+					close(quit)
+					return
 				case tcell.KeyEscape:
 					close(quit)
 					return

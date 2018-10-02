@@ -33,12 +33,17 @@ func GetCursor() Cursor {
 func (c *Cursor) MoveRight() {
 	//log.Println(c.loc.column)
 	//log.Println(buffer.GetLineLen(c.loc.row))
-	if c.loc.column < buffer.GetLineLen(c.loc.row) {
+	if c.loc.column+1 < buffer.GetLineLen(c.loc.row) {
 		c.loc.column++
 		c.showCursorInView()
 	} else {
 		if c.MoveDown() {
 			c.MoveStartOfLine()
+		} else {
+			if c.loc.column < buffer.GetLineLen(c.loc.row) {
+				c.loc.column++
+				c.showCursorInView()
+			}
 		}
 	}
 }
@@ -56,7 +61,7 @@ func (c *Cursor) MoveLeft() {
 
 // MoveDown the cursor
 func (c *Cursor) MoveDown() bool {
-	if buffer.Len() > c.loc.row {
+	if buffer.Len() > c.loc.row+1 {
 		c.loc.row++
 		for c.loc.column > buffer.GetLineLen(c.loc.row) {
 			c.MoveLeft()
