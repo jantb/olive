@@ -16,7 +16,6 @@ var styles = make(stylemap)
 func (sm stylemap) defineStyle(styledef *rpc.DefineStyle) {
 	var style tcell.Style
 
-	// TODO Make rpc.DefineStyle a map so we can see if FgColor exists or not
 	if styledef.FgColor != 0 {
 		r, g, b := styledef.FgColor.ToRGB()
 		fg := tcell.NewRGBColor(r, g, b)

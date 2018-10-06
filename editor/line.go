@@ -17,7 +17,6 @@ func NewLine(text string, cursors []int, styles []int) *Line {
 	return line
 }
 
-// TODO: Implement syntax highlight
 func (l *Line) SetStyles(styles []int) {
 	offset := 0
 	for i := 0; i < len(styles); i += 3 {

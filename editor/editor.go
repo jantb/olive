@@ -75,8 +75,7 @@ func NewEditor(rw io.ReadWriter, configPath string) *Editor {
 	// Set theme, this might be removed when xi-editor has a config file
 	e.xi.Notify(&rpc.Request{
 		Method: "set_theme",
-		// TODO: Read from settings?
-		Params: rpc.Object{"theme_name": "base16-eighties.dark"},
+		Params: rpc.Object{"theme_name": "Solarized (dark)"},
 	})
 
 	return e

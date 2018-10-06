@@ -2,6 +2,7 @@ package editor
 
 import (
 	"github.com/jantb/olive/rpc"
+	"log"
 	"strconv"
 
 	"github.com/gdamore/tcell"
@@ -29,8 +30,6 @@ type View struct {
 	lineEnd   int
 }
 
-var tmpStyle tcell.Style
-
 func ralign(str string, width int) string {
 	diff := width - len(str)
 	res := ""
@@ -46,7 +45,6 @@ func NewView(path string, vp *Viewport, xi *rpc.Connection) (*View, error) {
 	view := &View{}
 	view.view = NewViewport(vp, 3, 0)
 	view.gutter = NewViewport(vp, 0, 0)
-	//view.editview = NewViewport(view.view, 3, 0)
 	view.xi = xi
 	view.LineCache = NewLineCache()
 
@@ -82,14 +80,14 @@ func (v *View) Draw() {
 
 	// render line numbers
 	// TODO: improve, alot... :-)
-	style := defaultStyle.Foreground(tcell.ColorBlue)
+	style := defaultStyle.Foreground(tcell.ColorLightCyan)
 	width := len(strconv.Itoa(len(v.lines) + v.LineCache.invalidBefore))
 
 	v.gutter.SetWidth(width + 1)
 	v.view.SetOffsetX(width + 2)
 	for i := 0; i < len(v.lines); i++ {
 		nLine := i + v.invalidBefore
-		txt := ralign(strconv.Itoa(nLine), width)
+		txt := ralign(strconv.Itoa(nLine+1), width)
 		width := len(txt)
 		for x := 0; x < width; x++ {
 			v.gutter.SetContent(1+x, nLine, rune(txt[x]), nil, style)
@@ -148,11 +146,35 @@ func (v *View) HandleEvent(ev tcell.Event) {
 	switch e := ev.(type) {
 	case *tcell.EventKey:
 		ctrl := e.Modifiers()&tcell.ModCtrl != 0
+		alt := e.Modifiers()&tcell.ModAlt != 0
 
-		if e.Key() == tcell.KeyRune && !ctrl {
+		if e.Key() == tcell.KeyRune && !ctrl && !alt {
 			v.Insert(string(e.Rune()))
 		} else {
-			if !ctrl {
+			if ctrl && alt {
+				switch e.Name() {
+				case "Alt+Ctrl+L":
+					//	log.Println(goPlugin.Format(path))
+
+				default:
+					log.Println(string(e.Name()))
+				}
+			} else if ctrl && !alt {
+				switch e.Key() {
+				case tcell.KeyLeft:
+					v.MoveWordLeft()
+				case tcell.KeyRight:
+					v.MoveWordRight()
+				case tcell.KeyCtrlS:
+					v.Save()
+				case tcell.KeyCtrlU:
+					v.Undo()
+				case tcell.KeyCtrlR:
+					v.Redo()
+				case tcell.KeyCtrlD:
+					v.DuplicateLine()
+				}
+			} else {
 				switch e.Key() {
 				case tcell.KeyBackspace2, tcell.KeyBackspace:
 					v.DeleteBackward()
@@ -170,22 +192,6 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.MoveDown()
 				case tcell.KeyDelete:
 					v.DeleteForward()
-				}
-			} else {
-				// Ctrl
-				switch e.Key() {
-				case tcell.KeyLeft:
-					v.MoveWordLeft()
-				case tcell.KeyRight:
-					v.MoveWordRight()
-				case tcell.KeyCtrlS:
-					v.Save()
-				case tcell.KeyCtrlU:
-					v.Undo()
-				case tcell.KeyCtrlR:
-					v.Redo()
-				case tcell.KeyCtrlD:
-					v.DuplicateLine()
 				}
 			}
 		}
