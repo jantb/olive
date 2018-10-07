@@ -142,6 +142,7 @@ func (v *View) MakeLineVisible(line int) {
 	v.gutter.MakeVisibleY(line)
 }
 
+// HandleEvent handles tcell events
 func (v *View) HandleEvent(ev tcell.Event) {
 	switch e := ev.(type) {
 	case *tcell.EventKey:
@@ -167,12 +168,14 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.MoveWordRight()
 				case tcell.KeyCtrlS:
 					v.Save()
-				case tcell.KeyCtrlU:
+				case tcell.KeyCtrlZ:
 					v.Undo()
 				case tcell.KeyCtrlR:
 					v.Redo()
 				case tcell.KeyCtrlD:
 					v.DuplicateLine()
+				default:
+					log.Println(string(e.Name()))
 				}
 			} else {
 				switch e.Key() {
@@ -192,6 +195,9 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.MoveDown()
 				case tcell.KeyDelete:
 					v.DeleteForward()
+				default:
+					log.Println(string(e.Name()))
+
 				}
 			}
 		}
