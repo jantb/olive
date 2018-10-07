@@ -2,21 +2,13 @@ package editor
 
 import (
 	"github.com/atotto/clipboard"
+	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/rpc"
 	"log"
 	"strconv"
-
-	"github.com/gdamore/tcell"
 )
 
 const tabSize = 4
-
-// TODO: Move this to RPC
-type requestLines struct {
-	Method string `json:"method"`
-	Params []int  `json:"params"`
-	ViewID string `json:"view_id"`
-}
 
 type View struct {
 	*LineCache
@@ -148,15 +140,20 @@ func (v *View) HandleEvent(ev tcell.Event) {
 	switch e := ev.(type) {
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		log.Println(x, y, e.Buttons(), e.Modifiers())
+		buttons := e.Buttons()
+		if buttons&tcell.WheelUp != 0 {
+			v.MoveUp()
+		}
+		if buttons&tcell.WheelDown != 0 {
+			v.MoveDown()
+		}
 		switch e.Buttons() {
 		case tcell.Button1:
-			v.Click(y, x-v.gutter.width-1, 0, 1)
+			v.Click(x-v.gutter.width-1, y+v.view.viewy, 0, 1)
 		}
 	case *tcell.EventKey:
 		ctrl := e.Modifiers()&tcell.ModCtrl != 0
 		alt := e.Modifiers()&tcell.ModAlt != 0
-		log.Println(string(e.Name()))
 		if e.Key() == tcell.KeyRune && !ctrl && !alt {
 			v.Insert(string(e.Rune()))
 		} else {
@@ -164,9 +161,8 @@ func (v *View) HandleEvent(ev tcell.Event) {
 				switch e.Name() {
 				case "Alt+Ctrl+L":
 					//	log.Println(goPlugin.Format(path))
-
+					v.GoToLine(46000)
 				default:
-					log.Println(string(e.Name()))
 				}
 			} else if ctrl && !alt {
 				switch e.Key() {

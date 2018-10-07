@@ -63,6 +63,9 @@ func (ih *InputHandler) Undo() {
 func (ih *InputHandler) Redo() {
 	ih.edit(rpc.Object{"method": "redo"})
 }
+func (ih *InputHandler) GoToLine(line int) {
+	ih.edit(rpc.Object{"method": "goto_line", "params": rpc.Object{"line": line}})
+}
 
 func (ih *InputHandler) DuplicateLine() {
 	ih.edit(rpc.Object{"method": "duplicate_line"})
@@ -99,5 +102,5 @@ func (ih *InputHandler) Save() {
 }
 
 func (ih *InputHandler) Click(x, y, mod, clicks int) {
-	ih.edit(rpc.Object{"method": "click", "params": rpc.Array{x, y, mod, clicks}})
+	ih.edit(rpc.Object{"method": "click", "params": rpc.Array{y, x, mod, clicks}})
 }

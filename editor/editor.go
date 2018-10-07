@@ -2,12 +2,11 @@ package editor
 
 import (
 	"fmt"
+	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/rpc"
 	"io"
 	"log"
 	"os"
-
-	"github.com/gdamore/tcell"
 )
 
 type Editor struct {
@@ -41,7 +40,6 @@ func (e *Editor) initScreen() {
 		os.Exit(1)
 	}
 	if e.screen.HasMouse() {
-		log.Println("Mouse")
 		e.screen.EnableMouse()
 	}
 	e.screen.Clear()

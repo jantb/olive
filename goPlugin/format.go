@@ -24,6 +24,5 @@ func Format(content string) string {
 		log.Println(err)
 		return content
 	}
-	log.Println("ok")
 	return string(bytes)
 }

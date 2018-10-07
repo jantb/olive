@@ -13,7 +13,7 @@ type LineCache struct {
 func NewLineCache() *LineCache {
 	return &LineCache{
 		// TODO: Make capacity = height of buffer
-		lines: make([]*Line, 0, 10),
+		lines: make([]*Line, 0, 100),
 	}
 }
 
@@ -74,6 +74,7 @@ func (lc *LineCache) ApplyUpdate(update *rpc.Update) {
 				newInvalidAfter += nRemaining
 			}
 			oldIx += nRemaining
+
 		case "skip":
 			oldIx += op.N
 		case "invalidate":

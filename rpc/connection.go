@@ -71,7 +71,7 @@ func (c *Connection) recv() {
 	in := bufio.NewScanner(c.rw)
 
 	for in.Scan() {
-		log.Printf("<<< %s\n", in.Text())
+		//	log.Printf("<<< %s\n", in.Text())
 		var msg incomingMessage
 		json.Unmarshal([]byte(in.Text()), &msg)
 
@@ -117,7 +117,7 @@ func (c *Connection) recv() {
 // TODO: notify function
 func (c *Connection) send(msg *outgoingMessage) int {
 	b, _ := json.Marshal(msg)
-	log.Printf(">>> %s\n", b)
+	//	log.Printf(">>> %s\n", b)
 	c.rw.Write(b)
 	c.rw.Write([]byte{LF})
 	return c.rpcIndex
