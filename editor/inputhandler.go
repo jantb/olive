@@ -2,7 +2,6 @@ package editor
 
 import (
 	"github.com/jantb/olive/rpc"
-	"log"
 )
 
 type InputHandler struct {
@@ -66,7 +65,6 @@ func (ih *InputHandler) Redo() {
 }
 
 func (ih *InputHandler) DuplicateLine() {
-	log.Println("duplicateLine")
 	ih.edit(rpc.Object{"method": "duplicate_line"})
 }
 
@@ -98,4 +96,8 @@ func (ih *InputHandler) Save() {
 			"file_path": ih.FilePath,
 		},
 	})
+}
+
+func (ih *InputHandler) Click(x, y, mod, clicks int) {
+	ih.edit(rpc.Object{"method": "click", "params": rpc.Array{x, y, mod, clicks}})
 }

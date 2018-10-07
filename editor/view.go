@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"github.com/atotto/clipboard"
 	"github.com/jantb/olive/rpc"
 	"log"
 	"strconv"
@@ -145,10 +146,17 @@ func (v *View) MakeLineVisible(line int) {
 // HandleEvent handles tcell events
 func (v *View) HandleEvent(ev tcell.Event) {
 	switch e := ev.(type) {
+	case *tcell.EventMouse:
+		x, y := e.Position()
+		log.Println(x, y, e.Buttons(), e.Modifiers())
+		switch e.Buttons() {
+		case tcell.Button1:
+			v.Click(y, x-v.gutter.width-1, 0, 1)
+		}
 	case *tcell.EventKey:
 		ctrl := e.Modifiers()&tcell.ModCtrl != 0
 		alt := e.Modifiers()&tcell.ModAlt != 0
-
+		log.Println(string(e.Name()))
 		if e.Key() == tcell.KeyRune && !ctrl && !alt {
 			v.Insert(string(e.Rune()))
 		} else {
@@ -172,8 +180,17 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.Undo()
 				case tcell.KeyCtrlR:
 					v.Redo()
+				case tcell.KeyCtrlL:
+
 				case tcell.KeyCtrlD:
 					v.DuplicateLine()
+				case tcell.KeyCtrlV:
+					s, e := clipboard.ReadAll()
+					if e != nil {
+						log.Println(e)
+						break
+					}
+					v.Insert(s)
 				default:
 					log.Println(string(e.Name()))
 				}
@@ -197,7 +214,6 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.DeleteForward()
 				default:
 					log.Println(string(e.Name()))
-
 				}
 			}
 		}

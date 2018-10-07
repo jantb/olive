@@ -40,13 +40,18 @@ func (e *Editor) initScreen() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
+	if e.screen.HasMouse() {
+		log.Println("Mouse")
+		e.screen.EnableMouse()
+	}
 	e.screen.Clear()
 }
 
 func (e *Editor) handleEvent(ev tcell.Event) {
 	switch ev.(type) {
 	case *tcell.EventKey:
+		e.CurView().HandleEvent(ev)
+	case *tcell.EventMouse:
 		e.CurView().HandleEvent(ev)
 	}
 }
@@ -72,7 +77,6 @@ func NewEditor(rw io.ReadWriter, configPath string) *Editor {
 		},
 	})
 
-	// Set theme, this might be removed when xi-editor has a config file
 	e.xi.Notify(&rpc.Request{
 		Method: "set_theme",
 		Params: rpc.Object{"theme_name": "Solarized (dark)"},
