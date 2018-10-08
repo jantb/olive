@@ -12,7 +12,7 @@ const tabSize = 4
 
 type View struct {
 	*LineCache
-	*InputHandler
+	*rpc.InputHandler
 
 	ID         string
 	view       *Viewport
@@ -51,7 +51,7 @@ func NewView(path string, vp *Viewport, xi *rpc.Connection) (*View, error) {
 	}
 
 	view.ID = msg.Value.(string)
-	view.InputHandler = &InputHandler{view.ID, path, xi}
+	view.InputHandler = &rpc.InputHandler{view.ID, path, xi}
 
 	// Set scroll window size
 	_, height := vp.Size()
