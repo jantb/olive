@@ -101,3 +101,15 @@ func (ih *InputHandler) Save() {
 func (ih *InputHandler) Click(x, y, mod, clicks int) {
 	ih.edit(Object{"method": "click", "params": Array{y, x, mod, clicks}})
 }
+
+func (ih *InputHandler) RequestLines(first, last int) {
+
+}
+
+func (ih *InputHandler) MoveLineUp() {
+
+}
+
+func (ih *InputHandler) MoveLineDown() {
+
+}
