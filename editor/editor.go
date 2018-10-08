@@ -67,18 +67,8 @@ func NewEditor(rw io.ReadWriter, configPath string) *Editor {
 	e.Views = make(map[string]*View)
 
 	e.xi = rpc.NewConnection(rw)
-
-	e.xi.Notify(&rpc.Request{
-		Method: "client_started",
-		Params: rpc.Object{
-			"config_dir": configPath,
-		},
-	})
-
-	e.xi.Notify(&rpc.Request{
-		Method: "set_theme",
-		Params: rpc.Object{"theme_name": "Solarized (dark)"},
-	})
+	e.xi.Start(configPath)
+	e.xi.SetTheme("Solarized (dark)")
 
 	return e
 }
@@ -96,8 +86,6 @@ func (e *Editor) handleRequests() {
 			e.updates <- func() {
 				update := msg.Value.(*rpc.Update)
 				view := e.Views[update.ViewID]
-				// TODO: Could ApplyUpdate be immutable?
-				// If so we can do all the calculation outside the paint thread
 				view.ApplyUpdate(msg.Value.(*rpc.Update))
 			}
 		case *rpc.DefineStyle:
@@ -105,7 +93,6 @@ func (e *Editor) handleRequests() {
 				styles.defineStyle(msg.Value.(*rpc.DefineStyle))
 			}
 		case *rpc.ThemeChanged:
-			// TODO: Use tcell.Event interface instead
 			e.updates <- func() {
 				themeChanged := msg.Value.(*rpc.ThemeChanged)
 				theme := themeChanged.Theme
@@ -127,8 +114,6 @@ func (e *Editor) handleRequests() {
 			}
 		}
 
-		// TODO: Better way to signal redraw?
-		// TODO: Use tcell.Event interface instead
 		e.updates <- func() {
 			e.redraws <- struct{}{}
 		}

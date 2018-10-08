@@ -5,8 +5,7 @@ import (
 )
 
 type InputHandler struct {
-	ViewID string
-	// TODO: Maybe just keep this stuff on View struct
+	ViewID   string
 	FilePath string
 	c        *rpc.Connection
 }

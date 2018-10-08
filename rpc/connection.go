@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/linde12/kod/rpc"
 	"io"
 	"log"
 	"time"
@@ -152,5 +153,21 @@ func (c *Connection) RequestAsync(r *Request, callback func(*Message)) int {
 func (c *Connection) Notify(r *Request) {
 	c.send(&outgoingMessage{
 		Request: r,
+	})
+}
+
+func (c *Connection) Start(configPath string) {
+	c.Notify(&Request{
+		Method: "client_started",
+		Params: rpc.Object{
+			"config_dir": configPath,
+		},
+	})
+}
+
+func (c *Connection) SetTheme(theme string) {
+	c.Notify(&Request{
+		Method: "set_theme",
+		Params: rpc.Object{"theme_name": theme},
 	})
 }

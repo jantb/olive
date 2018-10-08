@@ -14,13 +14,14 @@ type View struct {
 	*LineCache
 	*InputHandler
 
-	ID        string
-	view      *Viewport
-	gutter    *Viewport
-	xi        *rpc.Connection
-	ViewID    string
-	lineStart int
-	lineEnd   int
+	ID         string
+	view       *Viewport
+	gutter     *Viewport
+	statusline *Viewport
+	xi         *rpc.Connection
+	ViewID     string
+	lineStart  int
+	lineEnd    int
 }
 
 func ralign(str string, width int) string {
@@ -71,8 +72,6 @@ func (v *View) Draw() {
 		return
 	}
 
-	// render line numbers
-	// TODO: improve, alot... :-)
 	style := defaultStyle.Foreground(tcell.ColorLightCyan)
 	width := len(strconv.Itoa(len(v.lines) + v.LineCache.invalidBefore))
 
@@ -87,7 +86,6 @@ func (v *View) Draw() {
 		}
 	}
 
-	// TODO: Line numbers in a separate viewport
 	for y, line := range v.lines {
 		if line == nil {
 			continue
@@ -95,9 +93,7 @@ func (v *View) Draw() {
 		nLine := y + v.invalidBefore
 		visualX := 0
 		for x, char := range []rune(line.Text) {
-			// TODO: Do this somewhere else
 			var style = defaultStyle
-			// TODO: Reserved??
 			if line.StyleIds[x] >= 2 {
 				fg, _, _ := styles[line.StyleIds[x]].Decompose()
 				style = style.Foreground(fg)
@@ -110,15 +106,12 @@ func (v *View) Draw() {
 				}
 				visualX += ts
 			} else if char != '\n' {
-				// TODO: Trim newline in a better way?
 				v.view.SetContent(visualX, nLine, char, nil, style)
 				visualX++
 			}
 		}
 		if len(line.Cursors) != 0 {
-			// TODO: Verify if xi-core will take care of tabs for us
 			cX := GetCursorVisualX(line.Cursors[0], line.Text)
-			// TODO: Multiple cursor support
 			v.view.ShowCursor(cX, nLine)
 		}
 	}
