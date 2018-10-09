@@ -20,7 +20,18 @@ func (ih *InputHandler) edit(params Object) {
 		Params: params,
 	})
 }
+func (ih *InputHandler) gesture(params Object) {
+	params["view_id"] = ih.ViewID
+	if _, ok := params["params"]; !ok {
+		params["params"] = &rpc.Object{}
+	}
 
+	ih.C.Notify(&Request{
+		Method: "gesture",
+		ViewID: ih.ViewID,
+		Params: params,
+	})
+}
 func (ih *InputHandler) MoveLeft() {
 	ih.edit(Object{"method": "move_left"})
 }
@@ -35,6 +46,14 @@ func (ih *InputHandler) MoveUp() {
 
 func (ih *InputHandler) MoveDown() {
 	ih.edit(Object{"method": "move_down"})
+}
+
+func (ih *InputHandler) ScrollPageUp() {
+	ih.edit(Object{"method": "scroll_page_up"})
+}
+
+func (ih *InputHandler) ScrollPageDown() {
+	ih.edit(Object{"method": "scroll_page_down"})
 }
 
 func (ih *InputHandler) MoveWordLeft() {
@@ -103,10 +122,13 @@ func (ih *InputHandler) Click(x, y, mod, clicks int) {
 }
 
 func (ih *InputHandler) RequestLines(first, last int) {
-
+	ih.edit(Object{"method": "request_lines", "params": Array{first, last}})
 }
 
 func (ih *InputHandler) MoveLineUp() {
+	//RequestLines//
+	//DeleteToBeginningOfLine
+	//MoveToRightEndOfLine
 
 }
 

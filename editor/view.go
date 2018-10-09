@@ -1,11 +1,12 @@
 package editor
 
 import (
+	"log"
+	"strconv"
+
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/rpc"
-	"log"
-	"strconv"
 )
 
 const tabSize = 4
@@ -135,10 +136,10 @@ func (v *View) HandleEvent(ev tcell.Event) {
 		x, y := e.Position()
 		buttons := e.Buttons()
 		if buttons&tcell.WheelUp != 0 {
-			v.MoveUp()
+			v.Scroll(v.lineStart-1, v.lineEnd-1)
 		}
 		if buttons&tcell.WheelDown != 0 {
-			v.MoveDown()
+			v.Scroll(v.lineStart+1, v.lineEnd+1)
 		}
 		switch e.Buttons() {
 		case tcell.Button1:
@@ -154,7 +155,8 @@ func (v *View) HandleEvent(ev tcell.Event) {
 				switch e.Name() {
 				case "Alt+Ctrl+L":
 					//	log.Println(goPlugin.Format(path))
-					v.GoToLine(46000)
+					v.RequestLines(0, 10)
+					//v.GoToLine(46000)
 				default:
 				}
 			} else if ctrl && !alt {
@@ -199,6 +201,10 @@ func (v *View) HandleEvent(ev tcell.Event) {
 					v.MoveRight()
 				case tcell.KeyDown:
 					v.MoveDown()
+				case tcell.KeyPgDn:
+					v.ScrollPageDown()
+				case tcell.KeyPgUp:
+					v.ScrollPageUp()
 				case tcell.KeyDelete:
 					v.DeleteForward()
 				default:
