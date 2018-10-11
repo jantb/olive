@@ -1,6 +1,6 @@
 package rpc
 
-type line struct {
+type Line struct {
 	Text   string `json:"text"`
 	Cursor []int  `json:"cursor"`
 	Styles []int  `json:"styles"`
@@ -9,7 +9,7 @@ type line struct {
 type op struct {
 	Op    string `json:"op"`
 	N     int    `json:"n"`
-	Lines []line `json:"lines"`
+	Lines []Line `json:"lines"`
 }
 
 type update struct {

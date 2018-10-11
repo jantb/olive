@@ -15,6 +15,7 @@ type Viewport struct {
 	width, height int
 	view          Painter
 	viewy         int
+	viewx         int
 }
 
 func (v *Viewport) GetViewport() (lineStart, lineEnd int) {
@@ -22,7 +23,7 @@ func (v *Viewport) GetViewport() (lineStart, lineEnd int) {
 }
 
 func (v *Viewport) SetContent(x int, y int, ch rune, comb []rune, style tcell.Style) {
-	v.view.SetContent(v.offx+x, v.offy+y-v.viewy, ch, comb, style)
+	v.view.SetContent(v.offx+x-v.viewx, v.offy+y-v.viewy, ch, comb, style)
 }
 
 func (v *Viewport) MakeVisibleY(y int) {
@@ -35,6 +36,16 @@ func (v *Viewport) MakeVisibleY(y int) {
 	v.ValidateViewY()
 }
 
+func (v *Viewport) MakeVisibleX(x int) {
+	if x >= v.viewx+v.width {
+		v.viewx = x - (v.width - 1)
+	}
+	if x >= 0 && x < v.viewx {
+		v.viewx = x
+	}
+	v.ValidateViewX()
+}
+
 func (v *Viewport) ShowCursor(x int, y int) {
 	v.view.ShowCursor(v.offx+x, v.offy+y-v.viewy)
 }
@@ -42,6 +53,12 @@ func (v *Viewport) ShowCursor(x int, y int) {
 func (v *Viewport) ValidateViewY() {
 	if v.viewy < 0 {
 		v.viewy = 0
+	}
+}
+
+func (v *Viewport) ValidateViewX() {
+	if v.viewx < 0 {
+		v.viewx = 0
 	}
 }
 

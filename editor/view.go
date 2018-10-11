@@ -124,8 +124,9 @@ func (v *View) Draw() {
 	}
 }
 
-func (v *View) MakeLineVisible(line int) {
+func (v *View) MakeLineVisible(line, x int) {
 	v.view.MakeVisibleY(line)
+	v.view.MakeVisibleX(x)
 	v.gutter.MakeVisibleY(line)
 }
 
