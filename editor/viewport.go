@@ -14,8 +14,7 @@ type Viewport struct {
 	offx, offy    int
 	width, height int
 	view          Painter
-	viewy         int
-	viewx         int
+	viewy, viewx  int
 }
 
 func (v *Viewport) GetViewport() (lineStart, lineEnd int) {
@@ -47,7 +46,7 @@ func (v *Viewport) MakeVisibleX(x int) {
 }
 
 func (v *Viewport) ShowCursor(x int, y int) {
-	v.view.ShowCursor(v.offx+x, v.offy+y-v.viewy)
+	v.view.ShowCursor(v.offx+x-v.viewx, v.offy+y-v.viewy)
 }
 
 func (v *Viewport) ValidateViewY() {
