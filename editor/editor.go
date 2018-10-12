@@ -152,24 +152,22 @@ func (e *Editor) Start() {
 
 	// editor loop
 	for {
-		if len(e.Views) != 0 {
-			curView := e.CurView()
-			e.screen.Clear()
-			curView.Draw()
-			e.screen.Show()
-		} else {
-			quit <- true
-		}
-
 		var event tcell.Event
 		select {
 		case event = <-e.events:
 		case update := <-e.updates:
 			update()
 		case <-e.redraws:
+			if len(e.Views) != 0 {
+				curView := e.CurView()
+				e.screen.Clear()
+				curView.Draw()
+				e.screen.Show()
+			} else {
+				quit <- true
+			}
 		case <-quit:
 			e.screen.Fini()
-			log.Println("bye")
 			os.Exit(0)
 		}
 
