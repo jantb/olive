@@ -16,7 +16,6 @@ func (ih *InputHandler) edit(params Object) {
 
 	ih.C.Notify(&Request{
 		Method: "edit",
-		ViewID: ih.ViewID,
 		Params: params,
 	})
 }
@@ -28,7 +27,6 @@ func (ih *InputHandler) gesture(params Object) {
 
 	ih.C.Notify(&Request{
 		Method: "gesture",
-		ViewID: ih.ViewID,
 		Params: params,
 	})
 }
@@ -98,7 +96,6 @@ func (ih *InputHandler) Newline() {
 func (ih *InputHandler) Insert(char string) {
 	ih.C.Notify(&Request{
 		Method: "edit",
-		ViewID: ih.ViewID,
 		Params: Object{"method": "insert", "params": Object{"chars": char}, "view_id": ih.ViewID},
 	})
 }
