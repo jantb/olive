@@ -78,6 +78,7 @@ func (v *View) Draw() {
 
 	v.gutter.SetWidth(width + 1)
 	v.view.SetOffsetX(width + 2)
+
 	for i := 0; i < len(v.lines); i++ {
 		nLine := i + v.invalidBefore
 		txt := ralign(strconv.Itoa(nLine+1), width)

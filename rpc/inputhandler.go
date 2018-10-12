@@ -135,3 +135,11 @@ func (ih *InputHandler) MoveLineUp() {
 func (ih *InputHandler) MoveLineDown() {
 
 }
+func (ih *InputHandler) Close() {
+	ih.C.Notify(&Request{
+		Method: "close_view",
+		Params: Object{
+			"view_id": ih.ViewID,
+		},
+	})
+}

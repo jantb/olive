@@ -176,10 +176,13 @@ func (e *Editor) Start() {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyCtrlQ:
+					for _, view := range e.Views {
+						view.Close()
+					}
 					close(quit)
 				}
 			case *tcell.EventResize:
-				e.screen.Sync()
+				e.redraws <- struct{}{}
 			}
 
 			e.handleEvent(event)
