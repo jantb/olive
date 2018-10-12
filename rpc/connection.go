@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -70,12 +71,27 @@ func NewConnection(rw io.ReadWriter) *Connection {
 }
 
 func (c *Connection) recv() {
-	in := bufio.NewScanner(c.rw)
-
-	for in.Scan() {
-		log.Printf("<<< %s\n", in.Text())
+	var buffer bytes.Buffer
+	reader := bufio.NewReader(c.rw)
+	for {
+		line, pre, err := reader.ReadLine()
+		buffer.Write(line)
+		for pre {
+			lineNext, p, err := reader.ReadLine()
+			pre = p
+			if err != nil && err == io.EOF {
+				break
+			}
+			buffer.Write(lineNext)
+		}
+		line = buffer.Bytes()
+		buffer.Reset()
+		if err != nil && err == io.EOF {
+			break
+		}
+		log.Printf("<<< %s\n", string(line))
 		var msg incomingMessage
-		json.Unmarshal([]byte(in.Text()), &msg)
+		json.Unmarshal(line, &msg)
 
 		if msg.Id != 0 {
 			if msg.Result != nil {
@@ -109,10 +125,6 @@ func (c *Connection) recv() {
 				log.Println("unhandled request: " + msg.Method)
 			}
 		}
-	}
-
-	if in.Err() != nil {
-		log.Printf("error: %s", in.Err())
 	}
 }
 
