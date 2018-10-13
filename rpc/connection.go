@@ -75,6 +75,9 @@ func (c *Connection) recv() {
 	reader := bufio.NewReader(c.rw)
 	for {
 		line, pre, err := reader.ReadLine()
+		if err != nil && err == io.EOF {
+			break
+		}
 		buffer.Write(line)
 		for pre {
 			lineNext, p, err := reader.ReadLine()
@@ -86,9 +89,6 @@ func (c *Connection) recv() {
 		}
 		line = buffer.Bytes()
 		buffer.Reset()
-		if err != nil && err == io.EOF {
-			break
-		}
 		log.Printf("<<< %s\n", string(line))
 		var msg incomingMessage
 		json.Unmarshal(line, &msg)
