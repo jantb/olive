@@ -1,4 +1,4 @@
-package editor
+package xi
 
 import (
 	"github.com/jantb/olive/rpc"
@@ -14,6 +14,22 @@ func NewLineCache() *LineCache {
 	return &LineCache{
 		lines: make([]*Line, 0, 1000),
 	}
+}
+
+func (lc LineCache) InvalidBefore() int {
+	return lc.invalidBefore
+}
+
+func (lc LineCache) TotalLength() int {
+	return lc.invalidBefore + len(lc.lines) + lc.invalidAfter
+}
+
+func (lc LineCache) Length() int {
+	return lc.invalidBefore + len(lc.lines) + lc.invalidAfter
+}
+
+func (lc LineCache) Lines() []*Line {
+	return lc.lines
 }
 
 func (lc *LineCache) addInvalid(newLines []*Line, newInvalidBefore *int, newInvalidAfter *int, n int) {

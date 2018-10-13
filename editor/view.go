@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"github.com/jantb/olive/xi"
 	"log"
 	"strconv"
 
@@ -12,14 +13,14 @@ import (
 const tabSize = 4
 
 type View struct {
-	*LineCache
+	*xi.LineCache
 	*rpc.InputHandler
 
 	ID         string
 	view       *Viewport
 	gutter     *Viewport
 	statusline *Viewport
-	xi         *rpc.Connection
+	con        *rpc.Connection
 	ViewID     string
 	lineStart  int
 	lineEnd    int
@@ -36,14 +37,14 @@ func ralign(str string, width int) string {
 	return res
 }
 
-func NewView(path string, vp *Viewport, xi *rpc.Connection) (*View, error) {
+func NewView(path string, vp *Viewport, con *rpc.Connection) (*View, error) {
 	view := &View{}
 	view.view = NewViewport(vp, 3, 0)
 	view.gutter = NewViewport(vp, 0, 0)
-	view.xi = xi
-	view.LineCache = NewLineCache()
+	view.con = con
+	view.LineCache = xi.NewLineCache()
 
-	msg, err := xi.Request(&rpc.Request{
+	msg, err := con.Request(&rpc.Request{
 		Method: "new_view",
 		Params: &rpc.Object{"file_path": path},
 	})
@@ -52,11 +53,11 @@ func NewView(path string, vp *Viewport, xi *rpc.Connection) (*View, error) {
 	}
 
 	view.ID = msg.Value.(string)
-	view.InputHandler = &rpc.InputHandler{view.ID, path, xi}
+	view.InputHandler = &rpc.InputHandler{view.ID, path, con}
 
 	// Set scroll window size
 	_, height := vp.Size()
-	xi.Notify(&rpc.Request{
+	con.Notify(&rpc.Request{
 		Method: "edit",
 		Params: &rpc.Object{
 			"method":  "scroll",
@@ -69,18 +70,18 @@ func NewView(path string, vp *Viewport, xi *rpc.Connection) (*View, error) {
 }
 
 func (v *View) Draw() {
-	if len(v.lines) == 0 {
+	if v.LineCache.TotalLength() == 0 {
 		return
 	}
 
 	style := defaultStyle.Foreground(tcell.ColorLightCyan)
-	width := len(strconv.Itoa(len(v.lines) + v.LineCache.invalidBefore))
+	width := len(strconv.Itoa(v.LineCache.TotalLength()))
 
 	v.gutter.SetWidth(width + 1)
 	v.view.SetOffsetX(width + 2)
 
-	for i := 0; i < len(v.lines); i++ {
-		nLine := i + v.invalidBefore
+	for i := 0; i < v.LineCache.Length(); i++ {
+		nLine := i + v.LineCache.InvalidBefore()
 		txt := ralign(strconv.Itoa(nLine+1), width)
 		width := len(txt)
 		for x := 0; x < width; x++ {
@@ -88,11 +89,11 @@ func (v *View) Draw() {
 		}
 	}
 
-	for y, line := range v.lines {
+	for y, line := range v.LineCache.Lines() {
 		if line == nil {
 			continue
 		}
-		nLine := y + v.invalidBefore
+		nLine := y + v.LineCache.InvalidBefore()
 		visualX := 0
 		for x, char := range []rune(line.Text) {
 			var style = defaultStyle

@@ -1,4 +1,4 @@
-package editor
+package xi
 
 type Line struct {
 	Text     string
