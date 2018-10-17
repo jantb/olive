@@ -1,11 +1,13 @@
 package rpc
 
-import "github.com/linde12/kod/rpc"
+import (
+	"github.com/linde12/kod/rpc"
+)
 
 type InputHandler struct {
 	ViewID   string
 	FilePath string
-	C        *Connection
+	Xi       *Connection
 }
 
 func (ih *InputHandler) edit(params Object) {
@@ -14,7 +16,7 @@ func (ih *InputHandler) edit(params Object) {
 		params["params"] = &rpc.Object{}
 	}
 
-	ih.C.Notify(&Request{
+	ih.Xi.Notify(&Request{
 		Method: "edit",
 		Params: params,
 	})
@@ -25,7 +27,7 @@ func (ih *InputHandler) gesture(params Object) {
 		params["params"] = &rpc.Object{}
 	}
 
-	ih.C.Notify(&Request{
+	ih.Xi.Notify(&Request{
 		Method: "gesture",
 		Params: params,
 	})
@@ -94,7 +96,7 @@ func (ih *InputHandler) Newline() {
 }
 
 func (ih *InputHandler) Insert(char string) {
-	ih.C.Notify(&Request{
+	ih.Xi.Notify(&Request{
 		Method: "edit",
 		Params: Object{"method": "insert", "params": Object{"chars": char}, "view_id": ih.ViewID},
 	})
@@ -104,8 +106,12 @@ func (ih *InputHandler) Scroll(lineStart, lineEnd int) {
 	ih.edit(Object{"method": "scroll", "params": Array{lineStart, lineEnd}})
 }
 
+func (ih *InputHandler) Resize(width, height int) {
+	ih.edit(Object{"method": "resize", "params": Object{"width": width, "height": height}})
+}
+
 func (ih *InputHandler) Save() {
-	ih.C.Notify(&Request{
+	ih.Xi.Notify(&Request{
 		Method: "save",
 		Params: Object{
 			"view_id":   ih.ViewID,
@@ -133,10 +139,14 @@ func (ih *InputHandler) MoveLineDown() {
 
 }
 func (ih *InputHandler) Close() {
-	ih.C.Notify(&Request{
+	ih.Xi.Notify(&Request{
 		Method: "close_view",
 		Params: Object{
 			"view_id": ih.ViewID,
 		},
 	})
+}
+
+func (ih *InputHandler) AddCursor(x, y int) {
+	ih.edit(Object{"method": "gesture", "params": Object{"line": y, "col": x, "ty": "toggle_sel"}})
 }

@@ -18,3 +18,6 @@ Then install olive
 > olive filename.go
 ```
 
+# Shortcuts:
+CTRL-S Save file
+CTRL-C Quit
