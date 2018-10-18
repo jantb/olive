@@ -119,7 +119,11 @@ func (m *View) getContent(screen tcell.Screen, x int, y int) Block {
 }
 
 func (m *View) MakeVisible(x, y int) {
-	x = GetCursorVisualX(x, m.dataView[m.curViewID].Lines()[y].Text)
+	lines := m.dataView[m.curViewID].Lines()
+	if len(lines) <= y {
+		return
+	}
+	x = GetCursorVisualX(x, lines[y].Text)
 	_, _, width, height := m.Box.GetInnerRect()
 
 	if y >= m.offy+height {
@@ -207,6 +211,18 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 					dataview.SelectAll()
 					src := dataview.Copy()
 					dataview.Insert(goPlugin.Format(src))
+					dataview.CancelOperation()
+				} else if m.footer.language == "XML" {
+					dataview.CancelOperation()
+					dataview.SelectAll()
+					src := dataview.Copy()
+					dataview.Insert(goPlugin.FormatXml(src))
+					dataview.CancelOperation()
+				} else if m.footer.language == "JSON" {
+					dataview.CancelOperation()
+					dataview.SelectAll()
+					src := dataview.Copy()
+					dataview.Insert(goPlugin.FormatJson(src))
 					dataview.CancelOperation()
 				}
 

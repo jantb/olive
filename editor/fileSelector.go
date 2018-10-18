@@ -4,18 +4,18 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
 
 func isDir(name string) bool {
-	fi, err := os.Stat(name)
-	if err != nil {
-		log.Fatal(err)
-		return false
+	if fi, err := os.Stat(name); !os.IsNotExist(err) {
+		return fi.IsDir()
 	}
-	return fi.IsDir()
+	if _, err := os.Stat(name); os.IsNotExist(err) {
+		os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
+	}
+	return false
 }
 
 func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
