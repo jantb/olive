@@ -41,6 +41,9 @@ func (m *View) Draw(screen tcell.Screen) {
 	}
 	lines := dataview.Lines()
 	m.Lines = [][]Block{}
+	if len(lines) < m.offy {
+		return
+	}
 	for y, line := range lines[m.offy:] {
 		var blocks []Block
 		m.Lines = append(m.Lines, blocks)
