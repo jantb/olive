@@ -12,6 +12,7 @@ type MainView struct {
 	Lines    [][]Block
 	*tview.Box
 	*Edit
+	offy, offx int
 }
 
 type Block struct {
@@ -21,10 +22,11 @@ type Block struct {
 
 // NewMainView returns a new main view primitive.
 func NewMainView() *MainView {
-	return &MainView{
+	view := MainView{
 		Box:   tview.NewBox().SetBorder(true),
 		Lines: [][]Block{},
 	}
+	return &view
 }
 
 // Draw draws this primitive onto the screen.
@@ -37,7 +39,7 @@ func (m *MainView) Draw(screen tcell.Screen) {
 	}
 	lines := dataview.Lines()
 	m.Lines = [][]Block{}
-	for y, line := range lines {
+	for y, line := range lines[m.offy:] {
 		var blocks []Block
 		m.Lines = append(m.Lines, blocks)
 		for x, r := range line.Text {
@@ -57,7 +59,7 @@ func (m *MainView) Draw(screen tcell.Screen) {
 	}
 
 	// Draw cursors
-	for y, line := range lines {
+	for y, line := range lines[m.offy:] {
 		for _, cursor := range line.Cursors {
 			content := m.getContent(screen, cursor, y)
 			content.Style = content.Style.Reverse(true)
@@ -69,7 +71,7 @@ func (m *MainView) Draw(screen tcell.Screen) {
 func (m *MainView) draw(screen tcell.Screen, x int, y int, b Block) {
 
 	xMin, yMin, width, height := m.Box.GetInnerRect()
-	x = xMin + x
+	x = xMin + x - m.offx
 	y = yMin + y
 
 	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
@@ -81,7 +83,7 @@ func (m *MainView) draw(screen tcell.Screen, x int, y int, b Block) {
 func (m *MainView) getContent(screen tcell.Screen, x int, y int) Block {
 
 	xMin, yMin, width, height := m.Box.GetInnerRect()
-	x = xMin + x
+	x = xMin + x - m.offx
 	y = yMin + y
 
 	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
@@ -89,6 +91,25 @@ func (m *MainView) getContent(screen tcell.Screen, x int, y int) Block {
 	}
 	mainc, _, style, _ := screen.GetContent(x, y)
 	return Block{Rune: mainc, Style: style}
+}
+
+func (m *MainView) MakeVisible(x, y int) {
+	_, _, width, height := m.Box.GetInnerRect()
+	log.Println(y, m.offy+height, y >= m.offy+height)
+	if y >= m.offy+height {
+		m.offy = y - (height - 1)
+	}
+
+	if y >= 0 && y < m.offy {
+		m.offy = y
+	}
+
+	if x >= m.offx+width {
+		m.offx = x - (width - 1)
+	}
+	if x >= 0 && x < m.offx {
+		m.offx = x
+	}
 }
 
 // InputHandler returns the handler for this primitive.

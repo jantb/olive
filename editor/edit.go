@@ -142,17 +142,17 @@ func (e *Edit) handleRequests() {
 				defaultStyle = defaultStyle.Background(bg)
 				fg := tcell.NewRGBColor(theme.Fg.ToRGB())
 				defaultStyle = defaultStyle.Foreground(fg)
-
-				//	e.screen.SetStyle(defaultStyle)
+				e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+					screen.SetStyle(defaultStyle)
+					return false
+				})
 
 				log.Printf("Theme:%v", theme)
 			}
 		case *rpc.ScrollTo:
 			e.updates <- func() {
-				log.Println("scroll to")
-				//scrollTo := msg.Value.(*rpc.ScrollTo)
-				//e.Views[scrollTo.ViewID].MakeLineVisible(scrollTo.Line, scrollTo.Col)
-				//e.Views[scrollTo.ViewID].view.ShowCursor(scrollTo.Col, scrollTo.Line)
+				scrollTo := msg.Value.(*rpc.ScrollTo)
+				e.main.MakeVisible(scrollTo.Col, scrollTo.Line)
 			}
 		}
 

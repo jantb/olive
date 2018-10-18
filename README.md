@@ -21,3 +21,4 @@ Then install olive
 # Shortcuts:
 CTRL-S Save file
 CTRL-C Quit
+CTRL-Q Save file and close view
