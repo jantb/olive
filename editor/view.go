@@ -3,6 +3,7 @@ package editor
 import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
+	"github.com/jantb/olive/goPlugin"
 	"github.com/rivo/tview"
 	"log"
 )
@@ -178,6 +179,10 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			switch event.Key() {
 			case tcell.KeyRune:
 				dataview.Insert(string(event.Rune()))
+			case tcell.KeyPgUp:
+				dataview.ScrollPageUpAndModifySelection()
+			case tcell.KeyPgDn:
+				dataview.ScrollPageDownAndModifySelection()
 			}
 			switch event.Name() {
 			case "Shift+Right":
@@ -197,7 +202,14 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			case "Alt+Ctrl+Z":
 				dataview.Redo()
 			case "Alt+Ctrl+L":
-				dataview.AddSelectionAbove()
+				if m.footer.language == "Go" {
+					dataview.CancelOperation()
+					dataview.SelectAll()
+					src := dataview.Copy()
+					dataview.Insert(goPlugin.Format(src))
+					dataview.CancelOperation()
+				}
+
 			}
 		}
 		if ctrl && !alt && !shift {
@@ -236,6 +248,8 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				m.focusFileselector()
 			case "Alt+Rune[c]":
 				clipboard.WriteAll(dataview.Copy())
+			case "Alt+Rune[x]":
+				clipboard.WriteAll(dataview.Cut())
 			case "Alt+Rune[v]":
 				s, e := clipboard.ReadAll()
 				if e != nil {

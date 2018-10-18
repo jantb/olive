@@ -88,6 +88,14 @@ func (ih *InputHandler) ScrollPageDown() {
 	ih.edit(Object{"method": "scroll_page_down"})
 }
 
+func (ih *InputHandler) ScrollPageUpAndModifySelection() {
+	ih.edit(Object{"method": "scroll_page_up_and_modify_selection"})
+}
+
+func (ih *InputHandler) ScrollPageDownAndModifySelection() {
+	ih.edit(Object{"method": "scroll_page_down_and_modify_selection"})
+}
+
 func (ih *InputHandler) MoveWordLeft() {
 	ih.edit(Object{"method": "move_word_left"})
 }
@@ -110,6 +118,14 @@ func (ih *InputHandler) Undo() {
 
 func (ih *InputHandler) Redo() {
 	ih.edit(Object{"method": "redo"})
+}
+
+func (ih *InputHandler) Transpose() {
+	ih.edit(Object{"method": "transpose"})
+}
+
+func (ih *InputHandler) Yank() {
+	ih.edit(Object{"method": "yank"})
 }
 func (ih *InputHandler) GoToLine(line int) {
 	ih.edit(Object{"method": "goto_line", "params": Object{"line": line}})
@@ -188,6 +204,20 @@ func (ih *InputHandler) Copy() string {
 	msg, err := ih.Xi.Request(&Request{
 		Method: "edit",
 		Params: Object{"method": "copy", "view_id": ih.ViewID},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return msg.Value.(string)
+}
+
+func (ih *InputHandler) Cut() string {
+
+	msg, err := ih.Xi.Request(&Request{
+		Method: "edit",
+		Params: Object{"method": "cut", "view_id": ih.ViewID},
 	})
 
 	if err != nil {
