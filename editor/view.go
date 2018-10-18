@@ -144,7 +144,6 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		ctrl := event.Modifiers()&tcell.ModCtrl != 0
 		alt := event.Modifiers()&tcell.ModAlt != 0
 		shift := event.Modifiers()&tcell.ModShift != 0
-		log.Println(shift)
 		if !ctrl && !alt && !shift {
 			switch event.Key() {
 			case tcell.KeyUp:
@@ -177,8 +176,6 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			switch event.Key() {
 			case tcell.KeyRune:
 				dataview.Insert(string(event.Rune()))
-			default:
-				log.Println(event.Name())
 			}
 			switch event.Name() {
 			case "Shift+Right":
@@ -191,7 +188,6 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.MoveDownAndModifySelection()
 			default:
 				log.Println(event.Name())
-
 			}
 		}
 		if ctrl && alt {
@@ -228,6 +224,15 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			switch event.Name() {
 			case "Alt+Rune[0]":
 				m.focusFileselector()
+			case "Alt+Rune[c]":
+				clipboard.WriteAll(dataview.Copy())
+			case "Alt+Rune[v]":
+				s, e := clipboard.ReadAll()
+				if e != nil {
+					log.Println(e)
+					return
+				}
+				dataview.Insert(s)
 			default:
 				log.Println(event.Name())
 			}
@@ -240,6 +245,5 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			}
 		}
 		log.Println(event.Name())
-		//dataview.Save()
 	})
 }

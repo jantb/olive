@@ -20,7 +20,9 @@ Then install olive
 
 # Shortcuts:
 Ctrl-z undo
+Alt-c copy
+Alt-v paste
 Ctrl-Alt-z redo
-CTRL-S Save file
-CTRL-C Quit
-CTRL-Q Save file and close view
+Ctrl-s Save file
+Ctrl-c Quit
+Ctrl-q Save file and close view

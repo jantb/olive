@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/linde12/kod/rpc"
+	"log"
 )
 
 type InputHandler struct {
@@ -165,4 +166,18 @@ func (ih *InputHandler) Close() {
 
 func (ih *InputHandler) AddCursor(x, y int) {
 	ih.edit(Object{"method": "gesture", "params": Object{"line": y, "col": x, "ty": "toggle_sel"}})
+}
+
+func (ih *InputHandler) Copy() string {
+
+	msg, err := ih.Xi.Request(&Request{
+		Method: "edit",
+		Params: Object{"method": "copy", "view_id": ih.ViewID},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return msg.Value.(string)
 }
