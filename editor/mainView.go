@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"log"
@@ -155,6 +156,15 @@ func (m *MainView) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 				dataview.Close()
 				m.curViewID = ""
 				m.focusFileselector()
+			case tcell.KeyCtrlD:
+				dataview.DuplicateLine()
+			case tcell.KeyCtrlV:
+				s, e := clipboard.ReadAll()
+				if e != nil {
+					log.Println(e)
+					return
+				}
+				dataview.Insert(s)
 			default:
 				log.Println(event.Name())
 			}
@@ -174,6 +184,7 @@ func (m *MainView) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 				log.Println(event.Name())
 			}
 		}
+		log.Println(event.Name())
 		//dataview.Save()
 	})
 }
