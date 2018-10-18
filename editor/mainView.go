@@ -62,9 +62,10 @@ func (m *MainView) Draw(screen tcell.Screen) {
 	// Draw cursors
 	for y, line := range lines[m.offy:] {
 		for _, cursor := range line.Cursors {
+			x := GetCursorVisualX(cursor, line.Text)
 			content := m.getContent(screen, cursor, y)
 			content.Style = content.Style.Reverse(true)
-			m.draw(screen, cursor, y, content)
+			m.draw(screen, x, y, content)
 		}
 	}
 }
