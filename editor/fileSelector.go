@@ -60,7 +60,6 @@ func (e *Edit) newFileselector(rootDir string) *tview.TreeView {
 			} else {
 				e.OpenFile(path)
 				e.focusMain()
-
 			}
 		} else {
 			// Collapse if visible, expand if collapsed.

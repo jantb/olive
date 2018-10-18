@@ -8,12 +8,17 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 type Edit struct {
 	grid         *tview.Grid
 	fileSelector *tview.TreeView
 	main         *MainView
+	headerTree   *tview.TextView
+	header       *tview.TextView
+	footerTree   *FooterTree
+	footer       *Footer
 
 	Views       map[string]*View
 	curViewID   string
@@ -66,6 +71,7 @@ func (e *Edit) OpenFile(path string) {
 		Method: "new_view",
 		Params: &rpc.Object{"file_path": path},
 	})
+	e.header.SetText(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,12 +88,6 @@ func (e *Edit) OpenFile(path string) {
 
 func (e *Edit) Init() {
 
-	newPrimitive := func(text string) tview.Primitive {
-		return tview.NewTextView().
-			SetTextAlign(tview.AlignLeft).
-			SetText(text)
-	}
-
 	path := "."
 	if len(os.Args) > 1 {
 		path = os.Args[1]
@@ -98,16 +98,24 @@ func (e *Edit) Init() {
 	e.main = NewMainView()
 	e.main.Edit = e
 	e.main.dataView = map[string]*Dataview{}
+	e.headerTree = tview.NewTextView().
+		SetTextAlign(tview.AlignLeft)
+	e.header = tview.NewTextView().
+		SetTextAlign(tview.AlignLeft)
+	e.footerTree = e.NewFooterTree()
+	e.footer = e.NewFooter()
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
 		SetColumns(30, 0).
 		SetBorders(false).
-		AddItem(newPrimitive("Header"), 0, 0, 1, 3, 0, 0, false).
-		AddItem(newPrimitive("Footer"), 2, 0, 1, 3, 0, 0, false)
+		AddItem(e.headerTree, 0, 0, 1, 1, 0, 0, false).
+		AddItem(e.header, 0, 1, 1, 1, 0, 0, false).
+		AddItem(e.footerTree, 2, 0, 1, 1, 0, 0, false).
+		AddItem(e.footer, 2, 1, 1, 1, 0, 0, false)
 
 	// Layout for screens narrower than 100 cells (fileSelector and side bar are hidden).
 	grid.AddItem(e.fileSelector, 1, 0, 1, 1, 0, 0, true).
-		AddItem(e.main, 1, 1, 1, 3, 0, 0, false)
+		AddItem(e.main, 1, 1, 1, 1, 0, 0, false)
 
 	e.grid = grid
 }
@@ -115,6 +123,18 @@ func (e *Edit) Init() {
 func (e *Edit) Start() {
 	e.Init()
 	e.application = tview.NewApplication()
+	path := "."
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	}
+	if !isDir(path) {
+		// Todo hack
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			e.OpenFile(path)
+			e.focusMain()
+		}()
+	}
 	if err := e.application.SetRoot(e.grid, true).Run(); err != nil {
 		panic(err)
 	}
@@ -128,7 +148,12 @@ func (e *Edit) handleRequests() {
 			e.updates <- func() {
 				update := msg.Value.(*rpc.Update)
 				dataView := e.main.dataView[update.ViewID]
+				for dataView == nil {
+					dataView = e.main.dataView[update.ViewID]
+					time.Sleep(100 * time.Millisecond)
+				}
 				dataView.ApplyUpdate(msg.Value.(*rpc.Update))
+				e.footer.totalLines = dataView.Length()
 			}
 		case *rpc.DefineStyle:
 			e.updates <- func() {
@@ -143,6 +168,11 @@ func (e *Edit) handleRequests() {
 				defaultStyle = defaultStyle.Background(bg)
 				fg := tcell.NewRGBColor(e.theme.Fg.ToRGB())
 				defaultStyle = defaultStyle.Foreground(fg)
+
+				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
+				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
+				e.header.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
+
 				e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 					screen.SetStyle(defaultStyle)
 					return false
@@ -152,6 +182,8 @@ func (e *Edit) handleRequests() {
 			e.updates <- func() {
 				scrollTo := msg.Value.(*rpc.ScrollTo)
 				e.main.MakeVisible(scrollTo.Col, scrollTo.Line)
+				e.footer.cursorX = scrollTo.Col
+				e.footer.cursorY = scrollTo.Line
 			}
 		}
 

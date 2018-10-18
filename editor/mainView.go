@@ -24,7 +24,7 @@ type Block struct {
 // NewMainView returns a new main view primitive.
 func NewMainView() *MainView {
 	view := MainView{
-		Box:   tview.NewBox().SetBorder(true),
+		Box:   tview.NewBox().SetBorder(false),
 		Lines: [][]Block{},
 	}
 	return &view
@@ -71,6 +71,9 @@ func (m *MainView) Draw(screen tcell.Screen) {
 		for x, block := range line {
 			if block.Rune == '\t' {
 				m.draw(screen, x, y, block)
+				m.draw(screen, x+1, y, block)
+				m.draw(screen, x+2, y, block)
+				m.draw(screen, x+3, y, block)
 				offX += 3
 				continue
 			}

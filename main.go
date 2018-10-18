@@ -42,9 +42,6 @@ func main() {
 	log.SetOutput(f)
 
 	rw := readwriter{stdout, stdin}
-	//editor.NewEditor(rw, configDir)
-	//e.Start()
-	edit := editor.NewEdit(rw, configDir)
-	edit.Start()
-
+	editor := editor.NewEdit(rw, configDir)
+	editor.Start()
 }
