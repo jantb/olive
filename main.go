@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/jantb/olive/editor"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/jantb/olive/editor"
 )
 
 type readwriter struct {
