@@ -146,8 +146,6 @@ func (e *Edit) handleRequests() {
 					screen.SetStyle(defaultStyle)
 					return false
 				})
-
-				log.Printf("Theme:%v", theme)
 			}
 		case *rpc.ScrollTo:
 			e.updates <- func() {

@@ -46,6 +46,7 @@ func (m *MainView) Draw(screen tcell.Screen) {
 		for x, r := range line.Text {
 			var style = defaultStyle
 			if line.StyleIds[x] >= 2 {
+
 				fg, _, _ := styles[line.StyleIds[x]].Decompose()
 				style = style.Foreground(fg)
 			}
@@ -97,7 +98,7 @@ func (m *MainView) getContent(screen tcell.Screen, x int, y int) Block {
 
 func (m *MainView) MakeVisible(x, y int) {
 	_, _, width, height := m.Box.GetInnerRect()
-	log.Println(y, m.offy+height, y >= m.offy+height)
+
 	if y >= m.offy+height {
 		m.offy = y - (height - 1)
 	}
@@ -120,7 +121,9 @@ func (m *MainView) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 		dataview := m.dataView[m.curViewID]
 		ctrl := event.Modifiers()&tcell.ModCtrl != 0
 		alt := event.Modifiers()&tcell.ModAlt != 0
-		if !ctrl && !alt {
+		shift := event.Modifiers()&tcell.ModShift != 0
+		log.Println(shift)
+		if !ctrl && !alt && !shift {
 			switch event.Key() {
 			case tcell.KeyUp:
 				dataview.MoveUp()
@@ -146,6 +149,27 @@ func (m *MainView) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 				dataview.ScrollPageDown()
 			default:
 				log.Println(event.Name())
+			}
+		}
+		if !ctrl && !alt && shift {
+			switch event.Key() {
+			case tcell.KeyRune:
+				dataview.Insert(string(event.Rune()))
+			default:
+				log.Println(event.Name())
+			}
+			switch event.Name() {
+			case "Shift+Right":
+				dataview.MoveRightAndModifySelection()
+			case "Shift+Left":
+				dataview.MoveLeftAndModifySelection()
+			case "Shift+Up":
+				dataview.MoveUpAndModifySelection()
+			case "Shift+Down":
+				dataview.MoveDownAndModifySelection()
+			default:
+				log.Println(event.Name())
+
 			}
 		}
 		if ctrl && !alt {

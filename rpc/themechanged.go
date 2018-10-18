@@ -24,6 +24,11 @@ type Theme struct {
 	BracketContentsFg *RGBA `json:"bracket_contents_foreground"`
 	BracketsFg        *RGBA `json:"brackets_foreground"`
 	Caret             *RGBA `json:"caret"`
+	Gutter            *RGBA `json:"gutter"`
+	LineHightlight    *RGBA `json:"line_highlight"`
+	Misspelling       *RGBA `json:"misspelling"`
+	Selection         *RGBA `json:"selection"`
+	SelectionBorder   *RGBA `json:"selection_border"`
 	// TODO: Add all and document
 }
 

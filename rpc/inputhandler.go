@@ -36,16 +36,32 @@ func (ih *InputHandler) MoveLeft() {
 	ih.edit(Object{"method": "move_left"})
 }
 
+func (ih *InputHandler) MoveLeftAndModifySelection() {
+	ih.edit(Object{"method": "move_left_and_modify_selection"})
+}
+
 func (ih *InputHandler) MoveRight() {
 	ih.edit(Object{"method": "move_right"})
+}
+
+func (ih *InputHandler) MoveRightAndModifySelection() {
+	ih.edit(Object{"method": "move_right_and_modify_selection"})
 }
 
 func (ih *InputHandler) MoveUp() {
 	ih.edit(Object{"method": "move_up"})
 }
 
+func (ih *InputHandler) MoveUpAndModifySelection() {
+	ih.edit(Object{"method": "move_up_and_modify_selection"})
+}
+
 func (ih *InputHandler) MoveDown() {
 	ih.edit(Object{"method": "move_down"})
+}
+
+func (ih *InputHandler) MoveDownAndModifySelection() {
+	ih.edit(Object{"method": "move_down_and_modify_selection"})
 }
 
 func (ih *InputHandler) ScrollPageUp() {
