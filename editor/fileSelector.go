@@ -18,7 +18,7 @@ func isDir(name string) bool {
 	return fi.IsDir()
 }
 
-func (e *Edit) newFileselector(rootDir string) *tview.TreeView {
+func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 	if !isDir(rootDir) {
 		rootDir = "."
 	}

@@ -1,219 +1,237 @@
 package editor
 
 import (
-	"github.com/jantb/olive/xi"
-	"log"
-	"strconv"
-
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
-	"github.com/jantb/olive/rpc"
+	"github.com/rivo/tview"
+	"log"
 )
 
-const tabSize = 4
-
+// View implements the main editor view.
 type View struct {
-	*xi.LineCache
-	*rpc.InputHandler
-
-	ID         string
-	view       *Viewport
-	gutter     *Viewport
-	statusline *Viewport
-	con        *rpc.Connection
-	ViewID     string
-	lineStart  int
-	lineEnd    int
+	dataView map[string]*Dataview
+	Lines    [][]Block
+	*tview.Box
+	*Editor
+	offy, offx int
 }
 
-func ralign(str string, width int) string {
-	diff := width - len(str)
-	res := ""
-	for i := 0; i < diff; i++ {
-		res += " "
+type Block struct {
+	Rune  rune
+	Style tcell.Style
+}
+
+// NewView returns a new main view primitive.
+func NewView() *View {
+	view := View{
+		Box:   tview.NewBox().SetBorder(false),
+		Lines: [][]Block{},
 	}
-
-	res += str
-	return res
+	return &view
 }
 
-func NewView(path string, vp *Viewport, con *rpc.Connection) (*View, error) {
-	view := &View{}
-	view.view = NewViewport(vp, 3, 0)
-	view.gutter = NewViewport(vp, 0, 0)
-	view.con = con
-	view.LineCache = xi.NewLineCache()
-
-	msg, err := con.Request(&rpc.Request{
-		Method: "new_view",
-		Params: &rpc.Object{"file_path": path},
-	})
-	if err != nil {
-		return view, err
-	}
-
-	view.ID = msg.Value.(string)
-	view.InputHandler = &rpc.InputHandler{view.ID, path, con}
-
-	// Set scroll window size
-	_, height := vp.Size()
-	con.Notify(&rpc.Request{
-		Method: "edit",
-		Params: &rpc.Object{
-			"method":  "scroll",
-			"params":  &rpc.Array{0, height - 2},
-			"view_id": view.ID,
-		},
-	})
-
-	return view, nil
-}
-
-func (v *View) Draw() {
-	if v.LineCache.TotalLength() == 0 {
+// Draw draws this primitive onto the screen.
+func (m *View) Draw(screen tcell.Screen) {
+	_, bg, _ := defaultStyle.Decompose()
+	m.Box.SetBackgroundColor(bg).Draw(screen)
+	dataview := m.dataView[m.curViewID]
+	if dataview == nil {
 		return
 	}
-
-	style := defaultStyle.Foreground(tcell.ColorLightCyan)
-	width := len(strconv.Itoa(v.LineCache.TotalLength()))
-
-	v.gutter.SetWidth(width + 1)
-	v.view.SetOffsetX(width + 2)
-
-	for i := 0; i < v.LineCache.Length(); i++ {
-		nLine := i + v.LineCache.InvalidBefore()
-		txt := ralign(strconv.Itoa(nLine+1), width)
-		width := len(txt)
-		for x := 0; x < width; x++ {
-			v.gutter.SetContent(1+x, nLine, rune(txt[x]), nil, style)
-		}
-	}
-
-	for y, line := range v.LineCache.Lines() {
-		if line == nil {
-			continue
-		}
-		nLine := y + v.LineCache.InvalidBefore()
-		visualX := 0
-		for _, char := range []rune(line.Text) {
+	lines := dataview.Lines()
+	m.Lines = [][]Block{}
+	for y, line := range lines[m.offy:] {
+		var blocks []Block
+		m.Lines = append(m.Lines, blocks)
+		for x, r := range line.Text {
 			var style = defaultStyle
-			//if line.StyleIds[x] >= 2 {
-			//	fg, _, _ := styles[line.StyleIds[x]].Decompose()
-			//	style = style.Foreground(fg)
-			//}
-
-			if char == '\t' {
-				ts := tabSize - (visualX % tabSize)
-				for i := 0; i < ts; i++ {
-					v.view.SetContent(visualX+i, nLine, ' ', nil, style)
-				}
-				visualX += ts
-			} else if char != '\n' {
-				v.view.SetContent(visualX, nLine, char, nil, style)
-				visualX++
-			}
-		}
-		if len(line.Cursors) != 0 {
-			cX := GetCursorVisualX(line.Cursors[0], line.Text)
-			v.view.ShowCursor(cX, nLine)
-		}
-	}
-	lineStart, lineEnd := v.view.GetViewport()
-	if lineStart != v.lineStart || lineEnd != v.lineEnd {
-		v.Scroll(lineStart, lineEnd)
-		v.lineStart = lineStart
-		v.lineEnd = lineEnd
-	}
-}
-
-func (v *View) MakeLineVisible(line, x int) {
-	v.view.MakeVisibleY(line)
-	v.view.MakeVisibleX(x)
-	v.gutter.MakeVisibleY(line)
-}
-
-// HandleEvent handles tcell events
-func (v *View) HandleEvent(ev tcell.Event) {
-	switch e := ev.(type) {
-	case *tcell.EventMouse:
-		x, y := e.Position()
-		buttons := e.Buttons()
-		if buttons&tcell.WheelUp != 0 {
-			v.Scroll(v.lineStart-1, v.lineEnd-1)
-		}
-		if buttons&tcell.WheelDown != 0 {
-			v.Scroll(v.lineStart+1, v.lineEnd+1)
-		}
-		switch e.Buttons() {
-		case tcell.Button1:
-			v.Click(x-v.gutter.width-1, y+v.view.viewy, 0, 1)
-		}
-	case *tcell.EventKey:
-		ctrl := e.Modifiers()&tcell.ModCtrl != 0
-		alt := e.Modifiers()&tcell.ModAlt != 0
-		if e.Key() == tcell.KeyRune && !ctrl && !alt {
-			v.Insert(string(e.Rune()))
-		} else {
-			if ctrl && alt {
-				switch e.Name() {
-				case "Alt+Ctrl+L":
-					//	log.Println(goPlugin.Format(path))
-					v.RequestLines(0, 10)
-					//v.GoToLine(46000)
-				default:
-				}
-			} else if ctrl && !alt {
-				switch e.Key() {
-				case tcell.KeyLeft:
-					v.MoveWordLeft()
-				case tcell.KeyRight:
-					v.MoveWordRight()
-				case tcell.KeyCtrlS:
-					v.Save()
-				case tcell.KeyCtrlZ:
-					v.Undo()
-				case tcell.KeyCtrlR:
-					v.Redo()
-				case tcell.KeyCtrlL:
-
-				case tcell.KeyCtrlD:
-					v.DuplicateLine()
-				case tcell.KeyCtrlV:
-					s, e := clipboard.ReadAll()
-					if e != nil {
-						log.Println(e)
-						break
+			if line.StyleIds[x] != nil {
+				for _, value := range line.StyleIds[x] {
+					s := styles[value]
+					if value == 0 {
+						s = s.Background(tcell.NewRGBColor(m.Editor.theme.Selection.ToRGB()))
 					}
-					v.Insert(s)
-				default:
-					log.Println(string(e.Name()))
-				}
-			} else {
-				switch e.Key() {
-				case tcell.KeyBackspace2, tcell.KeyBackspace:
-					v.DeleteBackward()
-				case tcell.KeyTAB:
-					v.Tab()
-				case tcell.KeyEnter:
-					v.Newline()
-				case tcell.KeyLeft:
-					v.MoveLeft()
-				case tcell.KeyUp:
-					v.MoveUp()
-				case tcell.KeyRight:
-					v.MoveRight()
-				case tcell.KeyDown:
-					v.MoveDown()
-				case tcell.KeyPgDn:
-					v.ScrollPageDown()
-				case tcell.KeyPgUp:
-					v.ScrollPageUp()
-				case tcell.KeyDelete:
-					v.DeleteForward()
-				default:
-					log.Println(string(e.Name()))
+
+					fg, bg, _ := s.Decompose()
+
+					if fg != tcell.ColorDefault {
+						style = style.Foreground(fg)
+					}
+					if bg != tcell.ColorDefault {
+						style = style.Background(bg)
+					}
 				}
 			}
+			m.Lines[y] = append(m.Lines[y], Block{Rune: r, Style: style})
 		}
 	}
+
+	for y, line := range m.Lines {
+		offX := 0
+		for x, block := range line {
+			if block.Rune == '\t' {
+				m.draw(screen, x, y, block)
+				m.draw(screen, x+1, y, block)
+				m.draw(screen, x+2, y, block)
+				m.draw(screen, x+3, y, block)
+				offX += 3
+				continue
+			}
+			m.draw(screen, x+offX, y, block)
+		}
+	}
+
+	// Draw cursors
+	for y, line := range lines[m.offy:] {
+		for _, cursor := range line.Cursors {
+			x := GetCursorVisualX(cursor, line.Text)
+			content := m.getContent(screen, x, y)
+			content.Style = content.Style.Reverse(true)
+			m.draw(screen, x, y, content)
+		}
+	}
+}
+
+func (m *View) draw(screen tcell.Screen, x int, y int, b Block) {
+
+	xMin, yMin, width, height := m.Box.GetInnerRect()
+	x = xMin + x - m.offx
+	y = yMin + y
+
+	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
+		return
+	}
+	screen.SetContent(x, y, b.Rune, nil, b.Style)
+}
+
+func (m *View) getContent(screen tcell.Screen, x int, y int) Block {
+
+	xMin, yMin, width, height := m.Box.GetInnerRect()
+	x = xMin + x - m.offx
+	y = yMin + y
+
+	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
+		return Block{}
+	}
+	mainc, _, style, _ := screen.GetContent(x, y)
+	return Block{Rune: mainc, Style: style}
+}
+
+func (m *View) MakeVisible(x, y int) {
+	x = GetCursorVisualX(x, m.dataView[m.curViewID].Lines()[y].Text)
+	_, _, width, height := m.Box.GetInnerRect()
+
+	if y >= m.offy+height {
+		m.offy = y - (height - 1)
+	}
+
+	if y >= 0 && y < m.offy {
+		m.offy = y
+	}
+
+	if x >= m.offx+width {
+		m.offx = x - (width - 1)
+	}
+	if x >= 0 && x < m.offx {
+		m.offx = x
+	}
+}
+
+// InputHandler returns the handler for this primitive.
+func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.Primitive)) {
+	return m.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p tview.Primitive)) {
+		dataview := m.dataView[m.curViewID]
+		ctrl := event.Modifiers()&tcell.ModCtrl != 0
+		alt := event.Modifiers()&tcell.ModAlt != 0
+		shift := event.Modifiers()&tcell.ModShift != 0
+		log.Println(shift)
+		if !ctrl && !alt && !shift {
+			switch event.Key() {
+			case tcell.KeyUp:
+				dataview.MoveUp()
+			case tcell.KeyDown:
+				dataview.MoveDown()
+			case tcell.KeyLeft:
+				dataview.MoveLeft()
+			case tcell.KeyEnter:
+				dataview.Newline()
+			case tcell.KeyRight:
+				dataview.MoveRight()
+			case tcell.KeyRune:
+				dataview.Insert(string(event.Rune()))
+			case tcell.KeyTab:
+				dataview.Tab()
+			case tcell.KeyBS:
+				dataview.DeleteForward()
+			case tcell.KeyDEL:
+				dataview.DeleteBackward()
+			case tcell.KeyPgUp:
+				dataview.ScrollPageUp()
+			case tcell.KeyPgDn:
+				dataview.ScrollPageDown()
+			default:
+				log.Println(event.Name())
+			}
+		}
+		if !ctrl && !alt && shift {
+			switch event.Key() {
+			case tcell.KeyRune:
+				dataview.Insert(string(event.Rune()))
+			default:
+				log.Println(event.Name())
+			}
+			switch event.Name() {
+			case "Shift+Right":
+				dataview.MoveRightAndModifySelection()
+			case "Shift+Left":
+				dataview.MoveLeftAndModifySelection()
+			case "Shift+Up":
+				dataview.MoveUpAndModifySelection()
+			case "Shift+Down":
+				dataview.MoveDownAndModifySelection()
+			default:
+				log.Println(event.Name())
+
+			}
+		}
+		if ctrl && !alt {
+			switch event.Key() {
+			case tcell.KeyCtrlS:
+				dataview.Save()
+			case tcell.KeyCtrlQ:
+				dataview.Save()
+				dataview.Close()
+				m.curViewID = ""
+				m.focusFileselector()
+			case tcell.KeyCtrlD:
+				dataview.DuplicateLine()
+			case tcell.KeyCtrlV:
+				s, e := clipboard.ReadAll()
+				if e != nil {
+					log.Println(e)
+					return
+				}
+				dataview.Insert(s)
+			default:
+				log.Println(event.Name())
+			}
+		}
+		if !ctrl && alt {
+			switch event.Name() {
+			case "Alt+Rune[0]":
+				m.focusFileselector()
+			default:
+				log.Println(event.Name())
+			}
+		}
+		if ctrl && alt {
+			switch event.Key() {
+
+			default:
+				log.Println(event.Name())
+			}
+		}
+		log.Println(event.Name())
+		//dataview.Save()
+	})
 }

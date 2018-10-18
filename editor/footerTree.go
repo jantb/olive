@@ -7,14 +7,14 @@ import (
 
 type FooterTree struct {
 	*tview.Box
-	*Edit
+	*Editor
 }
 
-// NewMainView returns a new main view primitive.
-func (e *Edit) NewFooterTree() *FooterTree {
+// NewView returns a new main view primitive.
+func (e *Editor) NewFooterTree() *FooterTree {
 	return &FooterTree{
-		Box:  tview.NewBox().SetBorder(false),
-		Edit: e,
+		Box:    tview.NewBox().SetBorder(false),
+		Editor: e,
 	}
 }
 

@@ -29,7 +29,7 @@ func GetCursorVisualX(x int, line string) int {
 		x = len(line) - 1
 	}
 
-	return ByteWidth(string(line[:x]), tabSize)
+	return ByteWidth(string(line[:x]), 4)
 }
 
 func Count(b []byte) int {

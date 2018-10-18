@@ -8,16 +8,16 @@ import (
 
 type Footer struct {
 	*tview.Box
-	*Edit
+	*Editor
 	totalLines       int
 	cursorX, cursorY int
 }
 
-// NewMainView returns a new main view primitive.
-func (e *Edit) NewFooter() *Footer {
+// NewView returns a new main view primitive.
+func (e *Editor) NewFooter() *Footer {
 	return &Footer{
-		Box:  tview.NewBox().SetBorder(false),
-		Edit: e,
+		Box:    tview.NewBox().SetBorder(false),
+		Editor: e,
 	}
 }
 
