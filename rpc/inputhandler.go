@@ -41,6 +41,21 @@ func (ih *InputHandler) MoveLeftAndModifySelection() {
 	ih.edit(Object{"method": "move_left_and_modify_selection"})
 }
 
+func (ih *InputHandler) SelectAll() {
+	ih.edit(Object{"method": "select_all"})
+}
+
+func (ih *InputHandler) AddSelectionAbove() {
+	ih.edit(Object{"method": "add_selection_above"})
+}
+
+func (ih *InputHandler) AddSelectionBelow() {
+	ih.edit(Object{"method": "add_selection_below"})
+}
+func (ih *InputHandler) CancelOperation() {
+	ih.edit(Object{"method": "cancel_operation"})
+}
+
 func (ih *InputHandler) MoveRight() {
 	ih.edit(Object{"method": "move_right"})
 }

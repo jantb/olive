@@ -20,6 +20,8 @@ Then install olive
 
 # Shortcuts:
 Ctrl-z undo
+Alt-up add cursor above
+Alt-down add cursor below
 Alt-c copy
 Alt-v paste
 Ctrl-Alt-z redo

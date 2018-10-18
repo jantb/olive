@@ -146,6 +146,8 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		shift := event.Modifiers()&tcell.ModShift != 0
 		if !ctrl && !alt && !shift {
 			switch event.Key() {
+			case tcell.KeyEsc:
+				dataview.CancelOperation()
 			case tcell.KeyUp:
 				dataview.MoveUp()
 			case tcell.KeyDown:
@@ -194,12 +196,16 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			switch event.Name() {
 			case "Alt+Ctrl+Z":
 				dataview.Redo()
+			case "Alt+Ctrl+L":
+				dataview.AddSelectionAbove()
 			}
 		}
 		if ctrl && !alt && !shift {
 			switch event.Key() {
 			case tcell.KeyCtrlS:
 				dataview.Save()
+			case tcell.KeyCtrlA:
+				dataview.SelectAll()
 			case tcell.KeyCtrlZ:
 				dataview.Undo()
 			case tcell.KeyCtrlQ:
@@ -222,6 +228,10 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		}
 		if !ctrl && alt {
 			switch event.Name() {
+			case "Alt+Up":
+				dataview.AddSelectionAbove()
+			case "Alt+Down":
+				dataview.AddSelectionBelow()
 			case "Alt+Rune[0]":
 				m.focusFileselector()
 			case "Alt+Rune[c]":
