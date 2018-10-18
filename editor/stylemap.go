@@ -27,6 +27,5 @@ func (sm stylemap) defineStyle(styledef *rpc.DefineStyle) {
 		bg := tcell.NewRGBColor(styledef.BgColor.ToRGB())
 		style = style.Background(bg)
 	}
-	log.Println("styledef.ID", styledef.ID)
 	sm[styledef.ID] = style
 }

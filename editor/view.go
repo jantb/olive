@@ -95,12 +95,12 @@ func (v *View) Draw() {
 		}
 		nLine := y + v.LineCache.InvalidBefore()
 		visualX := 0
-		for x, char := range []rune(line.Text) {
+		for _, char := range []rune(line.Text) {
 			var style = defaultStyle
-			if line.StyleIds[x] >= 2 {
-				fg, _, _ := styles[line.StyleIds[x]].Decompose()
-				style = style.Foreground(fg)
-			}
+			//if line.StyleIds[x] >= 2 {
+			//	fg, _, _ := styles[line.StyleIds[x]].Decompose()
+			//	style = style.Foreground(fg)
+			//}
 
 			if char == '\t' {
 				ts := tabSize - (visualX % tabSize)

@@ -19,6 +19,7 @@ type Edit struct {
 	curViewID   string
 	xi          *rpc.Connection
 	application *tview.Application
+	theme       *rpc.Theme
 	// ui events
 	events chan tcell.Event
 	// user events
@@ -136,11 +137,11 @@ func (e *Edit) handleRequests() {
 		case *rpc.ThemeChanged:
 			e.updates <- func() {
 				themeChanged := msg.Value.(*rpc.ThemeChanged)
-				theme := themeChanged.Theme
+				e.theme = &themeChanged.Theme
 
-				bg := tcell.NewRGBColor(theme.Bg.ToRGB())
+				bg := tcell.NewRGBColor(e.theme.Bg.ToRGB())
 				defaultStyle = defaultStyle.Background(bg)
-				fg := tcell.NewRGBColor(theme.Fg.ToRGB())
+				fg := tcell.NewRGBColor(e.theme.Fg.ToRGB())
 				defaultStyle = defaultStyle.Foreground(fg)
 				e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 					screen.SetStyle(defaultStyle)

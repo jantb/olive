@@ -45,18 +45,36 @@ func (m *MainView) Draw(screen tcell.Screen) {
 		m.Lines = append(m.Lines, blocks)
 		for x, r := range line.Text {
 			var style = defaultStyle
-			if line.StyleIds[x] >= 2 {
+			if line.StyleIds[x] != nil {
+				for _, value := range line.StyleIds[x] {
+					s := styles[value]
+					if value == 0 {
+						s = s.Background(tcell.NewRGBColor(m.Edit.theme.Selection.ToRGB()))
+					}
 
-				fg, _, _ := styles[line.StyleIds[x]].Decompose()
-				style = style.Foreground(fg)
+					fg, bg, _ := s.Decompose()
+
+					if fg != tcell.ColorDefault {
+						style = style.Foreground(fg)
+					}
+					if bg != tcell.ColorDefault {
+						style = style.Background(bg)
+					}
+				}
 			}
 			m.Lines[y] = append(m.Lines[y], Block{Rune: r, Style: style})
 		}
 	}
 
 	for y, line := range m.Lines {
+		offX := 0
 		for x, block := range line {
-			m.draw(screen, x, y, block)
+			if block.Rune == '\t' {
+				m.draw(screen, x, y, block)
+				offX += 3
+				continue
+			}
+			m.draw(screen, x+offX, y, block)
 		}
 	}
 
@@ -64,7 +82,7 @@ func (m *MainView) Draw(screen tcell.Screen) {
 	for y, line := range lines[m.offy:] {
 		for _, cursor := range line.Cursors {
 			x := GetCursorVisualX(cursor, line.Text)
-			content := m.getContent(screen, cursor, y)
+			content := m.getContent(screen, x, y)
 			content.Style = content.Style.Reverse(true)
 			m.draw(screen, x, y, content)
 		}
@@ -97,6 +115,7 @@ func (m *MainView) getContent(screen tcell.Screen, x int, y int) Block {
 }
 
 func (m *MainView) MakeVisible(x, y int) {
+	x = GetCursorVisualX(x, m.dataView[m.curViewID].Lines()[y].Text)
 	_, _, width, height := m.Box.GetInnerRect()
 
 	if y >= m.offy+height {
