@@ -19,6 +19,8 @@ Then install olive
 ```
 
 # Shortcuts:
+Ctrl-z undo
+Ctrl-Alt-z redo
 CTRL-S Save file
 CTRL-C Quit
 CTRL-Q Save file and close view

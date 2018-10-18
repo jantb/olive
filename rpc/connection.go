@@ -121,6 +121,10 @@ func (c *Connection) recv() {
 				var scrollTo ScrollTo
 				json.Unmarshal(msg.Params, &scrollTo)
 				c.Messages <- &Message{msg.Method, &scrollTo}
+			case "language_changed":
+				var languageChanged LanguageChanged
+				json.Unmarshal(msg.Params, &languageChanged)
+				c.Messages <- &Message{msg.Method, &languageChanged}
 			default:
 				log.Println("unhandled request: " + msg.Method)
 			}

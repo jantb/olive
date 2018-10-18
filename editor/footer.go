@@ -10,6 +10,7 @@ type Footer struct {
 	*tview.Box
 	*Editor
 	totalLines       int
+	language         string
 	cursorX, cursorY int
 }
 
@@ -26,7 +27,7 @@ func (m *Footer) Draw(screen tcell.Screen) {
 	_, bg, _ := defaultStyle.Decompose()
 	m.Box.SetBackgroundColor(bg).Draw(screen)
 	m.drawText(screen, strconv.Itoa(m.totalLines)+
-		"L"+" "+strconv.Itoa(m.cursorY)+":"+strconv.Itoa(m.cursorX), 0)
+		"L"+" "+strconv.Itoa(m.cursorY)+":"+strconv.Itoa(m.cursorX)+" "+m.language, 0)
 }
 
 func (m *Footer) drawText(screen tcell.Screen, text string, offsetX int) {

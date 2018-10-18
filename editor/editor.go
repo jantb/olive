@@ -16,7 +16,7 @@ type Editor struct {
 	fileSelector *tview.TreeView
 	main         *View
 	headerTree   *tview.TextView
-	header       *tview.TextView
+	header       *Header
 	footerTree   *FooterTree
 	footer       *Footer
 
@@ -69,7 +69,7 @@ func (e *Editor) OpenFile(path string) {
 		Method: "new_view",
 		Params: &rpc.Object{"file_path": path},
 	})
-	e.header.SetText(path)
+	e.header.path = path
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,8 +98,7 @@ func (e *Editor) Init() {
 	e.main.dataView = map[string]*Dataview{}
 	e.headerTree = tview.NewTextView().
 		SetTextAlign(tview.AlignLeft)
-	e.header = tview.NewTextView().
-		SetTextAlign(tview.AlignLeft)
+	e.header = e.NewHeader()
 	e.footerTree = e.NewFooterTree()
 	e.footer = e.NewFooter()
 	grid := tview.NewGrid().
@@ -152,6 +151,7 @@ func (e *Editor) handleRequests() {
 				}
 				dataView.ApplyUpdate(msg.Value.(*rpc.Update))
 				e.footer.totalLines = dataView.Length()
+				e.header.pristine = update.Update.Pristine
 			}
 		case *rpc.DefineStyle:
 			e.updates <- func() {
@@ -182,6 +182,12 @@ func (e *Editor) handleRequests() {
 				e.main.MakeVisible(scrollTo.Col, scrollTo.Line)
 				e.footer.cursorX = scrollTo.Col
 				e.footer.cursorY = scrollTo.Line
+			}
+		case *rpc.LanguageChanged:
+			e.updates <- func() {
+				log.Println("lan")
+				languageChanged := msg.Value.(*rpc.LanguageChanged)
+				e.footer.language = languageChanged.LanguageID
 			}
 		}
 

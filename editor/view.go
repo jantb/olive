@@ -194,10 +194,18 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 
 			}
 		}
-		if ctrl && !alt {
+		if ctrl && alt {
+			switch event.Name() {
+			case "Alt+Ctrl+Z":
+				dataview.Redo()
+			}
+		}
+		if ctrl && !alt && !shift {
 			switch event.Key() {
 			case tcell.KeyCtrlS:
 				dataview.Save()
+			case tcell.KeyCtrlZ:
+				dataview.Undo()
 			case tcell.KeyCtrlQ:
 				dataview.Save()
 				dataview.Close()
