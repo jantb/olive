@@ -18,6 +18,7 @@ Then install olive
 > olive filename.go
 ```
 
+
 # Shortcuts:
 Ctrl-z undo
 Alt-up add cursor above
