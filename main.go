@@ -28,7 +28,8 @@ func main() {
 
 	path, err := exec.LookPath("xi-core")
 	if err != nil {
-		die("xi-core was not found in your PATH")
+		die("xi-core was not found in your PATH\n" +
+			"Install it from https://github.com/xi-editor/xi-editor/")
 	}
 
 	p := exec.Command(path)

@@ -8,10 +8,12 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
 type Editor struct {
+	mutex        *sync.Mutex
 	grid         *tview.Grid
 	fileSelector *tview.TreeView
 	main         *View
@@ -33,8 +35,9 @@ type Editor struct {
 
 func NewEdit(rw io.ReadWriter, configPath string) *Editor {
 	e := &Editor{}
+	e.mutex = &sync.Mutex{}
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-	e.redraws = make(chan struct{}, 50)
+	e.redraws = make(chan struct{}, 1)
 	e.updates = make(chan func(), 1)
 
 	e.xi = rpc.NewConnection(rw)
@@ -155,7 +158,13 @@ func (e *Editor) handleRequests() {
 					dataView = e.main.dataView[update.ViewID]
 					time.Sleep(100 * time.Millisecond)
 				}
+
+				log.Println("trying to get Lock in update")
+				e.mutex.Lock()
+				log.Println("Got Lock in update")
 				dataView.ApplyUpdate(msg.Value.(*rpc.Update))
+				log.Println("UnLocking in update")
+				e.mutex.Unlock()
 				e.footer.totalLines = dataView.Length()
 				e.header.pristine = update.Update.Pristine
 			}

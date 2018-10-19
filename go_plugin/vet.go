@@ -1,15 +1,12 @@
-package goPlugin
+package go_plugin
 
 import (
-	"bytes"
-	"encoding/json"
-	"github.com/go-xmlfmt/xmlfmt"
 	"io"
 	"log"
 	"os/exec"
 )
 
-func Format(content string) string {
+func Vet(content string) string {
 	// go get golang.org/x/tools/cmd/goimports
 	path, err := exec.LookPath("goimports")
 	if err != nil {
@@ -28,17 +25,4 @@ func Format(content string) string {
 		return content
 	}
 	return string(bytes)
-}
-
-func FormatXml(content string) string {
-	return xmlfmt.FormatXML(content, "", "  ")
-}
-
-func FormatJson(content string) string {
-	buf := new(bytes.Buffer)
-	err := json.Indent(buf, []byte(content), "", "  ")
-	if err != nil {
-		return content
-	}
-	return buf.String()
 }

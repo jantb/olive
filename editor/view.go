@@ -3,7 +3,7 @@ package editor
 import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
-	"github.com/jantb/olive/goPlugin"
+	"github.com/jantb/olive/go_plugin"
 	"github.com/rivo/tview"
 	"log"
 )
@@ -35,6 +35,9 @@ func NewView() *View {
 func (m *View) Draw(screen tcell.Screen) {
 	_, bg, _ := defaultStyle.Decompose()
 	m.Box.SetBackgroundColor(bg).Draw(screen)
+	_, _, w, h := m.Box.GetInnerRect()
+	m.Editor.mutex.Lock()
+	defer m.Editor.mutex.Unlock()
 	dataview := m.dataView[m.curViewID]
 	if dataview == nil {
 		return
@@ -44,10 +47,13 @@ func (m *View) Draw(screen tcell.Screen) {
 	if len(lines) < m.offy {
 		return
 	}
-	for y, line := range lines[m.offy:] {
+	for y, line := range lines[m.offy : m.offy+h] {
+		if line == nil {
+			continue
+		}
 		var blocks []Block
 		m.Lines = append(m.Lines, blocks)
-		for x, r := range line.Text {
+		for x, r := range line.Text[Max(0, Min(m.offx, len(line.Text)-1)):Max(0, Min(m.offx+w, len(line.Text)-1))] {
 			var style = defaultStyle
 			if line.StyleIds[x] != nil {
 				for _, value := range line.StyleIds[x] {
@@ -86,7 +92,10 @@ func (m *View) Draw(screen tcell.Screen) {
 	}
 
 	// Draw cursors
-	for y, line := range lines[m.offy:] {
+	for y, line := range lines[m.offy : m.offy+h] {
+		if line == nil {
+			continue
+		}
 		for _, cursor := range line.Cursors {
 			x := GetCursorVisualX(cursor, line.Text)
 			content := m.getContent(screen, x, y)
@@ -123,9 +132,7 @@ func (m *View) getContent(screen tcell.Screen, x int, y int) Block {
 
 func (m *View) MakeVisible(x, y int) {
 	lines := m.dataView[m.curViewID].Lines()
-	if len(lines) <= y {
-		return
-	}
+	y -= m.dataView[m.curViewID].LineCache.InvalidBefore()
 	x = GetCursorVisualX(x, lines[y].Text)
 	_, _, width, height := m.Box.GetInnerRect()
 
@@ -215,19 +222,19 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 					dataview.CancelOperation()
 					dataview.SelectAll()
 					src := dataview.Copy()
-					dataview.Insert(goPlugin.Format(src))
+					dataview.Insert(go_plugin.Format(src))
 					dataview.CancelOperation()
 				} else if m.footer.language == "XML" {
 					dataview.CancelOperation()
 					dataview.SelectAll()
 					src := dataview.Copy()
-					dataview.Insert(goPlugin.FormatXml(src))
+					dataview.Insert(go_plugin.FormatXml(src))
 					dataview.CancelOperation()
 				} else if m.footer.language == "JSON" {
 					dataview.CancelOperation()
 					dataview.SelectAll()
 					src := dataview.Copy()
-					dataview.Insert(goPlugin.FormatJson(src))
+					dataview.Insert(go_plugin.FormatJson(src))
 					dataview.CancelOperation()
 				}
 

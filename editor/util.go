@@ -35,3 +35,16 @@ func GetCursorVisualX(x int, line string) int {
 func Count(b []byte) int {
 	return utf8.RuneCountInString(string(b))
 }
+
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}

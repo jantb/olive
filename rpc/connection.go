@@ -4,12 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"github.com/linde12/kod/rpc"
 	"io"
 	"log"
-	"time"
-
-	"github.com/linde12/kod/rpc"
 )
 
 const LF = 0xA // Line-feed
@@ -89,7 +86,8 @@ func (c *Connection) recv() {
 		}
 		line = buffer.Bytes()
 		buffer.Reset()
-		log.Printf("<<< %s\n", string(line))
+		//log.Printf("<<< %s\n", string(line))
+		log.Println("<<< ")
 		var msg incomingMessage
 		json.Unmarshal(line, &msg)
 
@@ -132,7 +130,6 @@ func (c *Connection) recv() {
 	}
 }
 
-// TODO: notify function
 func (c *Connection) send(msg *outgoingMessage) int {
 	b, _ := json.Marshal(msg)
 	log.Printf(">>> %s\n", b)
@@ -143,16 +140,13 @@ func (c *Connection) send(msg *outgoingMessage) int {
 
 func (c *Connection) Request(r *Request) (*Message, error) {
 	ch := make(chan *Message, 1)
-	id := c.RequestAsync(r, func(m *Message) {
+	c.RequestAsync(r, func(m *Message) {
 		ch <- m
 	})
 
 	select {
 	case m := <-ch:
 		return m, nil
-		// TODO: const values
-	case <-time.After(5 * time.Second):
-		return nil, fmt.Errorf("request %d timed out", id)
 	}
 }
 
