@@ -45,4 +45,5 @@ func main() {
 	rw := readwriter{stdout, stdin}
 	editor := editor.NewEdit(rw, configDir)
 	editor.Start()
+	editor.Quit()
 }

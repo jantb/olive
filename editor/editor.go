@@ -45,6 +45,12 @@ func NewEdit(rw io.ReadWriter, configPath string) *Editor {
 	go e.mainLoop()
 	return e
 }
+func (e *Editor) Quit() {
+	dataviews := e.main.dataView
+	for _, value := range dataviews {
+		value.Close()
+	}
+}
 
 func (e *Editor) mainLoop() {
 	for {
