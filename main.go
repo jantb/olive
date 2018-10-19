@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 
 	"github.com/jantb/olive/editor"
 )
+import _ "net/http/pprof"
+import _ "net/http"
 
 type readwriter struct {
 	io.Reader
@@ -21,6 +24,9 @@ func die(format string, args ...interface{}) {
 }
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	configDir := os.Getenv("XI_CONFIG_DIR")
 	if configDir == "" {
 		configDir = os.Getenv("HOME") + "/.config/xi/"
