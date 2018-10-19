@@ -86,8 +86,8 @@ func (c *Connection) recv() {
 		}
 		line = buffer.Bytes()
 		buffer.Reset()
-		//log.Printf("<<< %s\n", string(line))
-		log.Println("<<< ")
+		log.Printf("<<< %s\n", string(line))
+		//log.Println("<<< ")
 		var msg incomingMessage
 		json.Unmarshal(line, &msg)
 

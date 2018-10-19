@@ -191,8 +191,9 @@ func (e *Editor) handleRequests() {
 			e.updates <- func() {
 				scrollTo := msg.Value.(*rpc.ScrollTo)
 				e.main.MakeVisible(scrollTo.Col, scrollTo.Line)
-				e.footer.cursorX = scrollTo.Col
-				e.footer.cursorY = scrollTo.Line
+				//Index is 1 based not 0
+				e.footer.cursorX = scrollTo.Col + 1
+				e.footer.cursorY = scrollTo.Line + 1
 			}
 		case *rpc.LanguageChanged:
 			e.updates <- func() {
