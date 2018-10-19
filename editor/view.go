@@ -8,13 +8,13 @@ import (
 	"log"
 )
 
-// View implements the main editor view.
+// View implements the view editor view.
 type View struct {
 	dataView map[string]*Dataview
 	Lines    [][]Block
 	*tview.Box
 	*Editor
-	offy, offx int
+	offy, offx, height, width int
 }
 
 type Block struct {
@@ -22,7 +22,7 @@ type Block struct {
 	Style tcell.Style
 }
 
-// NewView returns a new main view primitive.
+// NewView returns a new view view primitive.
 func NewView() *View {
 	view := View{
 		Box:   tview.NewBox().SetBorder(false),
@@ -36,6 +36,8 @@ func (m *View) Draw(screen tcell.Screen) {
 	_, bg, _ := defaultStyle.Decompose()
 	m.Box.SetBackgroundColor(bg).Draw(screen)
 	_, _, w, h := m.Box.GetInnerRect()
+	m.height = h
+	m.width = w
 	m.Editor.mutex.Lock()
 	defer m.Editor.mutex.Unlock()
 	dataview := m.dataView[m.curViewID]
@@ -175,6 +177,10 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.MoveRight()
 			case tcell.KeyRune:
 				dataview.Insert(string(event.Rune()))
+			case tcell.KeyHome:
+				dataview.MoveToBeginningOfLine()
+			case tcell.KeyEnd:
+				dataview.MoveToEndOfLine()
 			case tcell.KeyTab:
 				dataview.Tab()
 			case tcell.KeyBS:
@@ -199,6 +205,10 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.ScrollPageUpAndModifySelection()
 			case tcell.KeyPgDn:
 				dataview.ScrollPageDownAndModifySelection()
+			case tcell.KeyHome:
+				dataview.MoveToBeginningOfLineAndModifySelection()
+			case tcell.KeyEnd:
+				dataview.MoveToEndOfLineAndModifySelection()
 			}
 			switch event.Name() {
 			case "Shift+Right":
@@ -242,6 +252,20 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		}
 		if ctrl && !alt && !shift {
 			switch event.Key() {
+			case tcell.KeyBS:
+				dataview.DeleteWordForward()
+			case tcell.KeyHome:
+				dataview.MoveToBeginningOfDocument()
+			case tcell.KeyEnd:
+				dataview.MoveToEndOfDocument()
+			case tcell.KeyDelete:
+				dataview.DeleteWordForward()
+			case tcell.KeyBackspace2:
+				dataview.DeleteBackward()
+			case tcell.KeyLeft:
+				dataview.MoveWordLeft()
+			case tcell.KeyRight:
+				dataview.MoveWordRight()
 			case tcell.KeyCtrlS:
 				dataview.Save()
 			case tcell.KeyCtrlA:
@@ -251,14 +275,17 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			case tcell.KeyCtrlQ:
 				dataview.Save()
 				dataview.Close()
+				m.header.path = ""
 				m.curViewID = ""
+				m.footer.totalLines = 0
+				m.footer.cursorX = 0
+				m.footer.cursorY = 0
 				m.focusFileselector()
 			case tcell.KeyCtrlD:
 				dataview.DuplicateLine()
 			case tcell.KeyCtrlV:
 				s, e := clipboard.ReadAll()
 				if e != nil {
-					log.Println(e)
 					return
 				}
 				dataview.Insert(s)
@@ -285,13 +312,6 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 					return
 				}
 				dataview.Insert(s)
-			default:
-				log.Println(event.Name())
-			}
-		}
-		if ctrl && alt {
-			switch event.Key() {
-
 			default:
 				log.Println(event.Name())
 			}

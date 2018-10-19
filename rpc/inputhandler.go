@@ -96,6 +96,22 @@ func (ih *InputHandler) ScrollPageDownAndModifySelection() {
 	ih.edit(Object{"method": "scroll_page_down_and_modify_selection"})
 }
 
+func (ih *InputHandler) MoveToBeginningOfLine() {
+	ih.edit(Object{"method": "move_to_left_end_of_line"})
+}
+
+func (ih *InputHandler) MoveToBeginningOfLineAndModifySelection() {
+	ih.edit(Object{"method": "move_to_left_end_of_line_and_modify_selection"})
+}
+
+func (ih *InputHandler) MoveToEndOfLine() {
+	ih.edit(Object{"method": "move_to_right_end_of_line"})
+}
+
+func (ih *InputHandler) MoveToEndOfLineAndModifySelection() {
+	ih.edit(Object{"method": "move_to_right_end_of_line_and_modify_selection"})
+}
+
 func (ih *InputHandler) MoveWordLeft() {
 	ih.edit(Object{"method": "move_word_left"})
 }
@@ -106,6 +122,22 @@ func (ih *InputHandler) MoveWordRight() {
 
 func (ih *InputHandler) DeleteBackward() {
 	ih.edit(Object{"method": "delete_backward"})
+}
+
+func (ih *InputHandler) DeleteWordForward() {
+	ih.edit(Object{"method": "delete_word_forward"})
+}
+
+func (ih *InputHandler) MoveToBeginningOfDocument() {
+	ih.edit(Object{"method": "move_to_beginning_of_document"})
+}
+
+func (ih *InputHandler) MoveToEndOfDocument() {
+	ih.edit(Object{"method": "move_to_end_of_document"})
+}
+
+func (ih *InputHandler) DeleteWordBackward() {
+	ih.edit(Object{"method": "delete_word_backward"})
 }
 
 func (ih *InputHandler) DeleteForward() {

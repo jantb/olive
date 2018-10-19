@@ -14,7 +14,7 @@ type Footer struct {
 	cursorX, cursorY int
 }
 
-// NewView returns a new main view primitive.
+// NewView returns a new view view primitive.
 func (e *Editor) NewFooter() *Footer {
 	return &Footer{
 		Box:    tview.NewBox().SetBorder(false),
@@ -38,5 +38,5 @@ func (m *Footer) drawText(screen tcell.Screen, text string, offsetX int) {
 
 func (m *Footer) draw(screen tcell.Screen, x int, r rune) {
 	xr, yr, _, _ := m.Box.GetInnerRect()
-	screen.SetContent(xr+x, yr, r, nil, tcell.StyleDefault)
+	screen.SetContent(xr+x, yr, r, nil, defaultStyle.Foreground(tcell.ColorLightCyan))
 }

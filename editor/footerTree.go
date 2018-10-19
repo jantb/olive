@@ -10,7 +10,7 @@ type FooterTree struct {
 	*Editor
 }
 
-// NewView returns a new main view primitive.
+// NewView returns a new view view primitive.
 func (e *Editor) NewFooterTree() *FooterTree {
 	return &FooterTree{
 		Box:    tview.NewBox().SetBorder(false),
@@ -27,5 +27,5 @@ func (m *FooterTree) Draw(screen tcell.Screen) {
 
 func (m *FooterTree) draw(screen tcell.Screen, x int, r rune) {
 	xr, yr, _, _ := m.Box.GetInnerRect()
-	screen.SetContent(xr+x, yr, r, nil, tcell.StyleDefault)
+	screen.SetContent(xr+x, yr, r, nil, defaultStyle)
 }

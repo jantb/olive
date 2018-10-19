@@ -3,10 +3,11 @@ package go_plugin
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/go-xmlfmt/xmlfmt"
 	"io"
 	"log"
 	"os/exec"
+
+	"github.com/go-xmlfmt/xmlfmt"
 )
 
 func Format(content string) string {

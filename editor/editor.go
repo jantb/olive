@@ -13,14 +13,17 @@ import (
 )
 
 type Editor struct {
-	mutex        *sync.Mutex
-	grid         *tview.Grid
-	fileSelector *tview.TreeView
-	main         *View
-	headerTree   *tview.TextView
-	header       *Header
-	footerTree   *FooterTree
-	footer       *Footer
+	mutex              *sync.Mutex
+	grid               *tview.Grid
+	fileSelector       *tview.TreeView
+	view               *View
+	headerTree         *tview.TextView
+	header             *Header
+	footerTree         *FooterTree
+	footer             *Footer
+	linenums           *Linenums
+	linenums_width     int
+	fileSelector_width int
 
 	curViewID   string
 	xi          *rpc.Connection
@@ -49,7 +52,7 @@ func NewEdit(rw io.ReadWriter, configPath string) *Editor {
 	return e
 }
 func (e *Editor) Quit() {
-	dataviews := e.main.dataView
+	dataviews := e.view.dataView
 	for _, value := range dataviews {
 		value.Close()
 	}
@@ -66,7 +69,7 @@ func (e *Editor) mainLoop() {
 	}
 }
 func (e *Editor) focusMain() {
-	e.application.SetFocus(e.main)
+	e.application.SetFocus(e.view)
 }
 
 func (e *Editor) focusFileselector() {
@@ -84,15 +87,18 @@ func (e *Editor) OpenFile(path string) {
 	}
 
 	viewId := msg.Value.(string)
-	e.main.dataView[viewId] = &Dataview{ViewId: viewId}
-	e.main.dataView[viewId].InputHandler = &rpc.InputHandler{ViewID: viewId, FilePath: path, Xi: e.xi}
-	e.main.dataView[viewId].LineCache = xi.NewLineCache()
+	e.view.dataView[viewId] = &Dataview{ViewId: viewId}
+	e.view.dataView[viewId].InputHandler = &rpc.InputHandler{ViewID: viewId, FilePath: path, Xi: e.xi}
+	e.view.dataView[viewId].LineCache = xi.NewLineCache()
 	e.curViewID = viewId
-	_, _, w, h := e.main.Box.GetInnerRect()
-	e.main.dataView[viewId].Scroll(0, h)
-	e.main.dataView[viewId].Resize(w, h)
+	_, _, w, h := e.view.Box.GetInnerRect()
+	e.view.dataView[viewId].Scroll(0, h)
+	e.view.dataView[viewId].Resize(w, h)
 }
 
+func (e *Editor) updateColumnWidths() {
+	e.grid.SetColumns(e.fileSelector_width, e.linenums_width, 0)
+}
 func (e *Editor) Init() {
 
 	path := "."
@@ -101,27 +107,28 @@ func (e *Editor) Init() {
 	}
 
 	e.fileSelector = e.newFileselector(path)
-
-	e.main = NewView()
-	e.main.Editor = e
-	e.main.dataView = map[string]*Dataview{}
+	e.fileSelector_width = 30
+	e.view = NewView()
+	e.view.Editor = e
+	e.view.dataView = map[string]*Dataview{}
 	e.headerTree = tview.NewTextView().
 		SetTextAlign(tview.AlignLeft)
 	e.header = e.NewHeader()
 	e.footerTree = e.NewFooterTree()
 	e.footer = e.NewFooter()
+	e.linenums = e.NewLinenums()
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
-		SetColumns(30, 0).
+		SetColumns(e.fileSelector_width, e.linenums_width, 0).
 		SetBorders(false).
 		AddItem(e.headerTree, 0, 0, 1, 1, 0, 0, false).
-		AddItem(e.header, 0, 1, 1, 1, 0, 0, false).
+		AddItem(e.header, 0, 1, 1, 2, 0, 0, false).
 		AddItem(e.footerTree, 2, 0, 1, 1, 0, 0, false).
-		AddItem(e.footer, 2, 1, 1, 1, 0, 0, false)
+		AddItem(e.footer, 2, 1, 1, 2, 0, 0, false)
 
-	// Layout for screens narrower than 100 cells (fileSelector and side bar are hidden).
 	grid.AddItem(e.fileSelector, 1, 0, 1, 1, 0, 0, true).
-		AddItem(e.main, 1, 1, 1, 1, 0, 0, false)
+		AddItem(e.linenums, 1, 1, 1, 1, 0, 0, false).
+		AddItem(e.view, 1, 2, 1, 1, 0, 0, false)
 
 	e.grid = grid
 }
@@ -153,9 +160,9 @@ func (e *Editor) handleRequests() {
 		case *rpc.Update:
 			e.updates <- func() {
 				update := msg.Value.(*rpc.Update)
-				dataView := e.main.dataView[update.ViewID]
+				dataView := e.view.dataView[update.ViewID]
 				for dataView == nil {
-					dataView = e.main.dataView[update.ViewID]
+					dataView = e.view.dataView[update.ViewID]
 					time.Sleep(100 * time.Millisecond)
 				}
 				e.mutex.Lock()
@@ -190,7 +197,7 @@ func (e *Editor) handleRequests() {
 		case *rpc.ScrollTo:
 			e.updates <- func() {
 				scrollTo := msg.Value.(*rpc.ScrollTo)
-				e.main.MakeVisible(scrollTo.Col, scrollTo.Line)
+				e.view.MakeVisible(scrollTo.Col, scrollTo.Line)
 				//Index is 1 based not 0
 				e.footer.cursorX = scrollTo.Col + 1
 				e.footer.cursorY = scrollTo.Line + 1

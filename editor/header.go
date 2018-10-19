@@ -38,5 +38,5 @@ func (m *Header) drawText(screen tcell.Screen, text string, offsetX int) {
 
 func (m *Header) draw(screen tcell.Screen, x int, r rune) {
 	xr, yr, _, _ := m.Box.GetInnerRect()
-	screen.SetContent(xr+x, yr, r, nil, tcell.StyleDefault)
+	screen.SetContent(xr+x, yr, r, nil, defaultStyle)
 }
