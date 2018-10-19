@@ -172,7 +172,7 @@ func (m *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.Tab()
 			case tcell.KeyBS:
 				dataview.DeleteForward()
-			case tcell.KeyDEL:
+			case tcell.KeyDelete:
 				dataview.DeleteBackward()
 			case tcell.KeyPgUp:
 				dataview.ScrollPageUp()
