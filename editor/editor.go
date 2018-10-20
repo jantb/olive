@@ -153,7 +153,14 @@ func (e *Editor) Start() {
 		switch key := event.Key(); key {
 		case tcell.KeyCtrlC:
 			if e.view.HasFocus() {
-				clipboard.WriteAll(e.view.dataView[e.curViewID].Copy())
+				dataview := e.view.dataView[e.curViewID]
+				data := dataview.Copy()
+				if data == "" {
+					dataview.MoveToBeginningOfLine()
+					dataview.MoveToEndOfLineAndModifySelection()
+					data = dataview.Copy()
+				}
+				clipboard.WriteAll(data)
 				return nil
 			} else {
 				return event

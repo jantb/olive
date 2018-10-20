@@ -1,13 +1,14 @@
 package editor
 
 import (
+	"log"
+
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/go_plugin"
 	"github.com/jantb/olive/rpc"
 	"github.com/jantb/olive/xi"
 	"github.com/rivo/tview"
-	"log"
 )
 
 // View implements the view editor view.
@@ -289,7 +290,13 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			case tcell.KeyCtrlS:
 				dataview.Save()
 			case tcell.KeyCtrlC:
-				clipboard.WriteAll(dataview.Copy())
+				data := dataview.Copy()
+				if data == "" {
+					dataview.MoveToBeginningOfLine()
+					dataview.MoveToEndOfLineAndModifySelection()
+					data = dataview.Copy()
+				}
+				clipboard.WriteAll(data)
 			case tcell.KeyCtrlX:
 				clipboard.WriteAll(dataview.Cut())
 			case tcell.KeyCtrlA:
