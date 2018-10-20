@@ -19,8 +19,9 @@ type View struct {
 }
 
 type Block struct {
-	Rune  rune
-	Style tcell.Style
+	Rune       rune
+	Style      Style
+	StyleTcell tcell.Style
 }
 
 // NewView returns a new view view primitive.
@@ -70,24 +71,32 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 
 		for x, r := range line.Text[Max(0, Min(offx, len(line.Text)-1)):Max(0, Min(offx+width, len(line.Text)-1))] {
 			var style = defaultStyle
+			var styleFg = m.theme.Fg
+			var styleBg = m.theme.Bg
 			if line.StyleIds[x] != nil {
 				for _, value := range line.StyleIds[x] {
-					s := styles[value]
+					s := styles.GetTcellStyle(value)
+					defineStyle := styles[value]
 					if value == 0 {
 						s = s.Background(tcell.NewRGBColor(m.Editor.theme.Selection.ToRGB()))
+						styleBg = m.Editor.theme.Selection
+					} else {
+						styleBg = defineStyle.BgColor.ToRGBA()
 					}
+					styleFg = defineStyle.BgColor.ToRGBA()
 
 					fg, bg, _ := s.Decompose()
 
 					if fg != tcell.ColorDefault {
 						style = style.Foreground(fg)
 					}
+
 					if bg != tcell.ColorDefault {
 						style = style.Background(bg)
 					}
 				}
 			}
-			blocksy[y] = append(blocksy[y], Block{Rune: r, Style: style})
+			blocksy[y] = append(blocksy[y], Block{Rune: r, StyleTcell: style, Style: Style{fg: styleFg, bg: styleBg}})
 		}
 	}
 	return blocksy
@@ -118,7 +127,7 @@ func (m *View) drawCursors(lines []*xi.Line, h int, screen tcell.Screen) {
 		for _, cursor := range line.Cursors {
 			x := GetCursorVisualX(cursor, line.Text)
 			content := m.getContent(screen, x, y)
-			content.Style = content.Style.Reverse(true)
+			content.StyleTcell = content.StyleTcell.Reverse(true)
 			m.draw(screen, x, y, content)
 		}
 	}
@@ -133,7 +142,7 @@ func (m *View) draw(screen tcell.Screen, x int, y int, b Block) {
 	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
 		return
 	}
-	screen.SetContent(x, y, b.Rune, nil, b.Style)
+	screen.SetContent(x, y, b.Rune, nil, b.StyleTcell)
 }
 
 func (m *View) getContent(screen tcell.Screen, x int, y int) Block {
@@ -146,7 +155,7 @@ func (m *View) getContent(screen tcell.Screen, x int, y int) Block {
 		return Block{}
 	}
 	mainc, _, style, _ := screen.GetContent(x, y)
-	return Block{Rune: mainc, Style: style}
+	return Block{Rune: mainc, StyleTcell: style}
 }
 
 func (m *View) MakeVisible(x, y int) {

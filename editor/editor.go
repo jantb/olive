@@ -173,7 +173,7 @@ func (e *Editor) handleRequests() {
 			}
 		case *rpc.DefineStyle:
 			e.updates <- func() {
-				styles.defineStyle(msg.Value.(*rpc.DefineStyle))
+				styles.DefineStyle(msg.Value.(*rpc.DefineStyle))
 			}
 		case *rpc.ThemeChanged:
 			e.updates <- func() {
