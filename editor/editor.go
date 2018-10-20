@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/rpc"
 	"github.com/jantb/olive/xi"
@@ -148,6 +149,21 @@ func (e *Editor) Start() {
 			e.focusMain()
 		}()
 	}
+	e.application.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch key := event.Key(); key {
+		case tcell.KeyCtrlC:
+			if e.view.HasFocus() {
+				clipboard.WriteAll(e.view.dataView[e.curViewID].Copy())
+				return nil
+			} else {
+				return event
+			}
+		case tcell.KeyCtrlQ:
+			e.application.Stop()
+			return nil
+		}
+		return event
+	})
 	if err := e.application.SetRoot(e.grid, true).Run(); err != nil {
 		panic(err)
 	}

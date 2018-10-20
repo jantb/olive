@@ -288,12 +288,22 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.MoveWordRight()
 			case tcell.KeyCtrlS:
 				dataview.Save()
+			case tcell.KeyCtrlC:
+				clipboard.WriteAll(dataview.Copy())
+			case tcell.KeyCtrlX:
+				clipboard.WriteAll(dataview.Cut())
 			case tcell.KeyCtrlA:
 				dataview.SelectAll()
 			case tcell.KeyCtrlZ:
 				dataview.Undo()
+			case tcell.KeyCtrlV:
+				s, e := clipboard.ReadAll()
+				if e != nil {
+					log.Println(e)
+					return
+				}
+				dataview.Insert(s)
 			case tcell.KeyCtrlQ:
-				dataview.Save()
 				dataview.Close()
 				v.header.path = ""
 				v.curViewID = ""
@@ -303,12 +313,6 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				v.focusFileselector()
 			case tcell.KeyCtrlD:
 				dataview.DuplicateLine()
-			case tcell.KeyCtrlV:
-				s, e := clipboard.ReadAll()
-				if e != nil {
-					return
-				}
-				dataview.Insert(s)
 			default:
 				log.Println(event.Name())
 			}
@@ -332,17 +336,6 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.AddSelectionBelow()
 			case "Alt+Rune[0]":
 				v.focusFileselector()
-			case "Alt+Rune[c]":
-				clipboard.WriteAll(dataview.Copy())
-			case "Alt+Rune[x]":
-				clipboard.WriteAll(dataview.Cut())
-			case "Alt+Rune[v]":
-				s, e := clipboard.ReadAll()
-				if e != nil {
-					log.Println(e)
-					return
-				}
-				dataview.Insert(s)
 			default:
 				log.Println(event.Name())
 			}

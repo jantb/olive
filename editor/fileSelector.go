@@ -66,5 +66,18 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 			node.SetExpanded(!node.IsExpanded())
 		}
 	})
+	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch key := event.Key(); key {
+		case tcell.KeyRight:
+			e.fileSelector_width++
+			e.application.Draw()
+			return nil
+		case tcell.KeyLeft:
+			e.fileSelector_width--
+			e.application.Draw()
+			return nil
+		}
+		return event
+	})
 	return tree
 }
