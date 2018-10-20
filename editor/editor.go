@@ -69,7 +69,7 @@ func (e *Editor) mainLoop() {
 		}
 	}
 }
-func (e *Editor) focusMain() {
+func (e *Editor) focusView() {
 	e.application.SetFocus(e.view)
 }
 
@@ -146,7 +146,7 @@ func (e *Editor) Start() {
 		go func() {
 			time.Sleep(100 * time.Millisecond)
 			e.OpenFile(path)
-			e.focusMain()
+			e.focusView()
 		}()
 	}
 	e.application.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

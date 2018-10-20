@@ -59,7 +59,7 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 				add(node, path)
 			} else {
 				e.OpenFile(path)
-				e.focusMain()
+				e.focusView()
 			}
 		} else {
 			// Collapse if visible, expand if collapsed.
@@ -68,6 +68,11 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 	})
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch key := event.Key(); key {
+		case tcell.KeyEsc:
+			if e.view.curViewID != "" {
+				e.focusView()
+			}
+			return nil
 		case tcell.KeyRight:
 			if e.fileSelector_width < 200 {
 				e.fileSelector_width++
