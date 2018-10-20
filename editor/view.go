@@ -4,6 +4,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/go_plugin"
+	"github.com/jantb/olive/xi"
 	"github.com/rivo/tview"
 	"log"
 )
@@ -35,27 +36,39 @@ func NewView() *View {
 func (m *View) Draw(screen tcell.Screen) {
 	_, bg, _ := defaultStyle.Decompose()
 	m.Box.SetBackgroundColor(bg).Draw(screen)
-	_, _, w, h := m.Box.GetInnerRect()
-	m.height = h
-	m.width = w
+	_, _, width, height := m.Box.GetInnerRect()
+	m.height = height
+	m.width = width
 	m.Editor.mutex.Lock()
 	defer m.Editor.mutex.Unlock()
 	dataview := m.dataView[m.curViewID]
 	if dataview == nil {
 		return
 	}
+
 	lines := dataview.Lines()
-	m.Lines = [][]Block{}
-	if len(lines) < m.offy {
-		return
+	blocksy := [][]Block{}
+	offy := m.offy
+	offx := m.offx
+	blocksy = getBlocks(lines, offy, height, blocksy, offx, width, m)
+
+	m.Lines = blocksy
+	m.drawBlocks(screen)
+	m.drawCursors(lines, height, screen)
+}
+
+func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx int, width int, m *View) [][]Block {
+	if len(lines) < offy {
+		//return
 	}
-	for y, line := range lines[m.offy : m.offy+h] {
+	for y, line := range lines[offy : offy+height] {
 		if line == nil {
 			continue
 		}
 		var blocks []Block
-		m.Lines = append(m.Lines, blocks)
-		for x, r := range line.Text[Max(0, Min(m.offx, len(line.Text)-1)):Max(0, Min(m.offx+w, len(line.Text)-1))] {
+		blocksy = append(blocksy, blocks)
+
+		for x, r := range line.Text[Max(0, Min(offx, len(line.Text)-1)):Max(0, Min(offx+width, len(line.Text)-1))] {
 			var style = defaultStyle
 			if line.StyleIds[x] != nil {
 				for _, value := range line.StyleIds[x] {
@@ -74,10 +87,13 @@ func (m *View) Draw(screen tcell.Screen) {
 					}
 				}
 			}
-			m.Lines[y] = append(m.Lines[y], Block{Rune: r, Style: style})
+			blocksy[y] = append(blocksy[y], Block{Rune: r, Style: style})
 		}
 	}
+	return blocksy
+}
 
+func (m *View) drawBlocks(screen tcell.Screen) {
 	for y, line := range m.Lines {
 		offX := 0
 		for x, block := range line {
@@ -92,8 +108,9 @@ func (m *View) Draw(screen tcell.Screen) {
 			m.draw(screen, x+offX, y, block)
 		}
 	}
+}
 
-	// Draw cursors
+func (m *View) drawCursors(lines []*xi.Line, h int, screen tcell.Screen) {
 	for y, line := range lines[m.offy : m.offy+h] {
 		if line == nil {
 			continue
