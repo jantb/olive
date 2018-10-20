@@ -20,14 +20,6 @@ func (rgba RGBAInt) ToRGB() (int32, int32, int32) {
 	return int32(red), int32(green), int32(blue)
 }
 
-func (rgba RGBAInt) ToRGBA() *RGBA {
-	red := rgba >> 16 & 0xFF
-	green := rgba >> 8 & 0xFF
-	blue := rgba & 0xFF
-
-	return &RGBA{int32(red), int32(green), int32(blue), int32(0)}
-}
-
 type DefineStyle struct {
 	ID      int     `json:"id"`
 	FgColor RGBAInt `json:"fg_color"`

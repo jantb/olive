@@ -1,30 +1,25 @@
 package editor
 
 import (
-	"github.com/gdamore/tcell"
 	"github.com/jantb/olive/rpc"
+	"log"
+
+	"github.com/gdamore/tcell"
 )
 
-type stylemap map[int]*rpc.DefineStyle
+type stylemap map[int]tcell.Style
 
 var defaultStyle tcell.Style
 
 var styles = make(stylemap)
 
-type Style struct {
-	fg, bg *rpc.RGBA
-}
-
-func (sm stylemap) DefineStyle(styledef *rpc.DefineStyle) {
-	sm[styledef.ID] = styledef
-}
-
-func (sm stylemap) GetTcellStyle(styleId int) tcell.Style {
-	styledef := sm[styleId]
+func (sm stylemap) defineStyle(styledef *rpc.DefineStyle) {
 	var style tcell.Style
+
 	if styledef.FgColor != 0 {
 		r, g, b := styledef.FgColor.ToRGB()
 		fg := tcell.NewRGBColor(r, g, b)
+		log.Printf("fg: %d, %d, %d", r, g, b)
 		style = style.Foreground(fg)
 	}
 
@@ -32,5 +27,5 @@ func (sm stylemap) GetTcellStyle(styleId int) tcell.Style {
 		bg := tcell.NewRGBColor(styledef.BgColor.ToRGB())
 		style = style.Background(bg)
 	}
-	return style
+	sm[styledef.ID] = style
 }
