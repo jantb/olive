@@ -69,11 +69,15 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch key := event.Key(); key {
 		case tcell.KeyRight:
-			e.fileSelector_width++
+			if e.fileSelector_width < 200 {
+				e.fileSelector_width++
+			}
 			e.application.Draw()
 			return nil
 		case tcell.KeyLeft:
-			e.fileSelector_width--
+			if e.fileSelector_width > 3 {
+				e.fileSelector_width--
+			}
 			e.application.Draw()
 			return nil
 		}
