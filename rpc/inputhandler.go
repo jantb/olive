@@ -151,6 +151,10 @@ func (ih *InputHandler) DeleteWordBackward() {
 func (ih *InputHandler) DeleteForward() {
 	ih.edit(Object{"method": "delete_forward"})
 }
+func (ih *InputHandler) SelectLine() {
+	ih.MoveToBeginningOfLine()
+	ih.MoveToEndOfLineAndModifySelection()
+}
 
 func (ih *InputHandler) Undo() {
 	ih.edit(Object{"method": "undo"})
@@ -237,14 +241,27 @@ func (ih *InputHandler) RequestLines(first, last int) {
 }
 
 func (ih *InputHandler) MoveLineUp() {
-	//RequestLines//
-	//DeleteToBeginningOfLine
-	//MoveToRightEndOfLine
-
+	ih.SelectLine()
+	s := ih.Cut()
+	ih.MoveUp()
+	ih.SelectLine()
+	s2 := ih.Cut()
+	ih.Insert(s)
+	ih.MoveDown()
+	ih.Insert(s2)
+	ih.MoveUp()
 }
 
 func (ih *InputHandler) MoveLineDown() {
-
+	ih.SelectLine()
+	s := ih.Cut()
+	ih.MoveDown()
+	ih.SelectLine()
+	s2 := ih.Cut()
+	ih.Insert(s)
+	ih.MoveUp()
+	ih.Insert(s2)
+	ih.MoveDown()
 }
 func (ih *InputHandler) Close() {
 	ih.Xi.Notify(&Request{
@@ -285,6 +302,8 @@ func (ih *InputHandler) Cut() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	if msg.Value == nil {
+		return ""
+	}
 	return msg.Value.(string)
 }

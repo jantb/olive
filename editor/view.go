@@ -287,13 +287,16 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				dataview.MoveWordLeft()
 			case tcell.KeyRight:
 				dataview.MoveWordRight()
+			case tcell.KeyUp:
+				dataview.MoveLineUp()
+			case tcell.KeyDown:
+				dataview.MoveLineDown()
 			case tcell.KeyCtrlS:
 				dataview.Save()
 			case tcell.KeyCtrlC:
 				data := dataview.Copy()
 				if data == "" {
-					dataview.MoveToBeginningOfLine()
-					dataview.MoveToEndOfLineAndModifySelection()
+					dataview.SelectLine()
 					data = dataview.Copy()
 				}
 				clipboard.WriteAll(data)
