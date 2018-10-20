@@ -116,6 +116,14 @@ func (ih *InputHandler) MoveWordLeft() {
 	ih.edit(Object{"method": "move_word_left"})
 }
 
+func (ih *InputHandler) MoveWordLeftAndModifySelection() {
+	ih.edit(Object{"method": "move_word_left_and_modify_selection"})
+}
+
+func (ih *InputHandler) MoveWordRightAndModifySelection() {
+	ih.edit(Object{"method": "move_word_right_and_modify_selection"})
+}
+
 func (ih *InputHandler) MoveWordRight() {
 	ih.edit(Object{"method": "move_word_right"})
 }
@@ -200,6 +208,26 @@ func (ih *InputHandler) Save() {
 	})
 }
 
+func (ih *InputHandler) Find(chars string, caseSensitive, regex, wholeWords bool) {
+	ih.edit(Object{"method": "find", "params": Object{
+		"chars":          chars,
+		"case_sensitive": false,
+		"regex":          false,
+		"whole_words":    false,
+	}})
+}
+
+// find_next {"wrap_around": true, "allow_same": false, "modify_selection": "set"} find_previous {"wrap_around": true, "allow_same": false, "modify_selection": "set"} All parameters are optional. Boolean parameters are by default false and modify_selection is set by default. If allow_same is set to true the current selection is considered a valid next occurrence. Supported options for modify_selection are:
+//none: the selection is not modified
+//set: the next/previous match will be set as the new selection
+//add: the next/previous match will be added to the current selection
+//add_remove_current: the previously added selection will be removed and the next/previous match will be added to the current selection
+//Selects the next/previous occurrence matching the search query.
+func (ih *InputHandler) FindNext(wrapAround, allowSame bool, modifySelection string) {
+	ih.edit(Object{"method": "find_next", "params": Object{
+		"wrap_around": wrapAround, "allow_same": allowSame, "modify_selection": modifySelection,
+	}})
+}
 func (ih *InputHandler) Click(x, y, mod, clicks int) {
 	ih.edit(Object{"method": "click", "params": Array{y, x, mod, clicks}})
 }
@@ -237,11 +265,13 @@ func (ih *InputHandler) Copy() string {
 		Method: "edit",
 		Params: Object{"method": "copy", "view_id": ih.ViewID},
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if msg.Value == nil {
+		return ""
+	}
 	return msg.Value.(string)
 }
 

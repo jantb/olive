@@ -89,16 +89,16 @@ func (c *Connection) recv() {
 		log.Printf("<<< %s\n", string(line))
 		//log.Println("<<< ")
 		var msg incomingMessage
-		json.Unmarshal(line, &msg)
-
+		err = json.Unmarshal(line, &msg)
+		if err != nil {
+			log.Fatal(err)
+		}
 		if msg.Id != 0 {
-			if msg.Result != nil {
-				// response
-				if fn, ok := c.pending[msg.Id]; ok {
-					fn(&Message{msg.Method, msg.Result})
-				} else {
-					log.Println("unhandled response: ", msg)
-				}
+			// response
+			if fn, ok := c.pending[msg.Id]; ok {
+				fn(&Message{msg.Method, msg.Result})
+			} else {
+				log.Println("unhandled response: ", msg)
 			}
 		} else {
 			// request
@@ -123,6 +123,10 @@ func (c *Connection) recv() {
 				var languageChanged LanguageChanged
 				json.Unmarshal(msg.Params, &languageChanged)
 				c.Messages <- &Message{msg.Method, &languageChanged}
+			case "find_status":
+				var findStatus FindStatus
+				json.Unmarshal(msg.Params, &findStatus)
+				c.Messages <- &Message{msg.Method, &findStatus}
 			default:
 				log.Println("unhandled request: " + msg.Method)
 			}

@@ -29,3 +29,4 @@ Then install olive
 * Ctrl-s Save file
 * Ctrl-c Quit
 * Ctrl-q Save file and close view
+* Alt-j add cursor at next selection

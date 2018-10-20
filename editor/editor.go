@@ -207,6 +207,11 @@ func (e *Editor) handleRequests() {
 				languageChanged := msg.Value.(*rpc.LanguageChanged)
 				e.footer.language = languageChanged.LanguageID
 			}
+		case *rpc.FindStatus:
+			e.updates <- func() {
+				findStatus := msg.Value.(*rpc.FindStatus)
+				e.view.findstatus = findStatus
+			}
 		}
 
 		e.updates <- func() {
