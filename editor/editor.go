@@ -23,6 +23,8 @@ type Editor struct {
 	footerTree         *FooterTree
 	footer             *Footer
 	linenums           *Linenums
+	pages              *tview.Pages
+	gotoLine           *GotoLine
 	linenums_width     int
 	fileSelector_width int
 
@@ -118,6 +120,7 @@ func (e *Editor) Init() {
 	e.footerTree = e.NewFooterTree()
 	e.footer = e.NewFooter()
 	e.linenums = e.NewLinenums()
+	e.pages = tview.NewPages()
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
 		SetColumns(e.fileSelector_width, e.linenums_width, 0).
@@ -132,6 +135,22 @@ func (e *Editor) Init() {
 		AddItem(e.view, 1, 2, 1, 1, 0, 0, false)
 
 	e.grid = grid
+	modal := getModal()
+	e.gotoLine = e.NewGotoLine()
+
+	e.pages.
+		AddPage("gotoLine", modal(e.gotoLine, 20, 3), true, false).
+		AddPage("editor", e.grid, true, true)
+}
+
+func getModal() func(p tview.Primitive, width int, height int) tview.Primitive {
+	modal := func(p tview.Primitive, width, height int) tview.Primitive {
+		return tview.NewGrid().
+			SetColumns(0, width, 0).
+			SetRows(0, height, 0).
+			AddItem(p, 1, 1, 1, 1, 0, 0, true)
+	}
+	return modal
 }
 
 func (e *Editor) Start() {
@@ -171,7 +190,8 @@ func (e *Editor) Start() {
 		}
 		return event
 	})
-	if err := e.application.SetRoot(e.grid, true).Run(); err != nil {
+
+	if err := e.application.SetRoot(e.pages, true).Run(); err != nil {
 		panic(err)
 	}
 }

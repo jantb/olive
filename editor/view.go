@@ -273,6 +273,10 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		}
 		if ctrl && !alt && !shift {
 			switch event.Key() {
+			case tcell.KeyCtrlG:
+				v.pages.ShowPage("gotoLine")
+				v.pages.SendToBack("editor")
+				v.pages.SendToFront("gotoLine")
 			case tcell.KeyBS:
 				dataview.DeleteWordForward()
 			case tcell.KeyHome:
