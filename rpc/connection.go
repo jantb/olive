@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/linde12/kod/rpc"
 	"io"
 	"log"
 )
@@ -174,7 +173,7 @@ func (c *Connection) Notify(r *Request) {
 func (c *Connection) Start(configPath string) {
 	c.Notify(&Request{
 		Method: "client_started",
-		Params: rpc.Object{
+		Params: Object{
 			"config_dir": configPath,
 		},
 	})
@@ -183,6 +182,6 @@ func (c *Connection) Start(configPath string) {
 func (c *Connection) SetTheme(theme string) {
 	c.Notify(&Request{
 		Method: "set_theme",
-		Params: rpc.Object{"theme_name": theme},
+		Params: Object{"theme_name": theme},
 	})
 }
