@@ -70,8 +70,7 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 		}
 		var blocks []Block
 		blocksy = append(blocksy, blocks)
-
-		for x, r := range line.Text[Max(0, Min(offx, len(line.Text)-1)):Max(0, Min(offx+width, len(line.Text)-1))] {
+		for x, r := range line.Text[Max(0, Min(offx, len(line.Text))):Max(0, Min(offx+width, len(line.Text)))] {
 			var style = defaultStyle
 			if line.StyleIds[x] != nil {
 				for _, value := range line.StyleIds[x] {
@@ -98,17 +97,15 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 
 func (v *View) drawBlocks(screen tcell.Screen) {
 	for y, line := range v.Lines {
-		offX := 0
 		for x, block := range line {
 			if block.Rune == '\t' {
 				v.draw(screen, x, y, block)
 				v.draw(screen, x+1, y, block)
 				v.draw(screen, x+2, y, block)
 				v.draw(screen, x+3, y, block)
-				offX += 3
 				continue
 			}
-			v.draw(screen, x+offX, y, block)
+			v.draw(screen, x, y, block)
 		}
 	}
 }
@@ -119,7 +116,7 @@ func (v *View) drawCursors(lines []*xi.Line, h int, screen tcell.Screen) {
 			continue
 		}
 		for _, cursor := range line.Cursors {
-			x := GetCursorVisualX(cursor, line.Text)
+			x := GetCursorVisualX(cursor-v.offx, line.Text[Max(0, Min(v.offx, len(line.Text))):Max(0, Min(v.offx+v.width, len(line.Text)))])
 			content := v.getContent(screen, x, y)
 			content.Style = content.Style.Reverse(true)
 			v.draw(screen, x, y, content)
@@ -130,7 +127,7 @@ func (v *View) drawCursors(lines []*xi.Line, h int, screen tcell.Screen) {
 func (v *View) draw(screen tcell.Screen, x int, y int, b Block) {
 
 	xMin, yMin, width, height := v.Box.GetInnerRect()
-	x = xMin + x - v.offx
+	x = xMin + x
 	y = yMin + y
 
 	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
@@ -142,7 +139,7 @@ func (v *View) draw(screen tcell.Screen, x int, y int, b Block) {
 func (v *View) getContent(screen tcell.Screen, x int, y int) Block {
 
 	xMin, yMin, width, height := v.Box.GetInnerRect()
-	x = xMin + x - v.offx
+	x = xMin + x
 	y = yMin + y
 
 	if x < xMin || y < yMin || x >= width+xMin || y >= height+yMin {
