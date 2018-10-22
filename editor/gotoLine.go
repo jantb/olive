@@ -48,6 +48,7 @@ func (g *GotoLine) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 		switch key.Key() {
 		case tcell.KeyEsc:
 			g.pages.HidePage("gotoLine")
+			g.focusView()
 		case tcell.KeyRune:
 			r := key.Rune()
 			_, e := strconv.Atoi(string(r))
