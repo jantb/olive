@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"github.com/linde12/kod/rpc"
 	"log"
 )
 
@@ -14,7 +13,7 @@ type InputHandler struct {
 func (ih *InputHandler) edit(params Object) {
 	params["view_id"] = ih.ViewID
 	if _, ok := params["params"]; !ok {
-		params["params"] = &rpc.Object{}
+		params["params"] = &Object{}
 	}
 
 	ih.Xi.Notify(&Request{
@@ -25,7 +24,7 @@ func (ih *InputHandler) edit(params Object) {
 func (ih *InputHandler) gesture(params Object) {
 	params["view_id"] = ih.ViewID
 	if _, ok := params["params"]; !ok {
-		params["params"] = &rpc.Object{}
+		params["params"] = &Object{}
 	}
 
 	ih.Xi.Notify(&Request{
