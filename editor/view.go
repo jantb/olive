@@ -97,15 +97,17 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 
 func (v *View) drawBlocks(screen tcell.Screen) {
 	for y, line := range v.Lines {
+		offx := 0
 		for x, block := range line {
 			if block.Rune == '\t' {
 				v.draw(screen, x, y, block)
 				v.draw(screen, x+1, y, block)
 				v.draw(screen, x+2, y, block)
 				v.draw(screen, x+3, y, block)
+				offx += 3
 				continue
 			}
-			v.draw(screen, x, y, block)
+			v.draw(screen, x+offx, y, block)
 		}
 	}
 }
