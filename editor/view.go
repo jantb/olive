@@ -61,19 +61,18 @@ func (v *View) Draw(screen tcell.Screen) {
 }
 
 func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx int, width int, m *View) [][]Block {
-	if len(lines) < offy {
-		//return
-	}
+
 	for y, line := range lines[offy : offy+height] {
 		if line == nil {
 			continue
 		}
 		var blocks []Block
 		blocksy = append(blocksy, blocks)
-		for x, r := range line.Text[Max(0, Min(offx, len(line.Text))):Max(0, Min(offx+width, len(line.Text)))] {
+		offx := Max(0, Min(offx, len(line.Text)))
+		for x, r := range line.Text[offx:Max(0, Min(offx+width, len(line.Text)))] {
 			var style = defaultStyle
-			if line.StyleIds[x] != nil {
-				for _, value := range line.StyleIds[x] {
+			if line.StyleIds[x+offx] != nil {
+				for _, value := range line.StyleIds[x+offx] {
 					s := styles[value]
 					if value == 0 {
 						s = s.Background(tcell.NewRGBColor(m.Editor.theme.Selection.ToRGB()))
