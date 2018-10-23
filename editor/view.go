@@ -334,7 +334,9 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			case "Alt+Up":
 				dataview.AddSelectionAbove()
 			case "Alt+Rune[N]":
-				log.Println("open file")
+				v.pages.ShowPage("openFile")
+				v.pages.SendToBack("editor")
+				v.pages.SendToFront("openFile")
 			case "Alt+Rune[j]":
 				if v.findstatus == nil {
 					s := dataview.Copy()

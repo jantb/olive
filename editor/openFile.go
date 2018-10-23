@@ -24,21 +24,22 @@ func (e *Editor) NewOpenFile() *OpenFile {
 // Draw draws this primitive onto the screen.
 func (g *OpenFile) Draw(screen tcell.Screen) {
 	_, bg, _ := defaultStyle.Decompose()
-	g.Box.SetBackgroundColor(bg).SetTitle(" Go to line ").SetTitleAlign(tview.AlignLeft).SetBorder(true).Draw(screen)
-	offx := g.drawText(screen, "Line: ", 0, defaultStyle.Foreground(tcell.ColorLightCyan))
-	offx = g.drawText(screen, g.input, offx, defaultStyle.Background(tcell.ColorDarkCyan).Foreground(tcell.ColorYellow))
+	g.Box.SetBackgroundColor(bg).SetTitle(" Open file ").SetTitleAlign(tview.AlignLeft).SetBorder(true).Draw(screen)
+	offx := g.drawText(screen, "Enter file name: ", 0, 0, defaultStyle.Foreground(tcell.ColorLightCyan))
+	offx = g.drawText(screen, g.input, offx, 0, defaultStyle.Background(tcell.ColorDarkCyan).Foreground(tcell.ColorYellow))
+
 }
 
-func (g *OpenFile) drawText(screen tcell.Screen, text string, offsetX int, style tcell.Style) (offset int) {
+func (g *OpenFile) drawText(screen tcell.Screen, text string, offsetX, offsetY int, style tcell.Style) (offset int) {
 	for x, r := range text {
-		offset = g.draw(screen, x+offsetX, r, style)
+		offset = g.draw(screen, x+offsetX, offsetY, r, style)
 	}
 	return offset
 }
 
-func (g *OpenFile) draw(screen tcell.Screen, x int, r rune, style tcell.Style) int {
+func (g *OpenFile) draw(screen tcell.Screen, x, y int, r rune, style tcell.Style) int {
 	xr, yr, _, _ := g.Box.GetInnerRect()
-	screen.SetContent(xr+x, yr, r, nil, style)
+	screen.SetContent(xr+x, yr+y, r, nil, style)
 	return x + 1
 }
 
@@ -47,15 +48,11 @@ func (g *OpenFile) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 	return g.WrapInputHandler(func(key *tcell.EventKey, setFocus func(p tview.Primitive)) {
 		switch key.Key() {
 		case tcell.KeyEsc:
-			g.pages.HidePage("OpenFile")
+			g.pages.HidePage("openFile")
 			g.focusView()
 		case tcell.KeyRune:
 			r := key.Rune()
-			_, e := strconv.Atoi(string(r))
-			if e != nil {
-				break
-			}
-			if len(g.input) < 12 {
+			if len(g.input) < 20 {
 				g.input = g.input + string(r)
 			}
 		case tcell.KeyBackspace2:
@@ -65,14 +62,14 @@ func (g *OpenFile) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 		case tcell.KeyEnter:
 			i, e := strconv.Atoi(g.input)
 			if e != nil {
-				g.pages.HidePage("OpenFile")
+				g.pages.HidePage("openFile")
 				g.focusView()
 				return
 			}
 			g.res = i
-			g.pages.HidePage("OpenFile")
+			g.pages.HidePage("openFile")
 			g.focusView()
-			//g.view.dataView[g.view.curViewID].OpenFile(g.res - 1)
+			//	g.view.dataView[g.view.curViewID].OpenFile(g.res - 1)
 			g.input = ""
 			g.res = 0
 		}

@@ -25,6 +25,7 @@ type Editor struct {
 	linenums           *Linenums
 	pages              *tview.Pages
 	gotoLine           *GotoLine
+	openFile           *OpenFile
 	linenums_width     int
 	fileSelector_width int
 
@@ -121,6 +122,7 @@ func (e *Editor) Init() {
 	e.footer = e.NewFooter()
 	e.linenums = e.NewLinenums()
 	e.pages = tview.NewPages()
+
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
 		SetColumns(e.fileSelector_width, e.linenums_width, 0).
@@ -137,9 +139,11 @@ func (e *Editor) Init() {
 	e.grid = grid
 	modal := getModal()
 	e.gotoLine = e.NewGotoLine()
+	e.openFile = e.NewOpenFile()
 
 	e.pages.
 		AddPage("gotoLine", modal(e.gotoLine, 20, 3), true, false).
+		AddPage("openFile", modal(e.openFile, 40, 5), true, false).
 		AddPage("editor", e.grid, true, true)
 }
 
