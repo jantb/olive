@@ -68,11 +68,11 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 		}
 		var blocks []Block
 		blocksy = append(blocksy, blocks)
-		offx := Max(0, Min(offx, len(line.Text)))
-		for x, r := range line.Text[offx:Max(0, Min(offx+width, len(line.Text)))] {
+		offxStart := Max(0, Min(offx, len(line.Text)))
+		for x, r := range line.Text[offxStart:Max(0, Min(offx+width, len(line.Text)))] {
 			var style = defaultStyle
-			if line.StyleIds[x+offx] != nil {
-				for _, value := range line.StyleIds[x+offx] {
+			if line.StyleIds[x+offxStart] != nil {
+				for _, value := range line.StyleIds[x+offxStart] {
 					s := styles[value]
 					if value == 0 {
 						s = s.Background(tcell.NewRGBColor(m.Editor.theme.Selection.ToRGB()))
