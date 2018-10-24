@@ -66,7 +66,15 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 			node.SetExpanded(!node.IsExpanded())
 		}
 	})
+
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch key := event.Name(); key {
+		case "Alt+Rune[N]":
+			e.pages.ShowPage("openFile")
+			e.pages.SendToBack("editor")
+			e.pages.SendToFront("openFile")
+		}
+
 		switch key := event.Key(); key {
 		case tcell.KeyEsc:
 			if e.view.curViewID != "" {
@@ -85,6 +93,7 @@ func (e *Editor) newFileselector(rootDir string) *tview.TreeView {
 			}
 			e.application.Draw()
 			return nil
+
 		}
 		return event
 	})

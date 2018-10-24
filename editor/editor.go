@@ -68,6 +68,9 @@ func (e *Editor) mainLoop() {
 		case update := <-e.updates:
 			update()
 		case <-e.redraws:
+			for e.application == nil {
+				time.Sleep(time.Millisecond * 100)
+			}
 			go e.application.Draw()
 		}
 	}
@@ -80,7 +83,7 @@ func (e *Editor) focusFileselector() {
 	e.application.SetFocus(e.fileSelector)
 }
 
-func (e *Editor) OpenFile(path string) {
+func (e *Editor) OpenFile(path string) string {
 	msg, err := e.xi.Request(&rpc.Request{
 		Method: "new_view",
 		Params: &rpc.Object{"file_path": path},
@@ -98,6 +101,7 @@ func (e *Editor) OpenFile(path string) {
 	_, _, w, h := e.view.Box.GetInnerRect()
 	e.view.dataView[viewId].Scroll(0, h)
 	e.view.dataView[viewId].Resize(w, h)
+	return viewId
 }
 
 func (e *Editor) updateColumnWidths() {
@@ -143,7 +147,7 @@ func (e *Editor) Init() {
 
 	e.pages.
 		AddPage("gotoLine", modal(e.gotoLine, 20, 3), true, false).
-		AddPage("openFile", modal(e.openFile, 40, 5), true, false).
+		AddPage("openFile", modal(e.openFile, 40, 13), true, false).
 		AddPage("editor", e.grid, true, true)
 }
 
@@ -236,10 +240,10 @@ func (e *Editor) handleRequests() {
 				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 				e.header.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 
-				e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
-					screen.SetStyle(defaultStyle)
-					return false
-				})
+				//e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+				//	screen.SetStyle(defaultStyle)
+				//	return false
+				//})
 			}
 		case *rpc.ScrollTo:
 			e.updates <- func() {
