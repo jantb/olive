@@ -306,6 +306,8 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				clipboard.WriteAll(dataview.Cut())
 			case tcell.KeyCtrlA:
 				dataview.SelectAll()
+			case tcell.KeyCtrlY:
+				dataview.DeleteLine()
 			case tcell.KeyCtrlZ:
 				dataview.Undo()
 			case tcell.KeyCtrlV:

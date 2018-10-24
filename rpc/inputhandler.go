@@ -135,6 +135,11 @@ func (ih *InputHandler) DeleteWordForward() {
 	ih.edit(Object{"method": "delete_word_forward"})
 }
 
+func (ih *InputHandler) DeleteLine() {
+	ih.SelectLine()
+	ih.DeleteForward()
+}
+
 func (ih *InputHandler) MoveToBeginningOfDocument() {
 	ih.edit(Object{"method": "move_to_beginning_of_document"})
 }
@@ -153,6 +158,7 @@ func (ih *InputHandler) DeleteForward() {
 func (ih *InputHandler) SelectLine() {
 	ih.MoveToBeginningOfLine()
 	ih.MoveToEndOfLineAndModifySelection()
+	ih.MoveRightAndModifySelection()
 }
 
 func (ih *InputHandler) Undo() {
