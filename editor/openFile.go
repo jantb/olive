@@ -26,9 +26,8 @@ func (e *Editor) NewOpenFile() *OpenFile {
 		files:  make([]File, 10),
 		result: make([]string, 10),
 	}
-	file.traversePath()
+	go file.traversePath()
 	return &file
-
 }
 
 type File struct {
@@ -43,7 +42,9 @@ func (g *OpenFile) traversePath() {
 }
 
 func (g *OpenFile) visit(path string, f os.FileInfo, err error) error {
-	log.Println(f.Name())
+	if err != nil {
+		return nil
+	}
 	if f.Name() == ".git" || f.Name() == ".idea" {
 		return filepath.SkipDir
 	}
