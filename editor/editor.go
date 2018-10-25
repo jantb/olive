@@ -144,10 +144,9 @@ func (e *Editor) Init() {
 	modal := getModal()
 	e.gotoLine = e.NewGotoLine()
 	e.openFile = e.NewOpenFile()
-
 	e.pages.
 		AddPage("gotoLine", modal(e.gotoLine, 20, 3), true, false).
-		AddPage("openFile", modal(e.openFile, 40, 13), true, false).
+		AddPage("openFile", modal(e.openFile, 80, 23), true, false).
 		AddPage("editor", e.grid, true, true)
 }
 

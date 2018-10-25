@@ -12,19 +12,21 @@ import (
 type OpenFile struct {
 	*tview.Box
 	*Editor
-	input  string
-	result []string
-	index  int
-	files  []File
+	input    string
+	result   []string
+	index    int
+	files    []File
+	listSize int
 }
 
 // NewView returns a new view view primitive.
 func (e *Editor) NewOpenFile() *OpenFile {
 	file := OpenFile{
-		Box:    tview.NewBox().SetBorder(false),
-		Editor: e,
-		files:  make([]File, 10),
-		result: make([]string, 10),
+		Box:      tview.NewBox().SetBorder(false),
+		Editor:   e,
+		files:    make([]File, 20),
+		result:   make([]string, 20),
+		listSize: 20,
 	}
 	go file.traversePath()
 	return &file
@@ -61,7 +63,7 @@ func (g *OpenFile) Draw(screen tcell.Screen) {
 	g.Box.SetBackgroundColor(bg).SetTitle(" Open file ").SetTitleAlign(tview.AlignLeft).SetBorder(true).Draw(screen)
 	offx := g.drawText(screen, "Enter file name: ", 0, 0, defaultStyle.Foreground(tcell.ColorLightCyan))
 	offx = g.drawText(screen, g.input, offx, 0, defaultStyle.Background(tcell.ColorDarkCyan).Foreground(tcell.ColorYellow))
-	for key, value := range g.result[:Min(len(g.result), 10)] {
+	for key, value := range g.result[:Min(len(g.result), g.listSize)] {
 		if key == g.index {
 			g.drawText(screen, value, 0, key+1, defaultStyle.Background(tcell.ColorLightCyan).Foreground(tcell.ColorBlack))
 		} else {
@@ -78,7 +80,10 @@ func (g *OpenFile) drawText(screen tcell.Screen, text string, offsetX, offsetY i
 }
 
 func (g *OpenFile) draw(screen tcell.Screen, x, y int, r rune, style tcell.Style) int {
-	xr, yr, _, _ := g.Box.GetInnerRect()
+	xr, yr, w, _ := g.Box.GetInnerRect()
+	if x >= w {
+		return x + 1
+	}
 	screen.SetContent(xr+x, yr+y, r, nil, style)
 	return x + 1
 }
@@ -114,12 +119,12 @@ func (g *OpenFile) InputHandler() func(event *tcell.EventKey, setFocus func(p tv
 				}
 			}
 		case tcell.KeyDown:
-			if g.index+1 < len(g.result[:Min(len(g.result), 10)]) {
+			if g.index+1 < len(g.result[:Min(len(g.result), g.listSize)]) {
 				g.index++
 			}
 
 		case tcell.KeyUp:
-			if g.index > 0 && g.index <= len(g.result[:Min(len(g.result), 10)]) {
+			if g.index > 0 && g.index <= len(g.result[:Min(len(g.result), g.listSize)]) {
 				g.index--
 			}
 		case tcell.KeyEnter:
