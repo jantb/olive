@@ -1,6 +1,8 @@
 package editor
 
 import (
+	"fmt"
+	"github.com/jantb/olive/ds"
 	"log"
 
 	"github.com/atotto/clipboard"
@@ -19,6 +21,9 @@ type View struct {
 	*Editor
 	offy, offx, height, width int
 	findstatus                *rpc.FindStatus
+
+	errors   []ds.Position
+	warnings []ds.Position
 }
 
 type Block struct {
@@ -61,7 +66,6 @@ func (v *View) Draw(screen tcell.Screen) {
 }
 
 func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx int, width int, m *View) [][]Block {
-
 	for y, line := range lines[offy : offy+height] {
 		if line == nil {
 			continue
@@ -86,6 +90,17 @@ func getBlocks(lines []*xi.Line, offy int, height int, blocksy [][]Block, offx i
 					if bg != tcell.ColorDefault {
 						style = style.Background(bg)
 					}
+				}
+			}
+			for _, pos := range m.errors {
+				if pos.Column == x+offxStart && pos.Row == offy+y {
+					style = style.Background(tcell.Color52)
+				}
+			}
+
+			for _, pos := range m.warnings {
+				if pos.Column == x+offxStart && pos.Row == offy+y {
+					style = style.Background(tcell.ColorDarkOrange)
 				}
 			}
 			blocksy[y] = append(blocksy[y], Block{Rune: r, Style: style})
@@ -246,6 +261,11 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			switch event.Name() {
 			case "Alt+Ctrl+Z":
 				dataview.Redo()
+			case "Alt+Ctrl+X":
+				dataview.Save()
+				vet := go_plugin.Vet()
+				v.errors = vet
+				fmt.Println(vet)
 			case "Alt+Ctrl+L":
 				if v.footer.language == "Go" {
 					dataview.CancelOperation()

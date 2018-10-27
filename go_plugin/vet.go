@@ -1,28 +1,44 @@
 package go_plugin
 
 import (
-	"io"
+	"github.com/jantb/olive/ds"
 	"log"
 	"os/exec"
+	"strconv"
+	"strings"
 )
 
-func Vet(content string) string {
+func Vet() []ds.Position {
 	// go get golang.org/x/tools/cmd/goimports
-	path, err := exec.LookPath("goimports")
+	path, err := exec.LookPath("go")
 	if err != nil {
-		log.Println("goimports was not found in your PATH go get golang.org/x/tools/cmd/goimports")
-		return content
+		log.Println("go not installed")
+		return []ds.Position{}
 	}
 
-	p := exec.Command(path)
-	stdin, _ := p.StdinPipe()
+	p := exec.Command(path, "vet")
 
-	io.WriteString(stdin, content)
-	stdin.Close()
-	bytes, err := p.CombinedOutput()
-	if err != nil {
-		log.Println(err)
-		return content
+	bytes, _ := p.CombinedOutput()
+
+	s := string(bytes)
+	vetErrors := parseVet(s)
+
+	return vetErrors
+}
+
+func parseVet(s string) []ds.Position {
+	var position []ds.Position
+	split := strings.Split(s, "\n")
+	for _, vet := range split {
+		n := strings.Split(vet, ": ")
+		if len(n) != 2 {
+			continue
+		}
+		pathAndPos := n[0]
+		pos := strings.Split(pathAndPos, ":")
+		column, _ := strconv.Atoi(pos[1])
+		row, _ := strconv.Atoi(pos[2])
+		position = append(position, ds.Position{Column: column, Row: row, Path: pos[0], Explanation: n[1]})
 	}
-	return string(bytes)
+	return position
 }

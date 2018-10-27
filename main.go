@@ -22,7 +22,6 @@ func die(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, args...)
 	os.Exit(1)
 }
-
 func main() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))

@@ -23,18 +23,18 @@ type Editor struct {
 	footerTree         *FooterTree
 	footer             *Footer
 	linenums           *Linenums
+	gutter             *Gutter
 	pages              *tview.Pages
 	gotoLine           *GotoLine
 	openFile           *OpenFile
 	linenums_width     int
+	gutter_width       int
 	fileSelector_width int
 
 	curViewID   string
 	xi          *rpc.Connection
 	application *tview.Application
 	theme       *rpc.Theme
-	// ui events
-	events chan tcell.Event
 	// user events
 	redraws chan struct{}
 	updates chan func()
@@ -105,7 +105,7 @@ func (e *Editor) OpenFile(path string) string {
 }
 
 func (e *Editor) updateColumnWidths() {
-	e.grid.SetColumns(e.fileSelector_width, e.linenums_width, 0)
+	e.grid.SetColumns(e.fileSelector_width, e.linenums_width, e.gutter_width, 0)
 }
 func (e *Editor) Init() {
 
@@ -125,20 +125,22 @@ func (e *Editor) Init() {
 	e.footerTree = e.NewFooterTree()
 	e.footer = e.NewFooter()
 	e.linenums = e.NewLinenums()
+	e.gutter = e.NewGutter()
 	e.pages = tview.NewPages()
 
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
-		SetColumns(e.fileSelector_width, e.linenums_width, 0).
+		SetColumns(e.fileSelector_width, e.linenums_width, e.gutter_width, 0).
 		SetBorders(false).
 		AddItem(e.headerTree, 0, 0, 1, 1, 0, 0, false).
-		AddItem(e.header, 0, 1, 1, 2, 0, 0, false).
+		AddItem(e.header, 0, 1, 1, 3, 0, 0, false).
 		AddItem(e.footerTree, 2, 0, 1, 1, 0, 0, false).
-		AddItem(e.footer, 2, 1, 1, 2, 0, 0, false)
+		AddItem(e.footer, 2, 1, 1, 3, 0, 0, false)
 
 	grid.AddItem(e.fileSelector, 1, 0, 1, 1, 0, 0, true).
 		AddItem(e.linenums, 1, 1, 1, 1, 0, 0, false).
-		AddItem(e.view, 1, 2, 1, 1, 0, 0, false)
+		AddItem(e.gutter, 1, 2, 1, 1, 0, 0, false).
+		AddItem(e.view, 1, 3, 1, 1, 0, 0, false)
 
 	e.grid = grid
 	modal := getModal()
