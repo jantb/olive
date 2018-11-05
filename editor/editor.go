@@ -184,8 +184,7 @@ func (e *Editor) Start() {
 				dataview := e.view.dataView[e.curViewID]
 				data := dataview.Copy()
 				if data == "" {
-					dataview.MoveToBeginningOfLine()
-					dataview.MoveToEndOfLineAndModifySelection()
+					dataview.SelectLine()
 					data = dataview.Copy()
 				}
 				clipboard.WriteAll(data)
@@ -241,10 +240,6 @@ func (e *Editor) handleRequests() {
 				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 				e.header.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 
-				//e.application.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
-				//	screen.SetStyle(defaultStyle)
-				//	return false
-				//})
 			}
 		case *rpc.ScrollTo:
 			e.updates <- func() {

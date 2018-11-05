@@ -353,8 +353,18 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 		}
 		if !ctrl && alt {
 			switch event.Name() {
+
 			case "Alt+Up":
 				dataview.AddSelectionAbove()
+			case "Alt+Rune[c]":
+				data := dataview.Copy()
+				if data == "" {
+					dataview.SelectLine()
+					data = dataview.Copy()
+					dataview.CancelOperation()
+					dataview.MoveLeft()
+				}
+				clipboard.WriteAll(data)
 			case "Alt+Rune[N]":
 				v.pages.ShowPage("openFile")
 				v.pages.SendToBack("editor")
