@@ -344,7 +344,6 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 				v.footer.totalLines = 0
 				v.footer.cursorX = 0
 				v.footer.cursorY = 0
-				v.focusFileselector()
 			case tcell.KeyCtrlD:
 				dataview.DuplicateLine()
 			default:
@@ -383,7 +382,6 @@ func (v *View) InputHandler() func(event *tcell.EventKey, setFocus func(p tview.
 			case "Alt+Down":
 				dataview.AddSelectionBelow()
 			case "Alt+Rune[0]":
-				v.focusFileselector()
 			default:
 				log.Println(event.Name())
 			}

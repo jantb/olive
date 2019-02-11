@@ -14,22 +14,18 @@ import (
 )
 
 type Editor struct {
-	mutex              *sync.Mutex
-	grid               *tview.Grid
-	fileSelector       *tview.TreeView
-	view               *View
-	headerTree         *tview.TextView
-	header             *Header
-	footerTree         *FooterTree
-	footer             *Footer
-	linenums           *Linenums
-	gutter             *Gutter
-	pages              *tview.Pages
-	gotoLine           *GotoLine
-	openFile           *OpenFile
-	linenums_width     int
-	gutter_width       int
-	fileSelector_width int
+	mutex          *sync.Mutex
+	grid           *tview.Grid
+	view           *View
+	header         *Header
+	footer         *Footer
+	linenums       *Linenums
+	gutter         *Gutter
+	pages          *tview.Pages
+	gotoLine       *GotoLine
+	openFile       *OpenFile
+	linenums_width int
+	gutter_width   int
 
 	curViewID   string
 	xi          *rpc.Connection
@@ -79,10 +75,6 @@ func (e *Editor) focusView() {
 	e.application.SetFocus(e.view)
 }
 
-func (e *Editor) focusFileselector() {
-	e.application.SetFocus(e.fileSelector)
-}
-
 func (e *Editor) OpenFile(path string) string {
 	msg, err := e.xi.Request(&rpc.Request{
 		Method: "new_view",
@@ -105,24 +97,25 @@ func (e *Editor) OpenFile(path string) string {
 }
 
 func (e *Editor) updateColumnWidths() {
-	e.grid.SetColumns(e.fileSelector_width, e.linenums_width, e.gutter_width, 0)
+	e.grid.SetColumns(e.linenums_width, e.gutter_width, 0)
 }
+
+func isDir(name string) bool {
+	if fi, err := os.Stat(name); !os.IsNotExist(err) {
+		return fi.IsDir()
+	}
+	if _, err := os.Stat(name); os.IsNotExist(err) {
+		os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
+	}
+	return false
+}
+
 func (e *Editor) Init() {
 
-	path := "."
-	if len(os.Args) > 1 {
-		path = os.Args[1]
-	}
-
-	e.fileSelector = e.newFileselector(path)
-	e.fileSelector_width = 30
 	e.view = NewView()
 	e.view.Editor = e
 	e.view.dataView = map[string]*Dataview{}
-	e.headerTree = tview.NewTextView().
-		SetTextAlign(tview.AlignLeft)
 	e.header = e.NewHeader()
-	e.footerTree = e.NewFooterTree()
 	e.footer = e.NewFooter()
 	e.linenums = e.NewLinenums()
 	e.gutter = e.NewGutter()
@@ -130,17 +123,15 @@ func (e *Editor) Init() {
 
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
-		SetColumns(e.fileSelector_width, e.linenums_width, e.gutter_width, 0).
-		SetBorders(false).
-		AddItem(e.headerTree, 0, 0, 1, 1, 0, 0, false).
-		AddItem(e.header, 0, 1, 1, 3, 0, 0, false).
-		AddItem(e.footerTree, 2, 0, 1, 1, 0, 0, false).
-		AddItem(e.footer, 2, 1, 1, 3, 0, 0, false)
+		SetColumns(e.linenums_width, e.gutter_width, 0).
+		SetBorders(true).
+		AddItem(e.header, 0, 0, 1, 3, 0, 0, false).
+		AddItem(e.footer, 2, 0, 1, 3, 0, 0, false)
 
-	grid.AddItem(e.fileSelector, 1, 0, 1, 1, 0, 0, true).
-		AddItem(e.linenums, 1, 1, 1, 1, 0, 0, false).
-		AddItem(e.gutter, 1, 2, 1, 1, 0, 0, false).
-		AddItem(e.view, 1, 3, 1, 1, 0, 0, false)
+	grid.
+		AddItem(e.linenums, 1, 0, 1, 1, 0, 0, false).
+		AddItem(e.gutter, 1, 1, 1, 1, 0, 0, false).
+		AddItem(e.view, 1, 2, 1, 1, 0, 0, false)
 
 	e.grid = grid
 	modal := getModal()
@@ -236,8 +227,6 @@ func (e *Editor) handleRequests() {
 				fg := tcell.NewRGBColor(e.theme.Fg.ToRGB())
 				defaultStyle = defaultStyle.Foreground(fg)
 
-				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
-				e.headerTree.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 				e.header.SetBackgroundColor(tcell.NewRGBColor(e.theme.Bg.ToRGB()))
 
 			}
