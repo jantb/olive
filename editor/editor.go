@@ -124,7 +124,7 @@ func (e *Editor) Init() {
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
 		SetColumns(e.linenums_width, e.gutter_width, 0).
-		SetBorders(true).
+		SetBorders(false).
 		AddItem(e.header, 0, 0, 1, 3, 0, 0, false).
 		AddItem(e.footer, 2, 0, 1, 3, 0, 0, false)
 
