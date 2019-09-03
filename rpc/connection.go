@@ -128,6 +128,7 @@ func (c *Connection) recv() {
 				c.Messages <- &Message{msg.Method, &findStatus}
 			default:
 				log.Println("unhandled request: " + msg.Method)
+				log.Println("unhandled request: " + string(line))
 			}
 		}
 	}
